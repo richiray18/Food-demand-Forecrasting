@@ -1,6 +1,0 @@
-Django
-pandas
-scikit-learn
-joblib
-djangorestframework
-django-filter
