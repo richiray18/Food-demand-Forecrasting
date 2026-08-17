@@ -37,12 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'surplus',
+    'pickups',
+    'recipients',
     'meals',
     'accounts',
     'config',
     'rest_framework',
     'rest_framework_simplejwt',
-    ]
+]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -140,6 +144,6 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),   # generous for hackathon demo purposes
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),   
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
