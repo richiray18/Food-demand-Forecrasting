@@ -22,4 +22,6 @@ urlpatterns = [
     path("api/surplus/", include("surplus.urls")),
     path("api/pickups/", include("pickups.urls")),
     path("api/v1/accounts/", include("accounts.urls")),
+    path("api/v1/meals/", include("meals.urls")),
+    path("api-auth/", include("rest_framework.urls")),
 ]
