@@ -1,5 +1,8 @@
+# backend/pickups/apps.py
 from django.apps import AppConfig
 
 
 class PickupsConfig(AppConfig):
-    name = 'pickups'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "pickups"
+    verbose_name = "Surplus Pickups & Distribution"
