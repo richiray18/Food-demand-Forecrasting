@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'pickups',
     'recipients',
     'impact',
-    'django-filters',
+    'django_filters',
     'rest_framework',
     'rest_framework_simplejwt',
     
