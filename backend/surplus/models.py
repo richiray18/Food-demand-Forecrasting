@@ -57,9 +57,10 @@ class SurplusFood(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     meal = models.ForeignKey(
-        "meals.Meal", on_delete=models.PROTECT, related_name="surplus_entries",
+        "meals.MealConsumptionLog", on_delete=models.PROTECT, related_name="surplus_entries",
         null=True, blank=True,
     )
+    
     food_name = models.CharField(max_length=200)
     safety_rule = models.ForeignKey(
         FoodSafetyRule, on_delete=models.PROTECT, related_name="surplus_entries"
