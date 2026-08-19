@@ -26,5 +26,6 @@ urlpatterns = [
     path("api/recipients/", include("recipients.urls")),
     path("api/impact/", include("impact.urls")),
     path("api/v1/config/", include("config.urls_api")),
+    path("api/forecasting/", include("forecasting.urls")),
     path("api-auth/", include("rest_framework.urls")),
 ]
