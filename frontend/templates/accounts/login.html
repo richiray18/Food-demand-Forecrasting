@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in — NutriFlow</title>
+
+    <!-- Bootstrap Icons (for the brand mark, matching the sidebar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Project CSS (defines fonts, color tokens, .nf-field, .nf-btn, .nf-alert, etc.) -->
+    <link rel="stylesheet" href="../../static/css/style.css">
+
+    <style>
+        .nf-auth-shell {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--nf-canvas);
+        }
+
+        .nf-auth-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--nf-surface);
+            border: 1px solid var(--nf-border);
+            border-radius: var(--nf-radius-lg);
+            box-shadow: var(--nf-shadow-lg);
+            padding: 36px 32px;
+        }
+
+        .nf-auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--nf-font-display);
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--nf-green-800);
+            margin-bottom: 28px;
+        }
+
+        .nf-auth-brand i {
+            font-size: 24px;
+            color: var(--nf-amber-500);
+        }
+
+        .nf-auth-title {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .nf-auth-subtitle {
+            font-size: 14px;
+            color: var(--nf-ink-400);
+            margin-bottom: 24px;
+        }
+
+        .nf-auth-card .nf-btn {
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .nf-auth-error {
+            display: none;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 480px) {
+            .nf-auth-card {
+                padding: 28px 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nf-auth-shell">
+        <div class="nf-auth-card">
+
+            <div class="nf-auth-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <h1 class="nf-auth-title">Welcome back</h1>
+            <p class="nf-auth-subtitle">Sign in to manage your NutriFlow operations.</p>
+
+            <div class="nf-alert nf-alert-error nf-auth-error" id="nfLoginError"></div>
+
+            <form id="nfLoginForm" novalidate>
+                <div class="nf-field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                </div>
+
+                <div class="nf-field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="nf-btn nf-btn-primary" id="nfLoginBtn">
+                    <span id="nfLoginBtnText">Log in</span>
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Project JS (safe to include here: it null-checks for #nfSidebar / #nfLogoutBtn) -->
+    <script src="../../static/js/main.js"></script>
+
+    <script>
+        (function () {
+            var LOGIN_URL = 'http://127.0.0.1:8000/api/v1/accounts/login/';
+            var DASHBOARD_URL = '../dashboard/dashboard.html';
+
+            var form = document.getElementById('nfLoginForm');
+            var errorBox = document.getElementById('nfLoginError');
+            var loginBtn = document.getElementById('nfLoginBtn');
+            var loginBtnText = document.getElementById('nfLoginBtnText');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                hideError();
+
+                var username = document.getElementById('username').value.trim();
+                var password = document.getElementById('password').value;
+
+                setLoading(true);
+
+                fetch(LOGIN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                })
+                    .then(function (response) {
+                        return response.json().then(function (data) {
+                            return { ok: response.ok, data: data };
+                        });
+                    })
+                    .then(function (result) {
+                        setLoading(false);
+
+                        if (!result.ok || !result.data.access || !result.data.refresh) {
+                            showError(result.data);
+                            return;
+                        }
+
+                        localStorage.setItem('access_token', result.data.access);
+                        localStorage.setItem('refresh_token', result.data.refresh);
+
+                        window.location.href = DASHBOARD_URL;
+                    })
+                    .catch(function () {
+                        setLoading(false);
+                        showError(null);
+                    });
+            });
+
+            function setLoading(isLoading) {
+                loginBtn.disabled = isLoading;
+                loginBtnText.textContent = isLoading ? 'Logging in...' : 'Log in';
+            }
+
+            function showError(data) {
+                var message = 'Unable to log in. Please check your username and password and try again.';
+
+                if (data && typeof data === 'object' && data.detail) {
+                    message = data.detail;
+                }
+
+                errorBox.textContent = message;
+                errorBox.style.display = 'flex';
+            }
+
+            function hideError() {
+                errorBox.style.display = 'none';
+                errorBox.textContent = '';
+            }
+        })();
+    </script>
+
+</body>
+</html>
