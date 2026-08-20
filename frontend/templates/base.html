@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriFlow</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Project CSS -->
+    <!-- Path is correct for this file's own location: frontend/templates/base.html
+         If you copy this markup into a page inside a subfolder (e.g.
+         frontend/templates/dashboard/dashboard.html), add one more "../" — see
+         the path table below the code. -->
+    <link rel="stylesheet" href="../static/css/style.css">
+    <!-- Add a page-specific stylesheet on each page as needed, e.g.: -->
+    <!-- <link rel="stylesheet" href="../static/css/dashboard.css"> -->
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <!-- Sidebar -->
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav">
+                <a href="dashboard/dashboard.html" class="nf-nav-link" data-nav="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="forecast/forecast.html" class="nf-nav-link" data-nav="forecast">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="preparation/preparation.html" class="nf-nav-link" data-nav="preparation">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Preparation</span>
+                </a>
+                <a href="surplus/surplus.html" class="nf-nav-link" data-nav="surplus">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Surplus</span>
+                </a>
+                <a href="recipients/recipients.html" class="nf-nav-link" data-nav="recipients">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Recipients</span>
+                </a>
+                <a href="pickups/pickups.html" class="nf-nav-link" data-nav="pickups">
+                    <i class="bi bi-truck"></i>
+                    <span>Pickups</span>
+                </a>
+                <a href="impact/impact.html" class="nf-nav-link" data-nav="impact">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Impact</span>
+                </a>
+            </nav>
+
+            <div class="nf-sidebar-footer">
+                <!-- Logout is client-side only: JWT is stateless and there is
+                     no accounts logout endpoint. main.js should clear the
+                     stored token and redirect to accounts/login.html -->
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main content area -->
+        <div class="nf-main">
+
+            <!-- Topbar -->
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title" id="nfPageTitle">Dashboard</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Account</span>
+                </div>
+            </header>
+
+            <!-- Notifications container, filled by JS after fetch()/axios
+                 calls to the API (success/error toasts, validation messages) -->
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <!-- Page-specific content goes here -->
+            <main class="nf-content" id="nfContent">
+
+                <!-- PAGE CONTENT PLACEHOLDER -->
+
+            </main>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Project JS -->
+    <script src="../static/js/main.js"></script>
+    <!-- Add a page-specific script on each page as needed, e.g.: -->
+    <!-- <script src="../static/js/dashboard.js"></script> -->
+
+</body>
+</html>

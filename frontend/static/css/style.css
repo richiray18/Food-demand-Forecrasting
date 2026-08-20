@@ -1,0 +1,751 @@
+/* ==========================================================================
+   NutriFlow — style.css
+   Matches: frontend/templates/base.html
+   Fonts: Space Grotesk (headings/nav), Inter (body), JetBrains Mono (data)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+/* ---------------------------------------------------------------------- */
+/* 1. Design tokens                                                      */
+/* ---------------------------------------------------------------------- */
+:root {
+  /* Brand greens */
+  --nf-green-900: #1f3d2b;
+  --nf-green-800: #234830;
+  --nf-green-700: #2b5738;
+  --nf-green-600: #3c6e4c;
+  --nf-green-500: #4c8c63;
+  --nf-green-100: #e3ede4;
+
+  /* Accent */
+  --nf-amber-600: #c98b22;
+  --nf-amber-500: #e2a63b;
+  --nf-amber-100: #fbecd2;
+
+  /* Neutrals */
+  --nf-canvas: #f5f7f2;
+  --nf-surface: #ffffff;
+  --nf-border: #e1e6de;
+  --nf-border-strong: #cbd3c7;
+
+  /* Ink */
+  --nf-ink-900: #1b231d;
+  --nf-ink-700: #37413a;
+  --nf-ink-600: #4b564c;
+  --nf-ink-400: #7c877d;
+  --nf-ink-on-dark: #eef2ec;
+  --nf-ink-on-dark-muted: #a9bcaf;
+
+  /* Status */
+  --nf-success: #3c8a5b;
+  --nf-success-bg: #e5f3ea;
+  --nf-danger: #c4442e;
+  --nf-danger-bg: #fbe9e6;
+  --nf-warning: #d08a1e;
+  --nf-warning-bg: #fbf1de;
+  --nf-info: #2e6e8e;
+  --nf-info-bg: #e5f0f5;
+
+  /* Layout */
+  --nf-sidebar-w: 260px;
+  --nf-sidebar-w-collapsed: 76px;
+  --nf-topbar-h: 68px;
+  --nf-radius-sm: 8px;
+  --nf-radius-md: 12px;
+  --nf-radius-lg: 18px;
+  --nf-shadow-sm: 0 1px 2px rgba(27, 35, 29, 0.06);
+  --nf-shadow-md: 0 6px 20px rgba(27, 35, 29, 0.08);
+  --nf-shadow-lg: 0 16px 40px rgba(27, 35, 29, 0.14);
+
+  --nf-font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --nf-font-body: 'Inter', 'Segoe UI', sans-serif;
+  --nf-font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --nf-transition: 180ms ease;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 2. Reset & base                                                        */
+/* ---------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  font-family: var(--nf-font-body);
+  background: var(--nf-canvas);
+  color: var(--nf-ink-900);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--nf-font-display);
+  color: var(--nf-ink-900);
+  font-weight: 600;
+  margin: 0 0 0.5em;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--nf-amber-500);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--nf-amber-100);
+  color: var(--nf-ink-900);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 3. Layout shell                                                        */
+/* ---------------------------------------------------------------------- */
+.nf-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 4. Sidebar                                                             */
+/* ---------------------------------------------------------------------- */
+.nf-sidebar {
+  width: var(--nf-sidebar-w);
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--nf-green-900) 0%, var(--nf-green-800) 100%);
+  color: var(--nf-ink-on-dark);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  transition: width var(--nf-transition), transform var(--nf-transition);
+  z-index: 40;
+}
+
+.nf-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--nf-font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: #ffffff;
+  padding: 6px 10px 26px;
+  letter-spacing: 0.01em;
+}
+
+.nf-sidebar-brand i {
+  font-size: 22px;
+  color: var(--nf-amber-500);
+  flex-shrink: 0;
+}
+
+.nf-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nf-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--nf-radius-sm);
+  color: var(--nf-ink-on-dark-muted);
+  font-size: 14.5px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: background var(--nf-transition), color var(--nf-transition),
+    border-color var(--nf-transition);
+  white-space: nowrap;
+}
+
+.nf-nav-link i {
+  font-size: 17px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nf-nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.nf-nav-link.active {
+  background: rgba(226, 166, 59, 0.12);
+  color: #ffffff;
+  border-left-color: var(--nf-amber-500);
+}
+
+.nf-nav-link.active i {
+  color: var(--nf-amber-500);
+}
+
+.nf-sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+#nfLogoutBtn:hover {
+  background: rgba(196, 68, 46, 0.16);
+  color: #ffffff;
+}
+
+.nf-sidebar--collapsed {
+  width: var(--nf-sidebar-w-collapsed);
+}
+
+.nf-sidebar--collapsed .nf-sidebar-brand span,
+.nf-sidebar--collapsed .nf-nav-link span {
+  display: none;
+}
+
+.nf-sidebar--collapsed .nf-sidebar-brand {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.nf-sidebar--collapsed .nf-nav-link {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 5. Main column                                                         */
+/* ---------------------------------------------------------------------- */
+.nf-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 6. Topbar                                                              */
+/* ---------------------------------------------------------------------- */
+.nf-topbar {
+  height: var(--nf-topbar-h);
+  background: var(--nf-surface);
+  border-bottom: 1px solid var(--nf-border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.nf-sidebar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--nf-border);
+  background: var(--nf-surface);
+  border-radius: var(--nf-radius-sm);
+  color: var(--nf-ink-700);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background var(--nf-transition), border-color var(--nf-transition);
+}
+
+.nf-sidebar-toggle:hover {
+  background: var(--nf-green-100);
+  border-color: var(--nf-green-500);
+}
+
+.nf-page-title {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.nf-topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--nf-ink-700);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--nf-green-100);
+  white-space: nowrap;
+}
+
+.nf-topbar-user i {
+  font-size: 19px;
+  color: var(--nf-green-600);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 7. Messages / alerts                                                   */
+/* ---------------------------------------------------------------------- */
+.nf-messages {
+  padding: 16px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nf-messages:empty {
+  padding: 0;
+}
+
+.nf-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--nf-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.nf-alert-success {
+  background: var(--nf-success-bg);
+  color: var(--nf-success);
+  border-color: rgba(60, 138, 91, 0.25);
+}
+
+.nf-alert-error,
+.nf-alert-danger {
+  background: var(--nf-danger-bg);
+  color: var(--nf-danger);
+  border-color: rgba(196, 68, 46, 0.25);
+}
+
+.nf-alert-warning {
+  background: var(--nf-warning-bg);
+  color: var(--nf-warning);
+  border-color: rgba(208, 138, 30, 0.25);
+}
+
+.nf-alert-info {
+  background: var(--nf-info-bg);
+  color: var(--nf-info);
+  border-color: rgba(46, 110, 142, 0.25);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 8. Content area                                                        */
+/* ---------------------------------------------------------------------- */
+.nf-content {
+  padding: 24px;
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 9. Cards                                                                */
+/* ---------------------------------------------------------------------- */
+.nf-card {
+  background: var(--nf-surface);
+  border: 1px solid var(--nf-border);
+  border-radius: var(--nf-radius-md);
+  box-shadow: var(--nf-shadow-sm);
+  padding: 20px;
+  transition: box-shadow var(--nf-transition), transform var(--nf-transition);
+}
+
+.nf-card:hover {
+  box-shadow: var(--nf-shadow-md);
+}
+
+.nf-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.nf-card-title {
+  font-family: var(--nf-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.nf-card-subtitle {
+  font-size: 13px;
+  color: var(--nf-ink-400);
+  margin: 2px 0 0;
+}
+
+.nf-card-body {
+  font-size: 14px;
+  color: var(--nf-ink-600);
+}
+
+.nf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.nf-stat-card {
+  background: var(--nf-surface);
+  border: 1px solid var(--nf-border);
+  border-radius: var(--nf-radius-md);
+  box-shadow: var(--nf-shadow-sm);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nf-stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--nf-ink-400);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nf-stat-value {
+  font-family: var(--nf-font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--nf-ink-900);
+}
+
+.nf-stat-value .unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--nf-ink-400);
+  margin-left: 4px;
+}
+
+.nf-stat-delta {
+  font-size: 12.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+}
+
+.nf-stat-delta.up {
+  color: var(--nf-success);
+}
+
+.nf-stat-delta.down {
+  color: var(--nf-danger);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 10. Buttons                                                            */
+/* ---------------------------------------------------------------------- */
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--nf-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: var(--nf-radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--nf-transition), border-color var(--nf-transition),
+    color var(--nf-transition), transform var(--nf-transition);
+}
+
+.nf-btn:active {
+  transform: translateY(1px);
+}
+
+.nf-btn-primary {
+  background: var(--nf-green-600);
+  color: #ffffff;
+}
+
+.nf-btn-primary:hover {
+  background: var(--nf-green-700);
+}
+
+.nf-btn-accent {
+  background: var(--nf-amber-500);
+  color: var(--nf-green-900);
+}
+
+.nf-btn-accent:hover {
+  background: var(--nf-amber-600);
+  color: #ffffff;
+}
+
+.nf-btn-outline {
+  background: transparent;
+  border-color: var(--nf-border-strong);
+  color: var(--nf-ink-700);
+}
+
+.nf-btn-outline:hover {
+  border-color: var(--nf-green-600);
+  color: var(--nf-green-600);
+}
+
+.nf-btn-danger {
+  background: var(--nf-danger);
+  color: #ffffff;
+}
+
+.nf-btn-danger:hover {
+  background: #a8391f;
+}
+
+.nf-btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.nf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 11. Badges                                                             */
+/* ---------------------------------------------------------------------- */
+.nf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+.nf-badge-success {
+  background: var(--nf-success-bg);
+  color: var(--nf-success);
+}
+
+.nf-badge-warning {
+  background: var(--nf-warning-bg);
+  color: var(--nf-warning);
+}
+
+.nf-badge-danger {
+  background: var(--nf-danger-bg);
+  color: var(--nf-danger);
+}
+
+.nf-badge-info {
+  background: var(--nf-info-bg);
+  color: var(--nf-info);
+}
+
+.nf-badge-neutral {
+  background: var(--nf-green-100);
+  color: var(--nf-green-700);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 12. Forms                                                              */
+/* ---------------------------------------------------------------------- */
+.nf-field {
+  margin-bottom: 16px;
+}
+
+.nf-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nf-ink-700);
+  margin-bottom: 6px;
+}
+
+.nf-field input,
+.nf-field select,
+.nf-field textarea {
+  width: 100%;
+  font-family: var(--nf-font-body);
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--nf-border-strong);
+  border-radius: var(--nf-radius-sm);
+  background: var(--nf-surface);
+  color: var(--nf-ink-900);
+  transition: border-color var(--nf-transition), box-shadow var(--nf-transition);
+}
+
+.nf-field input:focus,
+.nf-field select:focus,
+.nf-field textarea:focus {
+  outline: none;
+  border-color: var(--nf-green-500);
+  box-shadow: 0 0 0 3px rgba(76, 140, 99, 0.15);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 13. Tables                                                             */
+/* ---------------------------------------------------------------------- */
+.nf-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--nf-surface);
+  border: 1px solid var(--nf-border);
+  border-radius: var(--nf-radius-md);
+  overflow: hidden;
+}
+
+.nf-table th {
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--nf-ink-400);
+  background: var(--nf-canvas);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--nf-border);
+}
+
+.nf-table td {
+  padding: 13px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--nf-border);
+  color: var(--nf-ink-700);
+}
+
+.nf-table tr:last-child td {
+  border-bottom: none;
+}
+
+.nf-table tbody tr:hover {
+  background: var(--nf-green-100);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 14. Scrollbar polish (webkit)                                          */
+/* ---------------------------------------------------------------------- */
+.nf-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nf-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 15. Responsive                                                         */
+/* ---------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .nf-sidebar-toggle {
+    display: inline-flex;
+  }
+
+  .nf-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    box-shadow: var(--nf-shadow-lg);
+  }
+
+  .nf-sidebar--open {
+    transform: translateX(0);
+  }
+
+  .nf-sidebar--collapsed {
+    width: var(--nf-sidebar-w);
+  }
+
+  .nf-sidebar--collapsed .nf-sidebar-brand span,
+  .nf-sidebar--collapsed .nf-nav-link span {
+    display: inline;
+  }
+
+  .nf-main {
+    width: 100%;
+  }
+
+  .nf-content {
+    padding: 20px;
+  }
+}
+
+.nf-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .nf-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(27, 35, 29, 0.45);
+    z-index: 35;
+  }
+}
+
+@media (max-width: 640px) {
+  .nf-topbar {
+    padding: 0 16px;
+    gap: 10px;
+  }
+
+  .nf-page-title {
+    font-size: 16.5px;
+  }
+
+  .nf-topbar-user span {
+    display: none;
+  }
+
+  .nf-topbar-user {
+    padding: 8px;
+  }
+
+  .nf-content {
+    padding: 14px;
+  }
+
+  .nf-messages {
+    padding: 12px 14px 0;
+  }
+
+  .nf-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-card,
+  .nf-stat-card {
+    padding: 16px;
+  }
+}
