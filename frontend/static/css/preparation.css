@@ -1,0 +1,128 @@
+/* ==========================================================================
+   NutriFlow — preparation.css
+   Scoped to the Preparation page only, under .nf-prep-page, so nothing
+   here can affect Dashboard, Login, or Forecast.
+   Relies on design tokens (--nf-*) defined in style.css.
+   ========================================================================== */
+
+.nf-prep-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nf-prep-intro {
+  max-width: 640px;
+}
+
+.nf-prep-heading {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.nf-prep-subtext {
+  font-size: 14px;
+  color: var(--nf-ink-600);
+  margin: 0;
+}
+
+.nf-prep-form-card {
+  max-width: 860px;
+}
+
+.nf-prep-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.nf-prep-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 20px;
+  margin-bottom: 4px;
+}
+
+.nf-required {
+  color: var(--nf-danger);
+}
+
+.nf-prep-checkboxes {
+  display: flex;
+  gap: 24px;
+  margin: 4px 0 18px;
+}
+
+.nf-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--nf-ink-700);
+  cursor: pointer;
+}
+
+.nf-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--nf-green-600);
+  cursor: pointer;
+}
+
+.nf-prep-surplus-preview {
+  font-family: var(--nf-font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: var(--nf-radius-sm);
+  margin-bottom: 18px;
+  background: var(--nf-green-100);
+  color: var(--nf-green-700);
+}
+
+.nf-prep-surplus-preview.warning {
+  background: var(--nf-warning-bg);
+  color: var(--nf-warning);
+}
+
+.nf-prep-status {
+  max-width: 860px;
+}
+
+.nf-prep-status:empty {
+  display: none;
+}
+
+.nf-prep-records-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.nf-prep-row-actions {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* Responsive: stack the form fields and header rows on small screens */
+@media (max-width: 720px) {
+  .nf-prep-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-prep-checkboxes {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nf-prep-form-header,
+  .nf-prep-records-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

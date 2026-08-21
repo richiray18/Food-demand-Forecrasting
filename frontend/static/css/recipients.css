@@ -1,0 +1,219 @@
+/* ==========================================================================
+   NutriFlow — recipients.css
+   Scoped to the Recipients page only, under .nf-recipients-page, so
+   nothing here affects Dashboard, Login, Forecast, Preparation, or Surplus.
+   Relies on design tokens (--nf-*) defined in style.css.
+   ========================================================================== */
+
+.nf-recipients-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nf-recipients-intro {
+  max-width: 680px;
+}
+
+.nf-recipients-heading {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.nf-recipients-subtext {
+  font-size: 14px;
+  color: var(--nf-ink-600);
+  margin: 0;
+}
+
+.nf-recipients-profile-card {
+  max-width: 900px;
+}
+
+.nf-recipients-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.nf-recipients-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.nf-recipients-form-status:empty {
+  display: none;
+}
+
+.nf-recipients-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 20px;
+  margin-bottom: 4px;
+}
+
+.nf-required {
+  color: var(--nf-danger);
+}
+
+.nf-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--nf-ink-700);
+  cursor: pointer;
+}
+
+.nf-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--nf-green-600);
+  cursor: pointer;
+}
+
+.nf-recipients-active-toggle {
+  margin: 4px 0 18px;
+}
+
+/* Filter bar */
+.nf-recipients-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.nf-recipients-filter-bar .nf-field {
+  margin-bottom: 0;
+  min-width: 160px;
+}
+
+.nf-recipients-search-field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.nf-recipients-available-toggle {
+  margin-bottom: 2px;
+}
+
+/* Directory cards */
+.nf-recipients-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.nf-recipient-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nf-recipient-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nf-recipient-card-title {
+  font-family: var(--nf-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.nf-recipient-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nf-recipient-meta {
+  font-size: 13px;
+  color: var(--nf-ink-600);
+  line-height: 1.6;
+}
+
+.nf-recipient-meta strong {
+  color: var(--nf-ink-900);
+  font-weight: 600;
+}
+
+/* Matching */
+.nf-recipients-match-card {
+  max-width: 900px;
+}
+
+.nf-recipients-match-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 14px 0 4px;
+  flex-wrap: wrap;
+}
+
+.nf-recipients-match-form .nf-field {
+  flex: 1;
+  min-width: 220px;
+  margin-bottom: 0;
+}
+
+.nf-recipients-match-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 12px;
+}
+
+.nf-match-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nf-match-score {
+  font-family: var(--nf-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--nf-radius-sm);
+  background: var(--nf-green-100);
+  color: var(--nf-green-700);
+  width: fit-content;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .nf-recipients-grid.nf-recipients-form-grid,
+  .nf-recipients-profile-card .nf-recipients-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .nf-recipients-profile-card .nf-recipients-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-recipients-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nf-recipients-filter-bar .nf-field {
+    min-width: 0;
+  }
+
+  #nfRecipientsGrid.nf-recipients-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-recipients-match-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

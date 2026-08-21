@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preparation — NutriFlow</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="../../static/css/style.css">
+    <link rel="stylesheet" href="../../static/css/preparation.css">
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav">
+                <a href="../dashboard/dashboard.html" class="nf-nav-link" data-nav="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="../forecast/forecast.html" class="nf-nav-link" data-nav="forecast">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="../preparation/preparation.html" class="nf-nav-link" data-nav="preparation">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Preparation</span>
+                </a>
+                <a href="../surplus/surplus.html" class="nf-nav-link" data-nav="surplus">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Surplus</span>
+                </a>
+                <a href="../recipients/recipients.html" class="nf-nav-link" data-nav="recipients">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Recipients</span>
+                </a>
+                <a href="../pickups/pickups.html" class="nf-nav-link" data-nav="pickups">
+                    <i class="bi bi-truck"></i>
+                    <span>Pickups</span>
+                </a>
+                <a href="../impact/impact.html" class="nf-nav-link" data-nav="impact">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Impact</span>
+                </a>
+            </nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title" id="nfPageTitle">Preparation</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Account</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content" id="nfContent">
+
+                <section class="nf-prep-page">
+
+                    <div class="nf-prep-intro">
+                        <h2 class="nf-prep-heading">Record Meal Preparation</h2>
+                        <p class="nf-prep-subtext">
+                            Log how much was prepared and consumed for a session so NutriFlow can track surplus.
+                        </p>
+                    </div>
+
+                    <div class="nf-card nf-prep-form-card">
+
+                        <div class="nf-prep-form-header">
+                            <h3 class="nf-card-title" id="nfPrepFormTitle">New Record</h3>
+                            <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" id="nfCancelEditBtn" style="display: none;">
+                                Cancel edit
+                            </button>
+                        </div>
+
+                        <form id="nfPrepForm" novalidate>
+
+                            <div class="nf-prep-grid">
+
+                                <div class="nf-field">
+                                    <label for="prepDate">Date <span class="nf-required">*</span></label>
+                                    <input type="date" id="prepDate" name="prepDate" required aria-required="true">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="prepSession">Meal Session <span class="nf-required">*</span></label>
+                                    <select id="prepSession" name="prepSession" required aria-required="true">
+                                        <option value="" selected disabled>Loading sessions...</option>
+                                    </select>
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="prepItem">Menu Item <span class="nf-required">*</span></label>
+                                    <select id="prepItem" name="prepItem" required aria-required="true">
+                                        <option value="" selected disabled>Loading menu items...</option>
+                                    </select>
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="prepHeadcount">Headcount <span class="nf-required">*</span></label>
+                                    <input type="number" id="prepHeadcount" name="prepHeadcount" min="1" step="1" required aria-required="true">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="prepQtyPrepared">Quantity Prepared (kg) <span class="nf-required">*</span></label>
+                                    <input type="number" id="prepQtyPrepared" name="prepQtyPrepared" min="0" step="0.1" required aria-required="true">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="prepQtyConsumed">Quantity Consumed (kg) <span class="nf-required">*</span></label>
+                                    <input type="number" id="prepQtyConsumed" name="prepQtyConsumed" min="0" step="0.1" required aria-required="true">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="prepWeatherNote">Weather Note</label>
+                                    <select id="prepWeatherNote" name="prepWeatherNote">
+                                        <option value="">None</option>
+                                        <option value="heavy rain">Heavy rain</option>
+                                        <option value="extreme heat">Extreme heat</option>
+                                        <option value="cold wave">Cold wave</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="nf-prep-checkboxes">
+                                <label class="nf-checkbox-label">
+                                    <input type="checkbox" id="prepIsHoliday" name="prepIsHoliday">
+                                    <span>Holiday</span>
+                                </label>
+
+                                <label class="nf-checkbox-label">
+                                    <input type="checkbox" id="prepIsExamPeriod" name="prepIsExamPeriod">
+                                    <span>Exam period</span>
+                                </label>
+                            </div>
+
+                            <div id="nfPrepSurplusPreview" class="nf-prep-surplus-preview" style="display: none;"></div>
+
+                            <button type="submit" class="nf-btn nf-btn-primary" id="nfPrepSubmitBtn">
+                                <span id="nfPrepSubmitBtnText">Save Record</span>
+                            </button>
+
+                        </form>
+                    </div>
+
+                    <div id="nfPrepStatus" class="nf-prep-status"></div>
+
+                    <div class="nf-prep-records-header">
+                        <h3 class="nf-card-title">Recent Preparation Records</h3>
+                        <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" id="nfRefreshRecordsBtn">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Refresh
+                        </button>
+                    </div>
+
+                    <div id="nfRecordsStatus"></div>
+
+                    <div class="nf-card" id="nfRecordsTableCard" style="display: none; padding: 0; overflow-x: auto;">
+                        <table class="nf-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Session</th>
+                                    <th>Menu Item</th>
+                                    <th>Prepared (kg)</th>
+                                    <th>Consumed (kg)</th>
+                                    <th>Surplus (kg)</th>
+                                    <th>Headcount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nfRecordsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../static/js/main.js"></script>
+    <script src="../../static/js/preparation.js"></script>
+
+</body>
+</html>

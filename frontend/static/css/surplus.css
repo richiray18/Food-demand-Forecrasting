@@ -1,0 +1,246 @@
+/* ==========================================================================
+   NutriFlow — surplus.css
+   Scoped to the Surplus page only, under .nf-surplus-page, so nothing
+   here can affect Dashboard, Login, Forecast, or Preparation.
+   Relies on design tokens (--nf-*) defined in style.css.
+   ========================================================================== */
+
+.nf-surplus-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nf-surplus-intro {
+  max-width: 680px;
+}
+
+.nf-surplus-heading {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.nf-surplus-subtext {
+  font-size: 14px;
+  color: var(--nf-ink-600);
+  margin: 0;
+}
+
+.nf-surplus-form-card {
+  max-width: 940px;
+}
+
+.nf-surplus-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.nf-surplus-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 20px;
+  margin-bottom: 4px;
+}
+
+.nf-required {
+  color: var(--nf-danger);
+}
+
+.nf-surplus-checkboxes {
+  display: flex;
+  gap: 24px;
+  margin: 4px 0 18px;
+}
+
+.nf-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--nf-ink-700);
+  cursor: pointer;
+}
+
+.nf-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--nf-green-600);
+  cursor: pointer;
+}
+
+.nf-surplus-form-status {
+  max-width: 940px;
+}
+
+.nf-surplus-form-status:empty {
+  display: none;
+}
+
+.nf-surplus-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.nf-surplus-filter-bar .nf-field {
+  margin-bottom: 0;
+  min-width: 150px;
+}
+
+.nf-surplus-search-field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.nf-surplus-available-toggle {
+  margin-bottom: 2px;
+}
+
+.nf-surplus-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.nf-surplus-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nf-surplus-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nf-surplus-card-title {
+  font-family: var(--nf-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.nf-surplus-meta {
+  font-size: 13px;
+  color: var(--nf-ink-600);
+  line-height: 1.6;
+}
+
+.nf-surplus-meta strong {
+  color: var(--nf-ink-900);
+  font-weight: 600;
+}
+
+.nf-surplus-countdown {
+  font-family: var(--nf-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--nf-radius-sm);
+  background: var(--nf-green-100);
+  color: var(--nf-green-700);
+  width: fit-content;
+}
+
+.nf-surplus-countdown.expiring-soon {
+  background: var(--nf-warning-bg);
+  color: var(--nf-warning);
+}
+
+.nf-surplus-countdown.expired {
+  background: var(--nf-danger-bg);
+  color: var(--nf-danger);
+}
+
+.nf-surplus-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.nf-surplus-temp-form {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.nf-surplus-temp-form input[type="number"] {
+  width: 80px;
+  font-family: var(--nf-font-body);
+  font-size: 13px;
+  padding: 7px 8px;
+  border: 1px solid var(--nf-border-strong);
+  border-radius: var(--nf-radius-sm);
+}
+
+.nf-surplus-history {
+  display: none;
+  border-top: 1px solid var(--nf-border);
+  padding-top: 10px;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--nf-ink-600);
+}
+
+.nf-surplus-history.open {
+  display: block;
+}
+
+.nf-surplus-history ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nf-surplus-history li {
+  font-family: var(--nf-font-mono);
+}
+
+/* Responsive: match Preparation page breakpoints */
+@media (max-width: 900px) {
+  .nf-surplus-grid.nf-surplus-form-grid,
+  .nf-surplus-form-card .nf-surplus-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .nf-surplus-form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nf-surplus-form-card .nf-surplus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-surplus-checkboxes {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nf-surplus-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nf-surplus-filter-bar .nf-field {
+    min-width: 0;
+  }
+
+  #nfSurplusGrid.nf-surplus-grid {
+    grid-template-columns: 1fr;
+  }
+}
