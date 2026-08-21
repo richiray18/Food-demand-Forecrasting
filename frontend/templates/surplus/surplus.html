@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surplus — NutriFlow</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="../../static/css/style.css">
+    <link rel="stylesheet" href="../../static/css/surplus.css">
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav">
+                <a href="../dashboard/dashboard.html" class="nf-nav-link" data-nav="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="../forecast/forecast.html" class="nf-nav-link" data-nav="forecast">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="../preparation/preparation.html" class="nf-nav-link" data-nav="preparation">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Preparation</span>
+                </a>
+                <a href="../surplus/surplus.html" class="nf-nav-link" data-nav="surplus">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Surplus</span>
+                </a>
+                <a href="../recipients/recipients.html" class="nf-nav-link" data-nav="recipients">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Recipients</span>
+                </a>
+                <a href="../pickups/pickups.html" class="nf-nav-link" data-nav="pickups">
+                    <i class="bi bi-truck"></i>
+                    <span>Pickups</span>
+                </a>
+                <a href="../impact/impact.html" class="nf-nav-link" data-nav="impact">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Impact</span>
+                </a>
+            </nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title" id="nfPageTitle">Surplus</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Account</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content" id="nfContent">
+
+                <section class="nf-surplus-page">
+
+                    <div class="nf-surplus-intro">
+                        <h2 class="nf-surplus-heading">Surplus Food Tracking</h2>
+                        <p class="nf-surplus-subtext">
+                            Register leftover food, monitor time-temperature safety, and discard items that are no longer safe to redistribute.
+                        </p>
+                    </div>
+
+                    <div class="nf-card nf-surplus-form-card">
+
+                        <div class="nf-surplus-form-header">
+                            <h3 class="nf-card-title">Register Surplus</h3>
+                        </div>
+
+                        <form id="nfSurplusForm" novalidate>
+                            <div class="nf-surplus-grid">
+
+                                <div class="nf-field">
+                                    <label for="surFoodName">Food Name <span class="nf-required">*</span></label>
+                                    <input type="text" id="surFoodName" name="surFoodName" required aria-required="true" placeholder="e.g. Vegetable biryani">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="surSafetyRule">Safety Rule <span class="nf-required">*</span></label>
+                                    <select id="surSafetyRule" name="surSafetyRule" required aria-required="true">
+                                        <option value="" selected disabled>Loading safety rules...</option>
+                                    </select>
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="surQuantity">Quantity <span class="nf-required">*</span></label>
+                                    <input type="number" id="surQuantity" name="surQuantity" min="0.01" step="0.01" required aria-required="true">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="surUnit">Unit <span class="nf-required">*</span></label>
+                                    <select id="surUnit" name="surUnit" required aria-required="true">
+                                        <option value="KG">Kilograms</option>
+                                        <option value="LITRE">Litres</option>
+                                        <option value="PORTION">Portions / servings</option>
+                                    </select>
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="surPreparedAt">Prepared At <span class="nf-required">*</span></label>
+                                    <input type="datetime-local" id="surPreparedAt" name="surPreparedAt" required aria-required="true">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="surStorageLocation">Storage Location</label>
+                                    <input type="text" id="surStorageLocation" name="surStorageLocation" placeholder="e.g. Kitchen cold room 2">
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="surCurrentTemp">Current Temperature (°C)</label>
+                                    <input type="number" id="surCurrentTemp" name="surCurrentTemp" step="0.1">
+                                </div>
+
+                            </div>
+
+                            <div class="nf-surplus-checkboxes">
+                                <label class="nf-checkbox-label">
+                                    <input type="checkbox" id="surIsRefrigerated" name="surIsRefrigerated">
+                                    <span>Refrigerated</span>
+                                </label>
+                                <label class="nf-checkbox-label">
+                                    <input type="checkbox" id="surIsHotHeld" name="surIsHotHeld">
+                                    <span>Hot held</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="nf-btn nf-btn-primary" id="nfSurplusSubmitBtn">
+                                <span id="nfSurplusSubmitBtnText">Register Surplus</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="nfSurplusFormStatus" class="nf-surplus-form-status"></div>
+
+                    <div class="nf-card nf-surplus-filter-bar">
+                        <div class="nf-field nf-surplus-search-field">
+                            <label for="surSearch">Search</label>
+                            <input type="text" id="surSearch" placeholder="Search by food name or location...">
+                        </div>
+
+                        <div class="nf-field">
+                            <label for="surStatusFilter">Status</label>
+                            <select id="surStatusFilter">
+                                <option value="">All statuses</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="RESERVED">Reserved for pickup</option>
+                                <option value="PICKED_UP">Picked up</option>
+                                <option value="EXPIRED">Expired / unsafe</option>
+                                <option value="DISCARDED">Discarded</option>
+                            </select>
+                        </div>
+
+                        <div class="nf-field">
+                            <label for="surRefrigeratedFilter">Refrigerated</label>
+                            <select id="surRefrigeratedFilter">
+                                <option value="">Any</option>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+
+                        <div class="nf-field">
+                            <label for="surHotHeldFilter">Hot held</label>
+                            <select id="surHotHeldFilter">
+                                <option value="">Any</option>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+
+                        <div class="nf-field">
+                            <label for="surOrdering">Sort by</label>
+                            <select id="surOrdering">
+                                <option value="safe_until">Soonest expiring</option>
+                                <option value="-created_at">Newest first</option>
+                                <option value="quantity_remaining">Quantity remaining</option>
+                            </select>
+                        </div>
+
+                        <label class="nf-checkbox-label nf-surplus-available-toggle">
+                            <input type="checkbox" id="surAvailableOnly">
+                            <span>Available only</span>
+                        </label>
+
+                        <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" id="nfRefreshSurplusBtn">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Refresh
+                        </button>
+                    </div>
+
+                    <div id="nfSurplusListStatus"></div>
+
+                    <div class="nf-grid nf-surplus-grid" id="nfSurplusGrid"></div>
+
+                </section>
+
+            </main>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../static/js/main.js"></script>
+    <script src="../../static/js/surplus.js"></script>
+
+</body>
+</html>
