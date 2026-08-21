@@ -1,566 +1,335 @@
 /* ==========================================================================
    NutriFlow — recipients.js
-   Handles the Recipients page: loads/creates the logged-in user's own
-   recipient profile, lists/filters the recipient directory, and runs
-   surplus-to-recipient matching. Talks to the real Django REST API.
+   Manages recipient NGO directory, automated surplus matching, and pickup dispatch.
+   Endpoints:
+     GET /api/recipients/recipients/
+     POST /api/recipients/recipients/match/
+     GET /api/surplus/surplus-food/?status=AVAILABLE
+     POST /api/pickups/pickups/
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
+  var tableBody = document.getElementById('rcpTableBody');
+  var listStatus = document.getElementById('rcpListStatus');
+  var searchInput = document.getElementById('rcpSearchInput');
 
-  /* ------------------------------------------------------------------ */
-  /* Endpoint constants — change here only if backend routes change     */
-  /* ------------------------------------------------------------------ */
-  var ME_URL = 'http://127.0.0.1:8000/api/v1/accounts/me/';
-  var RECIPIENTS_URL = 'http://127.0.0.1:8000/api/recipients/recipients/';
-  var MATCH_URL = RECIPIENTS_URL + 'match/';
-  var LOGIN_URL = '../accounts/login.html';
+  var statTotal = document.getElementById('rcpStatTotal');
+  var statCapacity = document.getElementById('rcpStatCapacity');
+  var statActive = document.getElementById('rcpStatActive');
 
-  /* ------------------------------------------------------------------ */
-  /* Element references                                                 */
-  /* ------------------------------------------------------------------ */
-  var badgeVerified = document.getElementById('nfBadgeVerified');
-  var badgeActive = document.getElementById('nfBadgeActive');
-  var badgeAvailable = document.getElementById('nfBadgeAvailable');
+  var matchSurplusSelect = document.getElementById('matchSurplusSelect');
+  var btnRunMatch = document.getElementById('btnRunMatch');
+  var matchResultsArea = document.getElementById('matchResultsArea');
+  var matchCardsContainer = document.getElementById('matchCardsContainer');
 
-  var profileStatus = document.getElementById('nfProfileStatus');
-  var profileForm = document.getElementById('nfRecipientForm');
+  // Schedule Pickup Modal elements
+  var schedulePickupForm = document.getElementById('schedulePickupForm');
+  var schedRecipientId = document.getElementById('schedRecipientId');
+  var schedOrgName = document.getElementById('schedOrgName');
+  var schedSurplusSelect = document.getElementById('schedSurplusSelect');
+  var schedQuantity = document.getElementById('schedQuantity');
+  var schedTime = document.getElementById('schedTime');
+  var schedNotes = document.getElementById('schedNotes');
+  var schedSubmitBtn = document.getElementById('schedSubmitBtn');
 
-  var orgNameInput = document.getElementById('recOrgName');
-  var phoneInput = document.getElementById('recPhone');
-  var contactPersonInput = document.getElementById('recContactPerson');
-  var addressInput = document.getElementById('recAddress');
-  var capacityQuantityInput = document.getElementById('recCapacityQuantity');
-  var capacityUnitSelect = document.getElementById('recCapacityUnit');
-  var isActiveCheckbox = document.getElementById('recIsActive');
+  var rawRecipientsList = [];
+  var availableSurplusList = [];
 
-  var submitBtn = document.getElementById('nfRecipientSubmitBtn');
-  var submitBtnText = document.getElementById('nfRecipientSubmitBtnText');
+  // Initialize
+  loadRecipients();
+  loadSurplusOptions();
 
-  var searchInput = document.getElementById('recSearch');
-  var activeFilterSelect = document.getElementById('recActiveFilter');
-  var capacityUnitFilterSelect = document.getElementById('recCapacityUnitFilter');
-  var orderingSelect = document.getElementById('recOrdering');
-  var availableOnlyCheckbox = document.getElementById('recAvailableOnly');
-  var refreshBtn = document.getElementById('nfRefreshRecipientsBtn');
+  // Search input filter
+  searchInput.addEventListener('input', applySearchFilter);
 
-  var directoryStatus = document.getElementById('nfDirectoryStatus');
-  var directoryGrid = document.getElementById('nfRecipientsGrid');
+  // Run Match button
+  btnRunMatch.addEventListener('click', runMatchmaker);
 
-  var matchForm = document.getElementById('nfMatchForm');
-  var matchSurplusFoodIdInput = document.getElementById('matchSurplusFoodId');
-  var matchSubmitBtn = document.getElementById('nfMatchSubmitBtn');
-  var matchSubmitBtnText = document.getElementById('nfMatchSubmitBtnText');
-  var matchStatus = document.getElementById('nfMatchStatus');
-  var matchResultsGrid = document.getElementById('nfMatchResultsGrid');
-
-  /* ------------------------------------------------------------------ */
-  /* Auth guard — same pattern as surplus.js / preparation.js           */
-  /* ------------------------------------------------------------------ */
-  var token = localStorage.getItem('access_token');
-  if (!token) {
-    window.location.href = LOGIN_URL;
-    return;
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* State                                                              */
-  /* ------------------------------------------------------------------ */
-  var currentUserId = null;
-  var myRecipientId = null; // null = no profile yet, so we POST on save
-  var searchDebounceTimer = null;
-
-  /* ------------------------------------------------------------------ */
-  /* Init                                                               */
-  /* ------------------------------------------------------------------ */
-  loadMyProfile();
-  loadDirectory();
-
-  profileForm.addEventListener('submit', handleProfileSubmit);
-  matchForm.addEventListener('submit', handleMatchSubmit);
-
-  refreshBtn.addEventListener('click', loadDirectory);
-  activeFilterSelect.addEventListener('change', loadDirectory);
-  capacityUnitFilterSelect.addEventListener('change', loadDirectory);
-  orderingSelect.addEventListener('change', loadDirectory);
-  availableOnlyCheckbox.addEventListener('change', loadDirectory);
-
-  searchInput.addEventListener('input', function () {
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(loadDirectory, 400);
+  // Schedule pickup submit
+  schedulePickupForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    submitScheduledPickup();
   });
 
-  /* ------------------------------------------------------------------ */
-  /* Auth helpers                                                       */
-  /* ------------------------------------------------------------------ */
-  function authHeaders(extra) {
-    var headers = { 'Authorization': 'Bearer ' + token };
-    if (extra) {
-      for (var key in extra) {
-        if (Object.prototype.hasOwnProperty.call(extra, key)) {
-          headers[key] = extra[key];
-        }
-      }
-    }
-    return headers;
-  }
+  function loadRecipients() {
+    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-400); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading partner organization directory...</div>';
 
-  function handleAuthError(response) {
-    if (response.status === 401 || response.status === 403) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = LOGIN_URL;
-      return true;
-    }
-    return false;
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Load logged-in user, then find (or not find) their recipient       */
-  /* profile among all recipients, per the confirmed backend contract:  */
-  /* GET /api/v1/accounts/me/ -> me.id                                  */
-  /* GET /api/recipients/recipients/ -> find recipient.user === me.id   */
-  /* ------------------------------------------------------------------ */
-  function loadMyProfile() {
-    showProfileStatus('info', 'Loading your recipient profile...');
-
-    fetch(ME_URL, { headers: authHeaders() })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-        if (!response.ok) throw new Error('status ' + response.status);
-        return response.json();
-      })
-      .then(function (me) {
-        if (me === null) return null;
-
-        currentUserId = me.id;
-        orgNameInput.value = me.organization_name || '';
-        phoneInput.value = me.phone_number || '';
-
-        return fetch(RECIPIENTS_URL, { headers: authHeaders() });
-      })
-      .then(function (response) {
-        if (response === null) return null;
-        if (handleAuthError(response)) return null;
-        if (!response.ok) throw new Error('status ' + response.status);
-        return response.json();
-      })
+    NutriFlow.apiFetch('/api/recipients/recipients/')
+      .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data === null) return;
-
-        var rows = Array.isArray(data) ? data : (data.results || []);
-        var mine = rows.find(function (r) {
-          return r.user === currentUserId;
-        });
-
-        if (mine) {
-          myRecipientId = mine.id;
-          populateProfileForm(mine);
-          submitBtnText.textContent = 'Save Recipient Profile';
-        } else {
-          myRecipientId = null;
-          resetStatusBadges();
-          submitBtnText.textContent = 'Save Recipient Profile';
-        }
-
-        hideProfileStatus();
+        listStatus.innerHTML = '';
+        rawRecipientsList = Array.isArray(data) ? data : (data.results || []);
+        updateRecipientKPIs();
+        renderTable(rawRecipientsList);
       })
-      .catch(function () {
-        showProfileStatus('error', 'Could not load your recipient profile. Please try again.');
+      .catch(function (err) {
+        listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-danger); font-size: 13.5px;">Error loading recipients: ' + err.message + '</div>';
       });
   }
 
-  function populateProfileForm(recipient) {
-    contactPersonInput.value = recipient.contact_person || '';
-    addressInput.value = recipient.address || '';
-    capacityQuantityInput.value = recipient.capacity_quantity;
-    capacityUnitSelect.value = recipient.capacity_unit;
-    isActiveCheckbox.checked = !!recipient.is_active;
+  function loadSurplusOptions() {
+    NutriFlow.apiFetch('/api/surplus/surplus-food/?status=AVAILABLE')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        availableSurplusList = Array.isArray(data) ? data : (data.results || []);
 
-    setBadge(badgeVerified, recipient.is_verified, 'Verified', 'Not verified');
-    setBadge(badgeActive, recipient.is_active, 'Active', 'Inactive');
-    setBadge(badgeAvailable, recipient.is_available_for_matching, 'Available for matching', 'Not available for matching');
+        matchSurplusSelect.innerHTML = '<option value="">Choose an active surplus batch to match...</option>';
+        schedSurplusSelect.innerHTML = '<option value="">Select surplus batch...</option>';
+
+        availableSurplusList.forEach(function (s) {
+          var label = s.food_name + ' (' + parseFloat(s.quantity_remaining).toFixed(1) + ' ' + (s.unit || 'KG') + ' available)';
+          
+          var opt1 = document.createElement('option');
+          opt1.value = s.id;
+          opt1.textContent = label;
+          matchSurplusSelect.appendChild(opt1);
+
+          var opt2 = document.createElement('option');
+          opt2.value = s.id;
+          opt2.textContent = label;
+          schedSurplusSelect.appendChild(opt2);
+        });
+
+        // Check if surplus_id passed in URL
+        var params = new URLSearchParams(window.location.search);
+        var surplusId = params.get('surplus_id');
+        if (surplusId) {
+          matchSurplusSelect.value = surplusId;
+          runMatchmaker();
+        }
+      })
+      .catch(function (err) {
+        console.error('Error loading surplus options:', err);
+      });
   }
 
-  function resetStatusBadges() {
-    badgeVerified.textContent = 'No profile yet';
-    badgeVerified.className = 'nf-badge nf-badge-neutral';
-    badgeActive.textContent = 'No profile yet';
-    badgeActive.className = 'nf-badge nf-badge-neutral';
-    badgeAvailable.textContent = 'No profile yet';
-    badgeAvailable.className = 'nf-badge nf-badge-neutral';
+  function updateRecipientKPIs() {
+    var total = rawRecipientsList.length;
+    var totalCap = 0;
+    var activeCount = 0;
+
+    rawRecipientsList.forEach(function (r) {
+      if (r.is_active && r.is_verified) activeCount++;
+      totalCap += parseFloat(r.capacity_quantity) || 0;
+    });
+
+    statTotal.textContent = total.toString();
+    statCapacity.innerHTML = totalCap.toFixed(0) + '<span class="unit">kg/day</span>';
+    statActive.textContent = activeCount.toString();
   }
 
-  function setBadge(el, isTrue, trueLabel, falseLabel) {
-    el.textContent = isTrue ? trueLabel : falseLabel;
-    el.className = 'nf-badge ' + (isTrue ? 'nf-badge-success' : 'nf-badge-warning');
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Save profile — POST if none exists, PATCH if one does              */
-  /* organization_name / phone_number / user / is_verified /            */
-  /* is_available_for_matching are never sent (read-only backend fields) */
-  /* ------------------------------------------------------------------ */
-  function handleProfileSubmit(event) {
-    event.preventDefault();
-    hideProfileStatus();
-
-    var contactPerson = contactPersonInput.value.trim();
-    var address = addressInput.value.trim();
-    var capacityQuantity = capacityQuantityInput.value;
-
-    if (!contactPerson) {
-      showProfileStatus('error', 'Please enter a contact person.');
-      contactPersonInput.focus();
+  function applySearchFilter() {
+    var val = (searchInput.value || '').toLowerCase().trim();
+    if (!val) {
+      renderTable(rawRecipientsList);
       return;
     }
 
-    if (!address) {
-      showProfileStatus('error', 'Please enter an address.');
-      addressInput.focus();
+    var filtered = rawRecipientsList.filter(function (r) {
+      var org = (r.organization_name || '').toLowerCase();
+      var contact = (r.contact_person || '').toLowerCase();
+      var addr = (r.address || '').toLowerCase();
+      return org.includes(val) || contact.includes(val) || addr.includes(val);
+    });
+
+    renderTable(filtered);
+  }
+
+  function renderTable(list) {
+    if (list.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--nf-ink-400); padding: 32px;">No recipient organizations found.</td></tr>';
       return;
     }
 
-    if (capacityQuantity === '' || Number(capacityQuantity) < 0) {
-      showProfileStatus('error', 'Capacity quantity must be zero or a positive number.');
-      capacityQuantityInput.focus();
+    tableBody.innerHTML = '';
+    list.forEach(function (r) {
+      var tr = document.createElement('tr');
+
+      var verBadge = r.is_verified
+        ? '<span class="nf-badge nf-badge-success"><i class="bi bi-patch-check-fill"></i> Verified</span>'
+        : '<span class="nf-badge nf-badge-warning"><i class="bi bi-hourglass"></i> Pending Admin</span>';
+
+      var statusBadge = (r.is_active && r.is_verified)
+        ? '<span class="nf-badge nf-badge-success"><i class="bi bi-broadcast"></i> Available</span>'
+        : '<span class="nf-badge nf-badge-neutral"><i class="bi bi-pause-circle"></i> Inactive / Full</span>';
+
+      tr.innerHTML = '<td><strong style="color: var(--nf-green-900); font-size: 14.5px;">' + (r.organization_name || 'Community Organization') + '</strong></td>' +
+        '<td><span style="font-size: 13px; color: var(--nf-ink-600);"><i class="bi bi-geo-alt"></i> ' + (r.address || 'Campus Vicinity') + '</span></td>' +
+        '<td>' + (r.contact_person || 'Coordinator') + '<br><span style="font-size: 12px; color: var(--nf-ink-400);">' + (r.phone_number || '—') + '</span></td>' +
+        '<td><strong style="font-family: var(--nf-font-mono);">' + parseFloat(r.capacity_quantity).toFixed(1) + ' ' + (r.capacity_unit || 'KG') + '</strong>/day</td>' +
+        '<td>' + verBadge + '</td>' +
+        '<td>' + statusBadge + '</td>' +
+        '<td style="text-align: right;">' +
+        '<button class="nf-btn nf-btn-primary nf-btn-sm" onclick="window.NutriFlowRecipients.openScheduleModal(\'' + r.id + '\', \'' + encodeURIComponent(r.organization_name || 'Recipient') + '\', \'' + (r.capacity_quantity || 50) + '\')" style="font-size: 12px; padding: 4px 10px;">' +
+        '<i class="bi bi-calendar-plus"></i> Schedule Pickup' +
+        '</button>' +
+        '</td>';
+
+      tableBody.appendChild(tr);
+    });
+  }
+
+  function runMatchmaker() {
+    var surplusId = matchSurplusSelect.value;
+    if (!surplusId) {
+      NutriFlow.showAlert('warning', 'Please choose an active surplus food batch first.');
       return;
     }
+
+    btnRunMatch.disabled = true;
+    btnRunMatch.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Scoring Matches...';
+    matchResultsArea.style.display = 'none';
+
+    // Call match endpoint
+    NutriFlow.apiFetch('/api/recipients/recipients/match/', {
+      method: 'POST',
+      body: { surplus_food: surplusId }
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Matchmaker failed (' + res.status + ')');
+        return res.json();
+      })
+      .then(function (data) {
+        btnRunMatch.disabled = false;
+        btnRunMatch.innerHTML = '<i class="bi bi-stars"></i> Find Optimal NGO Match';
+
+        var matches = data.matches || [];
+        if (matches.length === 0) {
+          NutriFlow.showAlert('info', 'No active, verified recipients found with sufficient remaining daily intake capacity.');
+          return;
+        }
+
+        renderMatchCards(matches, surplusId);
+      })
+      .catch(function (err) {
+        btnRunMatch.disabled = false;
+        btnRunMatch.innerHTML = '<i class="bi bi-stars"></i> Find Optimal NGO Match';
+        NutriFlow.showAlert('error', 'Matching engine notice: ' + err.message);
+      });
+  }
+
+  function renderMatchCards(matches, surplusId) {
+    matchCardsContainer.innerHTML = '';
+    matchResultsArea.style.display = 'block';
+
+    var selectedSurplus = availableSurplusList.find(function (s) { return s.id === surplusId; });
+    var neededQty = selectedSurplus ? parseFloat(selectedSurplus.quantity_remaining) : 10;
+
+    matches.forEach(function (m, idx) {
+      var r = m.recipient;
+      var scoreVal = Math.min(100, Math.round(m.score * 100));
+      var isTop = (idx === 0);
+
+      var cardCol = document.createElement('div');
+      cardCol.className = isTop ? 'col-md-12' : 'col-md-6';
+
+      var topBadge = isTop ? '<span class="nf-badge nf-badge-success" style="margin-bottom: 8px;"><i class="bi bi-trophy-fill"></i> Best Proximity & Capacity Match</span>' : '';
+
+      cardCol.innerHTML = '<div class="nf-card" style="' + (isTop ? 'border: 2px solid var(--nf-green-600); background: linear-gradient(135deg, rgba(76,140,99,0.06), #fff);' : '') + '">' +
+        topBadge +
+        '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">' +
+        '<div>' +
+        '<h4 style="font-size: 16px; margin: 0; color: var(--nf-green-900);">' + (r.organization_name || 'Organization') + '</h4>' +
+        '<div style="font-size: 12.5px; color: var(--nf-ink-600);"><i class="bi bi-geo-alt"></i> Available for Immediate Handover</div>' +
+        '</div>' +
+        '<div style="text-align: right;">' +
+        '<div style="font-family: var(--nf-font-mono); font-size: 18px; font-weight: 700; color: var(--nf-green-700);">' + scoreVal + '% Fit</div>' +
+        '<div style="font-size: 11px; color: var(--nf-ink-400);">Compatibility Score</div>' +
+        '</div>' +
+        '</div>' +
+        '<div style="display: flex; gap: 12px; font-size: 13px; color: var(--nf-ink-700); margin-bottom: 14px;">' +
+        '<div><i class="bi bi-box"></i> Intake Capacity: <strong>' + parseFloat(r.capacity_quantity).toFixed(1) + ' ' + (r.capacity_unit || 'KG') + '</strong></div>' +
+        '<div><i class="bi bi-patch-check"></i> Verification: <strong>Verified</strong></div>' +
+        '</div>' +
+        '<div style="display: flex; justify-content: flex-end;">' +
+        '<button class="nf-btn ' + (isTop ? 'nf-btn-primary' : 'nf-btn-outline') + ' nf-btn-sm" onclick="window.NutriFlowRecipients.openScheduleModalWithSurplus(\'' + r.id + '\', \'' + encodeURIComponent(r.organization_name || 'Recipient') + '\', \'' + surplusId + '\', \'' + neededQty + '\')">' +
+        '<i class="bi bi-calendar2-check"></i> Dispatch Pickup to this NGO' +
+        '</button>' +
+        '</div>' +
+        '</div>';
+
+      matchCardsContainer.appendChild(cardCol);
+    });
+  }
+
+  function submitScheduledPickup() {
+    var recipientId = schedRecipientId.value;
+    var surplusId = schedSurplusSelect.value;
+    var qty = parseFloat(schedQuantity.value);
+    var timeVal = schedTime.value;
+    var notesVal = schedNotes.value;
+
+    if (!recipientId || !surplusId || isNaN(qty) || qty <= 0 || !timeVal) {
+      NutriFlow.showAlert('warning', 'Please provide recipient, surplus batch, quantity, and scheduled pickup time.');
+      return;
+    }
+
+    schedSubmitBtn.disabled = true;
+    schedSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Scheduling Logistics...';
 
     var payload = {
-      contact_person: contactPerson,
-      address: address,
-      capacity_quantity: Number(capacityQuantity),
-      capacity_unit: capacityUnitSelect.value,
-      is_active: isActiveCheckbox.checked
+      recipient: recipientId,
+      surplus_food: surplusId,
+      quantity_requested: qty,
+      scheduled_time: new Date(timeVal).toISOString(),
+      notes: notesVal || 'Coordinated via NutriFlow Smart Match'
     };
 
-    var isEditing = myRecipientId !== null;
-    var url = isEditing ? (RECIPIENTS_URL + myRecipientId + '/') : RECIPIENTS_URL;
-    var method = isEditing ? 'PATCH' : 'POST';
-
-    setSubmitting(true, isEditing);
-
-    fetch(url, {
-      method: method,
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(payload)
-    })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-        return response.json().then(function (data) {
-          return { ok: response.ok, status: response.status, data: data };
-        });
-      })
-      .then(function (result) {
-        setSubmitting(false, isEditing);
-        if (result === null) return;
-
-        if (!result.ok) {
-          showProfileStatus('error', formatApiError(result.status, result.data));
-          return;
-        }
-
-        myRecipientId = result.data.id;
-        populateProfileForm(result.data);
-        showProfileStatus('success', isEditing ? 'Profile updated.' : 'Profile created.');
-        loadDirectory();
-      })
-      .catch(function () {
-        setSubmitting(false, isEditing);
-        showProfileStatus('error', 'Network error. Please check your connection and try again.');
-      });
-  }
-
-  function setSubmitting(isSubmitting, isEditing) {
-    submitBtn.disabled = isSubmitting;
-    if (isSubmitting) {
-      submitBtnText.textContent = isEditing ? 'Updating...' : 'Saving...';
-    } else {
-      submitBtnText.textContent = 'Save Recipient Profile';
-    }
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Directory: load / filter / render                                  */
-  /* Supported query params: search, is_active, capacity_unit,          */
-  /* available_only=true, ordering                                      */
-  /* ------------------------------------------------------------------ */
-  function loadDirectory() {
-    directoryStatus.innerHTML = '<div class="nf-alert nf-alert-info">Loading recipients...</div>';
-    directoryGrid.innerHTML = '';
-
-    var params = new URLSearchParams();
-
-    if (searchInput.value.trim()) {
-      params.set('search', searchInput.value.trim());
-    }
-    if (activeFilterSelect.value) {
-      params.set('is_active', activeFilterSelect.value);
-    }
-    if (capacityUnitFilterSelect.value) {
-      params.set('capacity_unit', capacityUnitFilterSelect.value);
-    }
-    if (orderingSelect.value) {
-      params.set('ordering', orderingSelect.value);
-    }
-    if (availableOnlyCheckbox.checked) {
-      params.set('available_only', 'true');
-    }
-
-    var url = RECIPIENTS_URL + (params.toString() ? '?' + params.toString() : '');
-
-    fetch(url, { headers: authHeaders() })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-        if (!response.ok) throw new Error('status ' + response.status);
-        return response.json();
-      })
-      .then(function (data) {
-        if (data === null) return;
-        var rows = Array.isArray(data) ? data : (data.results || []);
-
-        if (rows.length === 0) {
-          directoryStatus.innerHTML = '<div class="nf-alert nf-alert-warning">No recipients found.</div>';
-          return;
-        }
-
-        directoryStatus.innerHTML = '';
-        renderDirectory(rows);
-      })
-      .catch(function () {
-        directoryStatus.innerHTML = '<div class="nf-alert nf-alert-error">Could not load recipients. Please try again.</div>';
-      });
-  }
-
-  function renderDirectory(rows) {
-    directoryGrid.innerHTML = '';
-
-    rows.forEach(function (recipient) {
-      var card = document.createElement('div');
-      card.className = 'nf-card nf-recipient-card';
-
-      var header = document.createElement('div');
-      header.className = 'nf-recipient-card-header';
-
-      var title = document.createElement('h4');
-      title.className = 'nf-recipient-card-title';
-      title.textContent = recipient.organization_name || 'Unnamed organization';
-
-      var badges = document.createElement('div');
-      badges.className = 'nf-recipient-badges';
-
-      var verifiedBadge = document.createElement('span');
-      verifiedBadge.className = 'nf-badge ' + (recipient.is_verified ? 'nf-badge-success' : 'nf-badge-warning');
-      verifiedBadge.textContent = recipient.is_verified ? 'Verified' : 'Not verified';
-
-      var activeBadge = document.createElement('span');
-      activeBadge.className = 'nf-badge ' + (recipient.is_active ? 'nf-badge-success' : 'nf-badge-neutral');
-      activeBadge.textContent = recipient.is_active ? 'Active' : 'Inactive';
-
-      var availableBadge = document.createElement('span');
-      availableBadge.className = 'nf-badge ' + (recipient.is_available_for_matching ? 'nf-badge-info' : 'nf-badge-neutral');
-      availableBadge.textContent = recipient.is_available_for_matching ? 'Available for matching' : 'Not available for matching';
-
-      badges.appendChild(verifiedBadge);
-      badges.appendChild(activeBadge);
-      badges.appendChild(availableBadge);
-
-      header.appendChild(title);
-      card.appendChild(header);
-      card.appendChild(badges);
-
-      var meta = document.createElement('div');
-      meta.className = 'nf-recipient-meta';
-
-      appendMetaLine(meta, 'Capacity', formatNumber(recipient.capacity_quantity) + ' ' + (recipient.capacity_unit || '').toLowerCase());
-      appendMetaLine(meta, 'Contact person', recipient.contact_person || '—');
-      appendMetaLine(meta, 'Phone', recipient.phone_number || '—');
-      appendMetaLine(meta, 'Address', recipient.address || '—');
-
-      card.appendChild(meta);
-
-      if (myRecipientId === recipient.id) {
-        var editBtn = document.createElement('button');
-        editBtn.type = 'button';
-        editBtn.className = 'nf-btn nf-btn-outline nf-btn-sm';
-        editBtn.textContent = 'Edit my profile';
-        editBtn.addEventListener('click', function () {
-          document.getElementById('nfRecipientForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-        card.appendChild(editBtn);
-      }
-
-      directoryGrid.appendChild(card);
-    });
-  }
-
-  function appendMetaLine(container, label, value) {
-    var line = document.createElement('div');
-
-    var strong = document.createElement('strong');
-    strong.textContent = label + ': ';
-
-    line.appendChild(strong);
-    line.appendChild(document.createTextNode(value));
-    container.appendChild(line);
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Matching — POST /api/recipients/recipients/match/                  */
-  /* Body: { surplus_food }. Response: { surplus_food, matches: [...] } */
-  /* Frontend only displays the backend's ranked results.                */
-  /* ------------------------------------------------------------------ */
-  function handleMatchSubmit(event) {
-    event.preventDefault();
-    hideMatchStatus();
-    matchResultsGrid.innerHTML = '';
-
-    var surplusFoodId = matchSurplusFoodIdInput.value.trim();
-
-    if (!surplusFoodId) {
-      showMatchStatus('error', 'Please enter a surplus food ID.');
-      matchSurplusFoodIdInput.focus();
-      return;
-    }
-
-    setMatchSubmitting(true);
-
-    fetch(MATCH_URL, {
+    NutriFlow.apiFetch('/api/pickups/pickups/', {
       method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ surplus_food: surplusFoodId })
+      body: payload
     })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-        return response.json().then(function (data) {
-          return { ok: response.ok, status: response.status, data: data };
-        });
-      })
-      .then(function (result) {
-        setMatchSubmitting(false);
-        if (result === null) return;
-
-        if (!result.ok) {
-          showMatchStatus('error', formatApiError(result.status, result.data));
-          return;
+      .then(function (res) {
+        if (!res.ok) {
+          return res.json().then(function (err) {
+            throw new Error(err.detail || (typeof err === 'object' ? Object.values(err).flat().join(' ') : 'Failed to schedule pickup.'));
+          });
         }
-
-        var matches = result.data.matches || [];
-
-        if (matches.length === 0) {
-          showMatchStatus('warning', 'No eligible recipients were found for this surplus item.');
-          return;
-        }
-
-        hideMatchStatus();
-        renderMatches(matches);
+        return res.json();
       })
-      .catch(function () {
-        setMatchSubmitting(false);
-        showMatchStatus('error', 'Network error. Please check your connection and try again.');
+      .then(function (created) {
+        schedSubmitBtn.disabled = false;
+        schedSubmitBtn.innerHTML = '<i class="bi bi-truck"></i> Confirm & Generate Verification Code';
+        NutriFlow.closeModal('schedulePickupModal');
+
+        NutriFlow.showAlert('success', 'Pickup #' + (created.id ? created.id.slice(0, 8) : '') + ' scheduled! Verification Code: ' + (created.verification_code || 'Generated') + '. Redirecting to Pickups logistics...', 4000);
+
+        setTimeout(function () {
+          window.location.href = '/pickups/';
+        }, 1500);
+      })
+      .catch(function (err) {
+        schedSubmitBtn.disabled = false;
+        schedSubmitBtn.innerHTML = '<i class="bi bi-truck"></i> Confirm & Generate Verification Code';
+        NutriFlow.showAlert('error', err.message);
       });
   }
 
-  function renderMatches(matches) {
-    matchResultsGrid.innerHTML = '';
+  // Global namespace for onclick bindings
+  window.NutriFlowRecipients = {
+    openScheduleModal: function (id, nameEnc, maxCap) {
+      schedRecipientId.value = id;
+      schedOrgName.value = decodeURIComponent(nameEnc);
+      schedQuantity.value = parseFloat(maxCap) > 20 ? '20.0' : maxCap;
+      
+      // Default time: 1 hour from now
+      var soon = new Date();
+      soon.setHours(soon.getHours() + 1);
+      schedTime.value = soon.toISOString().slice(0, 16);
 
-    matches.forEach(function (match) {
-      var recipient = match.recipient || {};
+      NutriFlow.openModal('schedulePickupModal');
+    },
+    openScheduleModalWithSurplus: function (recId, nameEnc, surplusId, neededQty) {
+      schedRecipientId.value = recId;
+      schedOrgName.value = decodeURIComponent(nameEnc);
+      schedSurplusSelect.value = surplusId;
+      schedQuantity.value = neededQty;
 
-      var card = document.createElement('div');
-      card.className = 'nf-card nf-match-card';
+      var soon = new Date();
+      soon.setHours(soon.getHours() + 1);
+      schedTime.value = soon.toISOString().slice(0, 16);
 
-      var title = document.createElement('h4');
-      title.className = 'nf-recipient-card-title';
-      title.textContent = recipient.organization_name || 'Unnamed organization';
-      card.appendChild(title);
-
-      var badges = document.createElement('div');
-      badges.className = 'nf-recipient-badges';
-
-      var activeBadge = document.createElement('span');
-      activeBadge.className = 'nf-badge ' + (recipient.is_active ? 'nf-badge-success' : 'nf-badge-neutral');
-      activeBadge.textContent = recipient.is_active ? 'Active' : 'Inactive';
-
-      var verifiedBadge = document.createElement('span');
-      verifiedBadge.className = 'nf-badge ' + (recipient.is_verified ? 'nf-badge-success' : 'nf-badge-warning');
-      verifiedBadge.textContent = recipient.is_verified ? 'Verified' : 'Not verified';
-
-      badges.appendChild(activeBadge);
-      badges.appendChild(verifiedBadge);
-      card.appendChild(badges);
-
-      var meta = document.createElement('div');
-      meta.className = 'nf-recipient-meta';
-      appendMetaLine(meta, 'Capacity', formatNumber(recipient.capacity_quantity) + ' ' + (recipient.capacity_unit || '').toLowerCase());
-      card.appendChild(meta);
-
-      var score = document.createElement('div');
-      score.className = 'nf-match-score';
-      score.textContent = 'Score: ' + formatScore(match.score);
-      card.appendChild(score);
-
-      matchResultsGrid.appendChild(card);
-    });
-  }
-
-  function setMatchSubmitting(isSubmitting) {
-    matchSubmitBtn.disabled = isSubmitting;
-    matchSubmitBtnText.textContent = isSubmitting ? 'Finding matches...' : 'Find Matches';
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Helpers                                                            */
-  /* ------------------------------------------------------------------ */
-  function formatNumber(value) {
-    var n = parseFloat(value);
-    return isNaN(n) ? '—' : n.toFixed(2);
-  }
-
-  function formatScore(value) {
-    var n = parseFloat(value);
-    return isNaN(n) ? '—' : n.toFixed(4);
-  }
-
-  function formatApiError(status, data) {
-    if (status === 400 && data && typeof data === 'object') {
-      var parts = [];
-      for (var field in data) {
-        if (Object.prototype.hasOwnProperty.call(data, field)) {
-          var value = data[field];
-          var text = Array.isArray(value) ? value.join(' ') : String(value);
-          parts.push(field + ': ' + text);
-        }
-      }
-      if (parts.length > 0) return parts.join(' | ');
+      NutriFlow.openModal('schedulePickupModal');
     }
-    if (status === 404) {
-      return 'The requested record could not be found.';
-    }
-    return 'Request failed (status ' + status + ').';
-  }
-
-  function showProfileStatus(type, message) {
-    var alertClass = 'nf-alert-info';
-    if (type === 'error') alertClass = 'nf-alert-error';
-    else if (type === 'success') alertClass = 'nf-alert-success';
-    else if (type === 'warning') alertClass = 'nf-alert-warning';
-    profileStatus.innerHTML = '<div class="nf-alert ' + alertClass + '">' + message + '</div>';
-  }
-
-  function hideProfileStatus() {
-    profileStatus.innerHTML = '';
-  }
-
-  function showMatchStatus(type, message) {
-    var alertClass = 'nf-alert-info';
-    if (type === 'error') alertClass = 'nf-alert-error';
-    else if (type === 'success') alertClass = 'nf-alert-success';
-    else if (type === 'warning') alertClass = 'nf-alert-warning';
-    matchStatus.innerHTML = '<div class="nf-alert ' + alertClass + '">' + message + '</div>';
-  }
-
-  function hideMatchStatus() {
-    matchStatus.innerHTML = '';
-  }
+  };
 });

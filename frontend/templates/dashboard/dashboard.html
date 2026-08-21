@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — NutriFlow</title>
+    <title>Executive Operations Dashboard — NutriFlow</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-    <link rel="stylesheet" href="../../static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
 <body>
 
@@ -21,31 +22,31 @@
             </div>
 
             <nav class="nf-nav">
-                <a href="../dashboard/dashboard.html" class="nf-nav-link" data-nav="dashboard">
+                <a href="/dashboard/" class="nf-nav-link" data-nav="dashboard">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="../forecast/forecast.html" class="nf-nav-link" data-nav="forecast">
+                <a href="/forecast/" class="nf-nav-link" data-nav="forecast">
                     <i class="bi bi-graph-up-arrow"></i>
                     <span>Forecast</span>
                 </a>
-                <a href="../preparation/preparation.html" class="nf-nav-link" data-nav="preparation">
+                <a href="/preparation/" class="nf-nav-link" data-nav="preparation">
                     <i class="bi bi-egg-fried"></i>
                     <span>Preparation</span>
                 </a>
-                <a href="../surplus/surplus.html" class="nf-nav-link" data-nav="surplus">
+                <a href="/surplus/" class="nf-nav-link" data-nav="surplus">
                     <i class="bi bi-box-seam"></i>
                     <span>Surplus</span>
                 </a>
-                <a href="../recipients/recipients.html" class="nf-nav-link" data-nav="recipients">
+                <a href="/recipients/" class="nf-nav-link" data-nav="recipients">
                     <i class="bi bi-people-fill"></i>
                     <span>Recipients</span>
                 </a>
-                <a href="../pickups/pickups.html" class="nf-nav-link" data-nav="pickups">
+                <a href="/pickups/" class="nf-nav-link" data-nav="pickups">
                     <i class="bi bi-truck"></i>
                     <span>Pickups</span>
                 </a>
-                <a href="../impact/impact.html" class="nf-nav-link" data-nav="impact">
+                <a href="/impact/" class="nf-nav-link" data-nav="impact">
                     <i class="bi bi-heart-pulse-fill"></i>
                     <span>Impact</span>
                 </a>
@@ -66,11 +67,11 @@
                     <i class="bi bi-list"></i>
                 </button>
 
-                <h1 class="nf-page-title" id="nfPageTitle">Dashboard</h1>
+                <h1 class="nf-page-title" id="nfPageTitle">Daily Operations Dashboard</h1>
 
                 <div class="nf-topbar-user">
                     <i class="bi bi-person-circle"></i>
-                    <span id="nfUserDisplay">Account</span>
+                    <span id="nfUserDisplay">Kitchen Admin</span>
                 </div>
             </header>
 
@@ -78,44 +79,140 @@
 
             <main class="nf-content" id="nfContent">
 
-                <div class="nf-card-subtitle" id="nfTodayDate" style="margin-bottom: 18px; font-size: 14px;"></div>
+                <!-- Header Actions & Date Filter -->
+                <div class="nf-filter-bar" style="margin-bottom: 22px;">
+                    <div>
+                        <h2 style="font-size: 20px; margin-bottom: 2px;">Campus Meal Intelligence</h2>
+                        <div class="nf-card-subtitle" id="nfTodayDate">Loading date...</div>
+                    </div>
+                    <div class="nf-filter-group">
+                        <label for="nfDateFilter" style="font-size: 13px; font-weight: 600; color: var(--nf-ink-700);">View Date:</label>
+                        <input type="date" id="nfDateFilter" class="form-control form-control-sm" style="width: 170px; border-radius: var(--nf-radius-sm);">
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" id="nfRefreshBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                </div>
 
+                <!-- Quick Action Bar -->
+                <div class="nf-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+                    <a href="/forecast/" class="nf-card" style="padding: 14px 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; border-left: 4px solid var(--nf-amber-500);">
+                        <i class="bi bi-cpu-fill" style="font-size: 24px; color: var(--nf-amber-500);"></i>
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">Run AI Forecast</div>
+                            <div style="font-size: 12px; color: var(--nf-ink-400);">Predict demand for next meal</div>
+                        </div>
+                    </a>
+                    <a href="/preparation/" class="nf-card" style="padding: 14px 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; border-left: 4px solid var(--nf-green-500);">
+                        <i class="bi bi-egg-fried" style="font-size: 24px; color: var(--nf-green-500);"></i>
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">Log Preparation</div>
+                            <div style="font-size: 12px; color: var(--nf-ink-400);">Record kitchen batch quantities</div>
+                        </div>
+                    </a>
+                    <a href="/surplus/" class="nf-card" style="padding: 14px 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; border-left: 4px solid var(--nf-danger);">
+                        <i class="bi bi-box-seam" style="font-size: 24px; color: var(--nf-danger);"></i>
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">Route Surplus</div>
+                            <div style="font-size: 12px; color: var(--nf-ink-400);">Monitor HACCP danger windows</div>
+                        </div>
+                    </a>
+                    <a href="/impact/" class="nf-card" style="padding: 14px 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; border-left: 4px solid var(--nf-info);">
+                        <i class="bi bi-heart-pulse-fill" style="font-size: 24px; color: var(--nf-info);"></i>
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">Impact Ledger</div>
+                            <div style="font-size: 12px; color: var(--nf-ink-400);">Review ESG CO2 & cost savings</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Primary Operational KPIs -->
                 <div class="nf-grid" style="margin-bottom: 24px;">
                     <div class="nf-stat-card">
-                        <span class="nf-stat-label">Total Prepared</span>
+                        <span class="nf-stat-label"><i class="bi bi-fire"></i> Prepared Quantity</span>
                         <span class="nf-stat-value" id="nfStatPrepared">—<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up"><i class="bi bi-check-circle"></i> Kitchen Logged</span>
                     </div>
                     <div class="nf-stat-card">
-                        <span class="nf-stat-label">Total Consumed</span>
+                        <span class="nf-stat-label"><i class="bi bi-people"></i> Consumed Quantity</span>
                         <span class="nf-stat-value" id="nfStatConsumed">—<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up"><i class="bi bi-pie-chart"></i> Actual Demand</span>
                     </div>
                     <div class="nf-stat-card">
-                        <span class="nf-stat-label">Total Surplus</span>
-                        <span class="nf-stat-value" id="nfStatSurplus">—<span class="unit">kg</span></span>
+                        <span class="nf-stat-label"><i class="bi bi-box-arrow-up-right"></i> Active Surplus</span>
+                        <span class="nf-stat-value" id="nfStatSurplus" style="color: var(--nf-amber-600);">—<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta down" id="nfSurplusRateLabel">Available for Rescue</span>
                     </div>
                     <div class="nf-stat-card">
-                        <span class="nf-stat-label">Total Headcount</span>
+                        <span class="nf-stat-label"><i class="bi bi-person-lines-fill"></i> Total Headcount</span>
                         <span class="nf-stat-value" id="nfStatHeadcount">—</span>
+                        <span class="nf-stat-delta up"><i class="bi bi-geo-alt"></i> Students Served</span>
+                    </div>
+                </div>
+
+                <!-- Smart Intelligence Alerts -->
+                <div id="nfSmartAlertsContainer" style="margin-bottom: 24px;"></div>
+
+                <!-- Visual Charts Section -->
+                <div class="row g-4" style="margin-bottom: 24px;">
+                    <div class="col-lg-8">
+                        <div class="nf-card" style="height: 100%;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title">Preparation vs Consumption Trend</h3>
+                                    <div class="nf-card-subtitle">Comparing food prepared with actual student consumption (kg)</div>
+                                </div>
+                                <span class="nf-badge nf-badge-neutral">Daily Batch Audit</span>
+                            </div>
+                            <div style="position: relative; height: 260px;">
+                                <canvas id="nfDemandChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="nf-card" style="height: 100%;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title">Session Demand Ratio</h3>
+                                    <div class="nf-card-subtitle">Proportion of meals consumed</div>
+                                </div>
+                            </div>
+                            <div style="position: relative; height: 220px;">
+                                <canvas id="nfSessionPieChart"></canvas>
+                            </div>
+                            <div id="nfSessionSummary" style="font-size: 12.5px; color: var(--nf-ink-600); margin-top: 10px; text-align: center;"></div>
+                        </div>
                     </div>
                 </div>
 
                 <div id="nfDashboardStatus"></div>
 
-                <div class="nf-card" id="nfTableCard" style="display: none; padding: 0; overflow-x: auto;">
-                    <table class="nf-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Session</th>
-                                <th>Item</th>
-                                <th>Prepared (kg)</th>
-                                <th>Consumed (kg)</th>
-                                <th>Surplus (kg)</th>
-                                <th>Headcount</th>
-                            </tr>
-                        </thead>
-                        <tbody id="nfLogsTableBody"></tbody>
-                    </table>
+                <!-- Detailed Logs Table -->
+                <div class="nf-card" id="nfTableCard" style="display: none; padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 20px; border-bottom: 1px solid var(--nf-border); display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 class="nf-card-title" style="margin: 0;">Detailed Meal Consumption & Variance Log</h3>
+                            <div class="nf-card-subtitle">Real-time breakdown per session dish</div>
+                        </div>
+                        <span class="nf-badge nf-badge-success" id="nfLogCountBadge">0 records</span>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="nf-table" style="border: none; border-radius: 0; margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Session</th>
+                                    <th>Item Name</th>
+                                    <th>Prepared</th>
+                                    <th>Consumed</th>
+                                    <th>Variance / Surplus</th>
+                                    <th>Headcount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nfLogsTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
 
             </main>
@@ -124,8 +221,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../static/js/main.js"></script>
-    <script src="../../static/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/dashboard.js"></script>
 
 </body>
 </html>

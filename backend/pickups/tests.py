@@ -29,8 +29,13 @@ class PickupTests(TestCase):
             food_name="Chole", safety_rule=self.rule, quantity=20,
             unit=SurplusFood.Unit.KG, prepared_at=timezone.now(), created_by=self.staff,
         )
-        self.recipient = Recipient.objects.create(name="City Shelter", is_verified=True, is_active=True) \
-            if RECIPIENTS_AVAILABLE else None
+        recipient_user = User.objects.create_user(
+            username="recipient_user", password="pass1234", role=User.Role.RECIPIENT_ORG,
+            is_verified=True, organization_name="City Shelter"
+        )
+        self.recipient = Recipient.objects.create(
+            user=recipient_user, capacity_quantity=50, is_active=True
+        ) if RECIPIENTS_AVAILABLE else None
 
     def test_pickup_quantity_cannot_exceed_available(self):
         if not RECIPIENTS_AVAILABLE:

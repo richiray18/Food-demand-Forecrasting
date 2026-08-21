@@ -1,94 +1,21 @@
 /* ==========================================================================
    NutriFlow — forecast.css
-   Scoped to the Forecast page only. All rules are namespaced under
-   .nf-forecast-page so nothing here can affect other pages.
-   Relies on design tokens (--nf-*) defined in style.css.
+   AI Demand Forecasting interface layout, factor chips, and parameter styling.
    ========================================================================== */
 
-.nf-forecast-page {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.nf-forecast-intro {
-  max-width: 640px;
-}
-
-.nf-forecast-heading {
-  font-size: 22px;
-  margin-bottom: 6px;
-}
-
-.nf-forecast-subtext {
-  font-size: 14px;
-  color: var(--nf-ink-600);
-  margin: 0;
-}
-
-.nf-forecast-form-card {
-  max-width: 780px;
-}
-
-.nf-forecast-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px 20px;
-  margin-bottom: 4px;
-}
-
-.nf-required {
-  color: var(--nf-danger);
-}
-
-.nf-forecast-checkboxes {
-  display: flex;
-  gap: 24px;
-  margin: 4px 0 20px;
-}
-
-.nf-checkbox-label {
+.nf-factor-chip {
+  background: var(--nf-surface);
+  border: 1px solid var(--nf-border);
+  padding: 10px 14px;
+  border-radius: var(--nf-radius-sm);
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--nf-ink-700);
-  cursor: pointer;
+  gap: 10px;
+  font-size: 13px;
+  transition: transform var(--nf-transition);
 }
 
-.nf-checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--nf-green-600);
-  cursor: pointer;
-}
-
-.nf-forecast-status {
-  max-width: 780px;
-}
-
-.nf-forecast-status:empty {
-  display: none;
-}
-
-.nf-forecast-results {
-  max-width: 900px;
-}
-
-.nf-stat-value-text {
-  font-family: var(--nf-font-body);
-  font-size: 18px;
-}
-
-/* Responsive: stack the form fields on smaller screens */
-@media (max-width: 640px) {
-  .nf-forecast-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .nf-forecast-checkboxes {
-    flex-direction: column;
-    gap: 10px;
-  }
+.nf-factor-chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--nf-green-500);
 }

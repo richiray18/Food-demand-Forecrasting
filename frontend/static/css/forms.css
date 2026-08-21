@@ -1,0 +1,49 @@
+/* ==========================================================================
+   NutriFlow — forms.css
+   Specialized form controls, switches, validation feedback, and input groups.
+   ========================================================================== */
+
+.nf-form-section {
+  margin-bottom: 24px;
+}
+
+.nf-form-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--nf-green-900);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nf-input-group {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.nf-input-addon {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--nf-ink-400);
+  background: var(--nf-canvas);
+  border: 1px solid var(--nf-border-strong);
+  border-left: none;
+  border-radius: 0 var(--nf-radius-sm) var(--nf-radius-sm) 0;
+}
+
+.nf-switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--nf-canvas);
+  border: 1px solid var(--nf-border);
+  border-radius: var(--nf-radius-sm);
+  margin-bottom: 10px;
+}

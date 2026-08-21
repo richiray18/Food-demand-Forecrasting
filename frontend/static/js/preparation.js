@@ -1,504 +1,370 @@
 /* ==========================================================================
    NutriFlow — preparation.js
-   Handles the Preparation page: loads sessions/items, submits new
-   MealConsumptionLog records, lists recent records, and supports
-   edit/delete against the real Django REST API.
+   Manages kitchen meal preparation logging, AI recommendations, and surplus routing.
+   Endpoints:
+     POST /api/v1/meals/consumption-logs/
+     GET /api/v1/meals/consumption-logs/
+     POST /api/surplus/surplus-food/
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
-
-  /* ------------------------------------------------------------------ */
-  /* Endpoint constants — change here only if backend routes change     */
-  /* ------------------------------------------------------------------ */
-  var API_BASE = 'http://127.0.0.1:8000/api/v1/';
-  var SESSIONS_URL = API_BASE + 'meals/sessions/';
-  var ITEMS_URL = API_BASE + 'meals/items/';
-  var LOGS_URL = API_BASE + 'meals/consumption-logs/';
-  var LOGIN_URL = '../accounts/login.html';
-
-  /* ------------------------------------------------------------------ */
-  /* Element references                                                 */
-  /* ------------------------------------------------------------------ */
   var form = document.getElementById('nfPrepForm');
-  var formTitle = document.getElementById('nfPrepFormTitle');
-  var cancelEditBtn = document.getElementById('nfCancelEditBtn');
-
   var dateInput = document.getElementById('prepDate');
   var sessionSelect = document.getElementById('prepSession');
   var itemSelect = document.getElementById('prepItem');
   var headcountInput = document.getElementById('prepHeadcount');
-  var qtyPreparedInput = document.getElementById('prepQtyPrepared');
-  var qtyConsumedInput = document.getElementById('prepQtyConsumed');
-  var weatherSelect = document.getElementById('prepWeatherNote');
-  var isHolidayCheckbox = document.getElementById('prepIsHoliday');
-  var isExamPeriodCheckbox = document.getElementById('prepIsExamPeriod');
+  var prepInput = document.getElementById('prepQuantityPrepared');
+  var consInput = document.getElementById('prepQuantityConsumed');
+  var holidaySwitch = document.getElementById('prepIsHoliday');
+  var examSwitch = document.getElementById('prepIsExam');
+  var submitBtn = document.getElementById('prepSubmitBtn');
 
-  var surplusPreview = document.getElementById('nfPrepSurplusPreview');
+  var liveSurplusEl = document.getElementById('prepLiveSurplus');
+  var liveStatusBadge = document.getElementById('prepLiveStatusBadge');
+  var liveNotice = document.getElementById('prepLiveNotice');
 
-  var submitBtn = document.getElementById('nfPrepSubmitBtn');
-  var submitBtnText = document.getElementById('nfPrepSubmitBtnText');
+  var aiCallout = document.getElementById('nfPrepAiCallout');
+  var aiHeadline = document.getElementById('nfPrepAiHeadline');
+  var aiSubtext = document.getElementById('nfPrepAiSubtext');
+  var applyAiBtn = document.getElementById('nfPrepApplyAiBtn');
 
-  var prepStatus = document.getElementById('nfPrepStatus');
-  var recordsStatus = document.getElementById('nfRecordsStatus');
-  var recordsTableCard = document.getElementById('nfRecordsTableCard');
-  var recordsTableBody = document.getElementById('nfRecordsTableBody');
-  var refreshBtn = document.getElementById('nfRefreshRecordsBtn');
+  var tableBody = document.getElementById('prepTableBody');
+  var listStatus = document.getElementById('prepListStatus');
+  var refreshListBtn = document.getElementById('prepRefreshListBtn');
 
-  /* ------------------------------------------------------------------ */
-  /* Auth guard                                                         */
-  /* ------------------------------------------------------------------ */
-  var token = localStorage.getItem('access_token');
-  if (!token) {
-    window.location.href = LOGIN_URL;
-    return;
-  }
+  // Modal elements
+  var routeFoodName = document.getElementById('routeFoodName');
+  var routeQuantity = document.getElementById('routeQuantity');
+  var routeSafetyRule = document.getElementById('routeSafetyRule');
+  var routeStorageLoc = document.getElementById('routeStorageLoc');
+  var routeTemp = document.getElementById('routeTemp');
+  var routeIsHotHeld = document.getElementById('routeIsHotHeld');
+  var routeIsRefrigerated = document.getElementById('routeIsRefrigerated');
+  var routeSubmitSurplusBtn = document.getElementById('routeSubmitSurplusBtn');
 
-  /* ------------------------------------------------------------------ */
-  /* State                                                              */
-  /* ------------------------------------------------------------------ */
-  var editingRecordId = null; // null = creating a new record
+  var itemsCache = [];
+  var sessionsCache = [];
+  var safetyRulesCache = [];
+  var activeCreatedLogId = null;
 
-  /* ------------------------------------------------------------------ */
-  /* Init                                                               */
-  /* ------------------------------------------------------------------ */
-  loadSessions();
-  loadItems();
-  loadRecords();
+  // Set today's date by default
+  var todayStr = getTodayDateString();
+  dateInput.value = todayStr;
 
-  qtyPreparedInput.addEventListener('input', updateSurplusPreview);
-  qtyConsumedInput.addEventListener('input', updateSurplusPreview);
+  // Initialize
+  loadInitialData();
 
-  form.addEventListener('submit', handleSubmit);
-  cancelEditBtn.addEventListener('click', resetForm);
-  refreshBtn.addEventListener('click', loadRecords);
+  // Event Listeners for Live Variance Calculation
+  prepInput.addEventListener('input', updateLiveVariance);
+  consInput.addEventListener('input', updateLiveVariance);
 
-  /* ------------------------------------------------------------------ */
-  /* Auth headers helper                                                */
-  /* ------------------------------------------------------------------ */
-  function authHeaders(extra) {
-    var headers = { 'Authorization': 'Bearer ' + token };
-    if (extra) {
-      for (var key in extra) {
-        if (Object.prototype.hasOwnProperty.call(extra, key)) {
-          headers[key] = extra[key];
-        }
-      }
-    }
-    return headers;
-  }
+  // Trigger AI recommendation check when Item or Session changes
+  sessionSelect.addEventListener('change', checkAiRecommendation);
+  itemSelect.addEventListener('change', checkAiRecommendation);
+  dateInput.addEventListener('change', checkAiRecommendation);
 
-  function handleAuthError(response) {
-    if (response.status === 401 || response.status === 403) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = LOGIN_URL;
-      return true;
-    }
-    return false;
-  }
+  // Refresh Table
+  refreshListBtn.addEventListener('click', loadRecentLogs);
 
-  /* ------------------------------------------------------------------ */
-  /* Load sessions dropdown                                             */
-  /* ------------------------------------------------------------------ */
-  function loadSessions() {
-    fetch(SESSIONS_URL, { headers: authHeaders() })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-        if (!response.ok) throw new Error('status ' + response.status);
-        return response.json();
+  // Form Submit
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    savePreparationLog();
+  });
+
+  // Modal Surplus Submit
+  routeSubmitSurplusBtn.addEventListener('click', submitSurplusFood);
+
+  function loadInitialData() {
+    Promise.all([
+      NutriFlow.apiFetch('/api/v1/meals/sessions/').then(function (r) { return r.json(); }),
+      NutriFlow.apiFetch('/api/v1/meals/items/').then(function (r) { return r.json(); }),
+      NutriFlow.apiFetch('/api/surplus/safety-rules/').then(function (r) { return r.json(); })
+    ])
+      .then(function (results) {
+        sessionsCache = Array.isArray(results[0]) ? results[0] : (results[0].results || []);
+        itemsCache = Array.isArray(results[1]) ? results[1] : (results[1].results || []);
+        safetyRulesCache = Array.isArray(results[2]) ? results[2] : (results[2].results || []);
+
+        populateSelect(sessionSelect, sessionsCache, function (s) { return s.name; });
+        populateSelect(itemSelect, itemsCache, function (i) { return i.name; });
+        populateSelect(routeSafetyRule, safetyRulesCache, function (r) { return r.name + ' (' + r.risk_category + ')'; });
+
+        handleUrlParams();
+        loadRecentLogs();
       })
-      .then(function (data) {
-        if (data === null) return;
-        var rows = Array.isArray(data) ? data : (data.results || []);
-
-        sessionSelect.innerHTML = '';
-
-        if (rows.length === 0) {
-          sessionSelect.innerHTML = '<option value="" selected disabled>No sessions available</option>';
-          return;
-        }
-
-        var placeholder = document.createElement('option');
-        placeholder.value = '';
-        placeholder.disabled = true;
-        placeholder.selected = true;
-        placeholder.textContent = 'Select session';
-        sessionSelect.appendChild(placeholder);
-
-        rows.forEach(function (session) {
-          var opt = document.createElement('option');
-          opt.value = session.id;
-          opt.textContent = session.name;
-          sessionSelect.appendChild(opt);
-        });
-      })
-      .catch(function () {
-        sessionSelect.innerHTML = '<option value="" selected disabled>Failed to load sessions</option>';
-        showPrepStatus('error', 'Could not load meal sessions from the server.');
+      .catch(function (err) {
+        NutriFlow.showAlert('error', 'Error loading meal data: ' + err.message);
       });
   }
 
-  /* ------------------------------------------------------------------ */
-  /* Load menu items dropdown                                           */
-  /* ------------------------------------------------------------------ */
-  function loadItems() {
-    fetch(ITEMS_URL, { headers: authHeaders() })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-        if (!response.ok) throw new Error('status ' + response.status);
-        return response.json();
-      })
-      .then(function (data) {
-        if (data === null) return;
-        var rows = Array.isArray(data) ? data : (data.results || []);
+  function handleUrlParams() {
+    var params = new URLSearchParams(window.location.search);
+    var itemId = params.get('item_id');
+    var sessionId = params.get('session_id');
+    var dateVal = params.get('date');
+    var recKg = params.get('recommended_kg');
 
-        itemSelect.innerHTML = '';
+    if (dateVal) dateInput.value = dateVal;
+    if (sessionId) sessionSelect.value = sessionId;
+    if (itemId) itemSelect.value = itemId;
 
-        if (rows.length === 0) {
-          itemSelect.innerHTML = '<option value="" selected disabled>No menu items available</option>';
-          return;
-        }
-
-        var placeholder = document.createElement('option');
-        placeholder.value = '';
-        placeholder.disabled = true;
-        placeholder.selected = true;
-        placeholder.textContent = 'Select menu item';
-        itemSelect.appendChild(placeholder);
-
-        rows.forEach(function (item) {
-          var opt = document.createElement('option');
-          opt.value = item.id;
-          opt.textContent = item.name;
-          itemSelect.appendChild(opt);
-        });
-      })
-      .catch(function () {
-        itemSelect.innerHTML = '<option value="" selected disabled>Failed to load menu items</option>';
-        showPrepStatus('error', 'Could not load menu items from the server.');
-      });
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Live surplus preview as the operator types                        */
-  /* ------------------------------------------------------------------ */
-  function updateSurplusPreview() {
-    var prepared = parseFloat(qtyPreparedInput.value);
-    var consumed = parseFloat(qtyConsumedInput.value);
-
-    if (isNaN(prepared) || isNaN(consumed)) {
-      surplusPreview.style.display = 'none';
-      return;
-    }
-
-    var surplus = prepared - consumed;
-    surplusPreview.style.display = 'block';
-
-    if (surplus < 0) {
-      surplusPreview.classList.add('warning');
-      surplusPreview.textContent = 'Warning: consumed quantity is greater than prepared quantity.';
+    if (recKg && itemId && sessionId) {
+      showAiRecommendation(parseFloat(recKg), 'Forecast transfer for ' + (dateVal || 'selected session'));
+      prepInput.value = parseFloat(recKg).toFixed(1);
+      updateLiveVariance();
     } else {
-      surplusPreview.classList.remove('warning');
-      surplusPreview.textContent = 'Surplus: ' + surplus.toFixed(1) + ' kg';
+      checkAiRecommendation();
     }
   }
 
-  /* ------------------------------------------------------------------ */
-  /* Form submit — create or update                                     */
-  /* ------------------------------------------------------------------ */
-  function handleSubmit(event) {
-    event.preventDefault();
-    hidePrepStatus();
-
-    var dateValue = dateInput.value;
-    var sessionValue = sessionSelect.value;
-    var itemValue = itemSelect.value;
-    var headcountValue = headcountInput.value;
-    var preparedValue = qtyPreparedInput.value;
-    var consumedValue = qtyConsumedInput.value;
-
-    // --- Validation -----------------------------------------------------
-    if (!dateValue) {
-      showPrepStatus('error', 'Please select a date.');
-      dateInput.focus();
-      return;
-    }
-
-    if (!sessionValue) {
-      showPrepStatus('error', 'Please select a meal session.');
-      sessionSelect.focus();
-      return;
-    }
-
-    if (!itemValue) {
-      showPrepStatus('error', 'Please select a menu item.');
-      itemSelect.focus();
-      return;
-    }
-
-    if (preparedValue === '' || Number(preparedValue) < 0) {
-      showPrepStatus('error', 'Quantity prepared must be zero or a positive number.');
-      qtyPreparedInput.focus();
-      return;
-    }
-
-    if (consumedValue === '' || Number(consumedValue) < 0) {
-      showPrepStatus('error', 'Quantity consumed must be zero or a positive number.');
-      qtyConsumedInput.focus();
-      return;
-    }
-
-    if (headcountValue === '' || Number(headcountValue) <= 0) {
-      showPrepStatus('error', 'Headcount must be a positive number.');
-      headcountInput.focus();
-      return;
-    }
-
-    var payload = {
-      date: dateValue,
-      session: Number(sessionValue),
-      item: Number(itemValue),
-      quantity_prepared_kg: Number(preparedValue),
-      quantity_consumed_kg: Number(consumedValue),
-      headcount: Number(headcountValue),
-      is_holiday: isHolidayCheckbox.checked,
-      is_exam_period: isExamPeriodCheckbox.checked,
-      weather_note: weatherSelect.value
-    };
-
-    var isEditing = editingRecordId !== null;
-    var url = isEditing ? (LOGS_URL + editingRecordId + '/') : LOGS_URL;
-    var method = isEditing ? 'PATCH' : 'POST';
-
-    setSubmitting(true, isEditing);
-
-    fetch(url, {
-      method: method,
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(payload)
-    })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-
-        return response.json().then(function (data) {
-          return { ok: response.ok, status: response.status, data: data };
-        });
-      })
-      .then(function (result) {
-        setSubmitting(false, isEditing);
-
-        if (result === null) return;
-
-        if (!result.ok) {
-          showPrepStatus('error', formatApiError(result.status, result.data));
-          return;
-        }
-
-        var surplus = result.data.surplus_kg;
-        var surplusText = (surplus !== null && surplus !== undefined)
-          ? (' Surplus: ' + Number(surplus).toFixed(1) + ' kg.')
-          : '';
-
-        showPrepStatus('success', (isEditing ? 'Record updated.' : 'Record saved.') + surplusText);
-
-        resetForm();
-        loadRecords();
-      })
-      .catch(function () {
-        setSubmitting(false, isEditing);
-        showPrepStatus('error', 'Network error. Please check your connection and try again.');
-      });
-  }
-
-  function formatApiError(status, data) {
-    if (status === 400 && data && typeof data === 'object') {
-      var parts = [];
-      for (var field in data) {
-        if (Object.prototype.hasOwnProperty.call(data, field)) {
-          var value = data[field];
-          var text = Array.isArray(value) ? value.join(' ') : String(value);
-          parts.push(field + ': ' + text);
-        }
-      }
-      if (parts.length > 0) {
-        return parts.join(' | ');
-      }
-    }
-    return 'Unable to save the record (status ' + status + ').';
-  }
-
-  function setSubmitting(isSubmitting, isEditing) {
-    submitBtn.disabled = isSubmitting;
-    if (isSubmitting) {
-      submitBtnText.textContent = isEditing ? 'Updating...' : 'Saving...';
-    } else {
-      submitBtnText.textContent = isEditing ? 'Update Record' : 'Save Record';
-    }
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Reset form back to "create new record" mode                        */
-  /* ------------------------------------------------------------------ */
-  function resetForm() {
-    editingRecordId = null;
-    form.reset();
-    surplusPreview.style.display = 'none';
-    formTitle.textContent = 'New Record';
-    submitBtnText.textContent = 'Save Record';
-    cancelEditBtn.style.display = 'none';
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Load recent records                                                */
-  /* ------------------------------------------------------------------ */
-  function loadRecords() {
-    recordsStatus.innerHTML = '<div class="nf-alert nf-alert-info">Loading recent records...</div>';
-    recordsTableCard.style.display = 'none';
-
-    fetch(LOGS_URL, { headers: authHeaders() })
-      .then(function (response) {
-        if (handleAuthError(response)) return null;
-        if (!response.ok) throw new Error('status ' + response.status);
-        return response.json();
-      })
-      .then(function (data) {
-        if (data === null) return;
-        var rows = Array.isArray(data) ? data : (data.results || []);
-
-        if (rows.length === 0) {
-          recordsStatus.innerHTML = '<div class="nf-alert nf-alert-warning">No preparation records found yet.</div>';
-          return;
-        }
-
-        recordsStatus.innerHTML = '';
-        renderRecordsTable(rows);
-        recordsTableCard.style.display = 'block';
-      })
-      .catch(function () {
-        recordsStatus.innerHTML = '<div class="nf-alert nf-alert-error">Could not load recent records.</div>';
-      });
-  }
-
-  function renderRecordsTable(rows) {
-    recordsTableBody.innerHTML = '';
-
-    rows.forEach(function (row) {
-      var tr = document.createElement('tr');
-
-      tr.appendChild(makeCell(row.date));
-      tr.appendChild(makeCell(row.session_name));
-      tr.appendChild(makeCell(row.item_name));
-      tr.appendChild(makeCell(formatNumber(row.quantity_prepared_kg)));
-      tr.appendChild(makeCell(formatNumber(row.quantity_consumed_kg)));
-      tr.appendChild(makeCell(formatNumber(row.surplus_kg)));
-      tr.appendChild(makeCell(row.headcount));
-
-      var actionsTd = document.createElement('td');
-      actionsTd.className = 'nf-prep-row-actions';
-
-      var editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.className = 'nf-btn nf-btn-outline nf-btn-sm';
-      editBtn.textContent = 'Edit';
-      editBtn.addEventListener('click', function () {
-        beginEdit(row);
-      });
-
-      var deleteBtn = document.createElement('button');
-      deleteBtn.type = 'button';
-      deleteBtn.className = 'nf-btn nf-btn-danger nf-btn-sm';
-      deleteBtn.textContent = 'Delete';
-      deleteBtn.addEventListener('click', function () {
-        confirmDelete(row.id);
-      });
-
-      actionsTd.appendChild(editBtn);
-      actionsTd.appendChild(deleteBtn);
-      tr.appendChild(actionsTd);
-
-      recordsTableBody.appendChild(tr);
+  function populateSelect(selectEl, list, labelFn) {
+    list.forEach(function (item) {
+      var opt = document.createElement('option');
+      opt.value = item.id;
+      opt.textContent = labelFn(item);
+      selectEl.appendChild(opt);
     });
   }
 
-  function makeCell(value) {
-    var td = document.createElement('td');
-    td.textContent = (value === null || value === undefined) ? '—' : value;
-    return td;
-  }
+  function checkAiRecommendation() {
+    var itemId = itemSelect.value;
+    var sessionId = sessionSelect.value;
+    var dateStr = dateInput.value;
 
-  function formatNumber(value) {
-    var n = parseFloat(value);
-    return isNaN(n) ? '—' : n.toFixed(1);
-  }
+    if (!itemId || !sessionId || !dateStr) {
+      aiCallout.style.display = 'none';
+      return;
+    }
 
-  /* ------------------------------------------------------------------ */
-  /* Edit                                                                */
-  /* ------------------------------------------------------------------ */
-  function beginEdit(row) {
-    editingRecordId = row.id;
+    var query = '?item_id=' + encodeURIComponent(itemId) +
+      '&session_id=' + encodeURIComponent(sessionId) +
+      '&date=' + encodeURIComponent(dateStr) +
+      '&is_holiday=' + holidaySwitch.checked +
+      '&is_exam_period=' + examSwitch.checked;
 
-    dateInput.value = row.date;
-    sessionSelect.value = String(row.session);
-    itemSelect.value = String(row.item);
-    headcountInput.value = row.headcount;
-    qtyPreparedInput.value = row.quantity_prepared_kg;
-    qtyConsumedInput.value = row.quantity_consumed_kg;
-    weatherSelect.value = row.weather_note || '';
-    isHolidayCheckbox.checked = !!row.is_holiday;
-    isExamPeriodCheckbox.checked = !!row.is_exam_period;
-
-    updateSurplusPreview();
-
-    formTitle.textContent = 'Edit Record';
-    submitBtnText.textContent = 'Update Record';
-    cancelEditBtn.style.display = 'inline-flex';
-
-    hidePrepStatus();
-    document.getElementById('nfPrepForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Delete                                                             */
-  /* ------------------------------------------------------------------ */
-  function confirmDelete(recordId) {
-    var confirmed = window.confirm('Delete this preparation record? This cannot be undone.');
-    if (!confirmed) return;
-
-    fetch(LOGS_URL + recordId + '/', {
-      method: 'DELETE',
-      headers: authHeaders()
-    })
-      .then(function (response) {
-        if (handleAuthError(response)) return;
-
-        if (!response.ok && response.status !== 204) {
-          throw new Error('status ' + response.status);
+    NutriFlow.apiFetch('/api/forecasting/predict/' + query)
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res && res.recommended_quantity_prepared_kg !== null && res.recommended_quantity_prepared_kg !== undefined) {
+          showAiRecommendation(res.recommended_quantity_prepared_kg, 'Baseline: ' + res.baseline_kg + 'kg with context adjustment');
+        } else {
+          aiCallout.style.display = 'none';
         }
-
-        if (editingRecordId === recordId) {
-          resetForm();
-        }
-
-        loadRecords();
       })
       .catch(function () {
-        recordsStatus.innerHTML = '<div class="nf-alert nf-alert-error">Could not delete the record. Please try again.</div>';
+        aiCallout.style.display = 'none';
       });
   }
 
-  /* ------------------------------------------------------------------ */
-  /* Status helpers                                                     */
-  /* ------------------------------------------------------------------ */
-  function showPrepStatus(type, message) {
-    var alertClass = 'nf-alert-info';
-    if (type === 'error') alertClass = 'nf-alert-error';
-    else if (type === 'success') alertClass = 'nf-alert-success';
-    else if (type === 'warning') alertClass = 'nf-alert-warning';
+  function showAiRecommendation(recKg, meta) {
+    aiHeadline.textContent = 'Recommended: Prepare ' + parseFloat(recKg).toFixed(1) + ' kg';
+    aiSubtext.textContent = meta;
+    aiCallout.style.display = 'block';
 
-    prepStatus.innerHTML = '<div class="nf-alert ' + alertClass + '">' + message + '</div>';
+    applyAiBtn.onclick = function () {
+      prepInput.value = parseFloat(recKg).toFixed(1);
+      updateLiveVariance();
+      NutriFlow.showAlert('success', 'Applied ' + parseFloat(recKg).toFixed(1) + 'kg recommendation to batch.', 3000);
+    };
   }
 
-  function hidePrepStatus() {
-    prepStatus.innerHTML = '';
+  function updateLiveVariance() {
+    var prep = parseFloat(prepInput.value) || 0;
+    var cons = parseFloat(consInput.value) || 0;
+    var surplus = prep - cons;
+
+    liveSurplusEl.textContent = (surplus >= 0 ? '+' : '') + surplus.toFixed(1) + ' kg';
+
+    if (prep > 0 && cons > 0) {
+      if (surplus > 5) {
+        liveSurplusEl.style.color = 'var(--nf-warning)';
+        liveStatusBadge.className = 'nf-badge nf-badge-warning';
+        liveStatusBadge.innerHTML = '<i class="bi bi-box-seam"></i> Surplus Generated';
+        liveNotice.textContent = surplus.toFixed(1) + 'kg excess food will be eligible for redistribution after logging.';
+      } else if (surplus < 0) {
+        liveSurplusEl.style.color = 'var(--nf-danger)';
+        liveStatusBadge.className = 'nf-badge nf-badge-danger';
+        liveStatusBadge.innerHTML = '<i class="bi bi-dash-circle"></i> Shortage Deficit';
+        liveNotice.textContent = 'Consumption exceeded batch preparation by ' + Math.abs(surplus).toFixed(1) + 'kg.';
+      } else {
+        liveSurplusEl.style.color = 'var(--nf-success)';
+        liveStatusBadge.className = 'nf-badge nf-badge-success';
+        liveStatusBadge.innerHTML = '<i class="bi bi-check-circle"></i> Optimal Balance';
+        liveNotice.textContent = 'Batch perfectly matches dining hall attendance demand.';
+      }
+    } else {
+      liveSurplusEl.style.color = 'var(--nf-ink-900)';
+      liveStatusBadge.className = 'nf-badge nf-badge-neutral';
+      liveStatusBadge.textContent = 'In Progress';
+      liveNotice.textContent = 'Enter prepared & consumed amounts to compute surplus balance.';
+    }
+  }
+
+  function savePreparationLog() {
+    var payload = {
+      date: dateInput.value,
+      session: parseInt(sessionSelect.value, 10),
+      item: parseInt(itemSelect.value, 10),
+      quantity_prepared_kg: parseFloat(prepInput.value),
+      quantity_consumed_kg: parseFloat(consInput.value),
+      headcount: parseInt(headcountInput.value, 10),
+      is_holiday: holidaySwitch.checked,
+      is_exam_period: examSwitch.checked
+    };
+
+    if (!payload.date || !payload.session || !payload.item || isNaN(payload.quantity_prepared_kg) || isNaN(payload.quantity_consumed_kg) || isNaN(payload.headcount)) {
+      NutriFlow.showAlert('warning', 'Please fill in all required batch fields.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving Batch...';
+
+    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/', {
+      method: 'POST',
+      body: payload
+    })
+      .then(function (res) {
+        if (!res.ok) {
+          return res.json().then(function (errData) {
+            var msg = 'Failed to save batch.';
+            if (errData.non_field_errors) msg = errData.non_field_errors.join(' ');
+            else if (typeof errData === 'object') msg = Object.values(errData).flat().join(' ');
+            throw new Error(msg);
+          });
+        }
+        return res.json();
+      })
+      .then(function (createdLog) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Consumption Log';
+
+        NutriFlow.showAlert('success', 'Meal consumption log successfully recorded!');
+        loadRecentLogs();
+
+        var surplusKg = parseFloat(createdLog.surplus_kg) || 0;
+        if (surplusKg > 2.0) {
+          // Open Surplus Modal for quick handoff
+          activeCreatedLogId = createdLog.id;
+          var selectedItemObj = itemsCache.find(function (i) { return i.id === payload.item; });
+          routeFoodName.value = selectedItemObj ? selectedItemObj.name : 'Prepared Surplus';
+          routeQuantity.value = surplusKg.toFixed(1);
+          if (safetyRulesCache.length > 0) routeSafetyRule.value = safetyRulesCache[0].id;
+          NutriFlow.openModal('prepSurplusModal');
+        } else {
+          form.reset();
+          dateInput.value = todayStr;
+          updateLiveVariance();
+        }
+      })
+      .catch(function (err) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Consumption Log';
+        NutriFlow.showAlert('error', err.message);
+      });
+  }
+
+  function submitSurplusFood() {
+    var safetyRuleId = routeSafetyRule.value;
+    var qty = parseFloat(routeQuantity.value);
+
+    if (!safetyRuleId || isNaN(qty) || qty <= 0) {
+      NutriFlow.showAlert('warning', 'Please specify a valid surplus quantity and safety rule.');
+      return;
+    }
+
+    routeSubmitSurplusBtn.disabled = true;
+    routeSubmitSurplusBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Registering Surplus...';
+
+    var nowIso = new Date().toISOString();
+    var payload = {
+      meal: activeCreatedLogId,
+      food_name: routeFoodName.value,
+      safety_rule: parseInt(safetyRuleId, 10),
+      quantity: qty,
+      quantity_remaining: qty,
+      unit: 'KG',
+      prepared_at: nowIso,
+      storage_location: routeStorageLoc.value || 'Kitchen Counter',
+      current_temperature_c: parseFloat(routeTemp.value) || 60.0,
+      is_hot_held: routeIsHotHeld.checked,
+      is_refrigerated: routeIsRefrigerated.checked
+    };
+
+    NutriFlow.apiFetch('/api/surplus/surplus-food/', {
+      method: 'POST',
+      body: payload
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Surplus registration failed with status ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        routeSubmitSurplusBtn.disabled = false;
+        routeSubmitSurplusBtn.innerHTML = '<i class="bi bi-shield-check"></i> Register to Surplus Food Inventory';
+        NutriFlow.closeModal('prepSurplusModal');
+        NutriFlow.showAlert('success', 'Surplus batch registered and actively monitored in Surplus Management!');
+        form.reset();
+        dateInput.value = todayStr;
+        updateLiveVariance();
+      })
+      .catch(function (err) {
+        routeSubmitSurplusBtn.disabled = false;
+        routeSubmitSurplusBtn.innerHTML = '<i class="bi bi-shield-check"></i> Register to Surplus Food Inventory';
+        NutriFlow.showAlert('error', err.message);
+      });
+  }
+
+  function loadRecentLogs() {
+    listStatus.innerHTML = '<div style="padding: 14px 20px; color: var(--nf-ink-400); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading logged batches...</div>';
+
+    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        listStatus.innerHTML = '';
+        var rows = Array.isArray(data) ? data : (data.results || []);
+
+        if (rows.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--nf-ink-400); padding: 24px;">No preparation logs found.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = '';
+        rows.slice(0, 15).forEach(function (row) {
+          var tr = document.createElement('tr');
+          var prep = parseFloat(row.quantity_prepared_kg) || 0;
+          var cons = parseFloat(row.quantity_consumed_kg) || 0;
+          var surplus = parseFloat(row.surplus_kg) || (prep - cons);
+
+          var surplusBadge = surplus > 0
+            ? '<span class="nf-badge nf-badge-warning">+' + surplus.toFixed(1) + ' kg</span>'
+            : (surplus < 0 ? '<span class="nf-badge nf-badge-danger">' + surplus.toFixed(1) + ' kg</span>' : '<span class="nf-badge nf-badge-success">0.0 kg</span>');
+
+          var actionBtn = '';
+          if (surplus > 1.0) {
+            actionBtn = '<button class="nf-btn nf-btn-outline nf-btn-sm" onclick="window.location.href=\'/surplus/\'" style="font-size: 11.5px; padding: 3px 8px;"><i class="bi bi-box-seam"></i> Surplus</button>';
+          }
+
+          tr.innerHTML = '<td><strong>' + (row.date || '—') + '</strong><br><span style="font-size: 12px; color: var(--nf-ink-400);">' + (row.session_name || 'Slot') + '</span></td>' +
+            '<td><strong>' + (row.item_name || 'Dish') + '</strong><br><span style="font-size: 11.5px; color: var(--nf-ink-400);">' + (row.headcount || 0) + ' headcount</span></td>' +
+            '<td>' + prep.toFixed(1) + ' / ' + cons.toFixed(1) + ' kg</td>' +
+            '<td>' + surplusBadge + '</td>' +
+            '<td>' + actionBtn + '</td>';
+
+          tableBody.appendChild(tr);
+        });
+      })
+      .catch(function (err) {
+        listStatus.innerHTML = '<div style="padding: 14px 20px; color: var(--nf-danger); font-size: 13.5px;">Error loading logs: ' + err.message + '</div>';
+      });
+  }
+
+  function getTodayDateString() {
+    var d = new Date();
+    var yyyy = d.getFullYear();
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return yyyy + '-' + mm + '-' + dd;
   }
 });
