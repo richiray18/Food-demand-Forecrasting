@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impact & ESG Sustainability Analytics — NutriFlow</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav">
+                <a href="/dashboard/" class="nf-nav-link" data-nav="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/forecast/" class="nf-nav-link" data-nav="forecast">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="/preparation/" class="nf-nav-link" data-nav="preparation">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Preparation</span>
+                </a>
+                <a href="/surplus/" class="nf-nav-link" data-nav="surplus">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Surplus</span>
+                </a>
+                <a href="/recipients/" class="nf-nav-link" data-nav="recipients">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Recipients</span>
+                </a>
+                <a href="/pickups/" class="nf-nav-link" data-nav="pickups">
+                    <i class="bi bi-truck"></i>
+                    <span>Pickups</span>
+                </a>
+                <a href="/impact/" class="nf-nav-link" data-nav="impact">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Impact</span>
+                </a>
+            </nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title" id="nfPageTitle">Sustainability & ESG Impact Ledger</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Account</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content" id="nfContent">
+
+                <!-- Header Title -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span class="nf-badge nf-badge-success"><i class="bi bi-globe-americas"></i> Verified ESG Environmental & Social Accounting</span>
+                    </div>
+                    <h2 style="font-size: 22px; margin-bottom: 2px;">Ecological & Economic Impact Analytics</h2>
+                    <p style="color: var(--nf-ink-400); margin: 0; font-size: 14px;">
+                        Transparent accounting of food waste diverted from landfills, institutional budget saved, and equivalent greenhouse gas emissions avoided.
+                    </p>
+                </div>
+
+                <!-- Primary Impact Hero Stats -->
+                <div class="nf-grid" style="margin-bottom: 24px;">
+                    <div class="nf-stat-card" style="border-top: 3px solid var(--nf-green-600);">
+                        <span class="nf-stat-label"><i class="bi bi-box2-heart"></i> Total Food Rescued</span>
+                        <span class="nf-stat-value" id="impStatRescued" style="color: var(--nf-green-700);">0.0<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up" id="impPortionsSub">≈ 0 meals served</span>
+                    </div>
+                    <div class="nf-stat-card" style="border-top: 3px solid var(--nf-amber-500);">
+                        <span class="nf-stat-label"><i class="bi bi-currency-rupee"></i> Institutional Cost Saved</span>
+                        <span class="nf-stat-value" id="impStatSavings" style="color: var(--nf-amber-600);">₹0</span>
+                        <span class="nf-stat-delta up">Budget Preserved</span>
+                    </div>
+                    <div class="nf-stat-card" style="border-top: 3px solid var(--nf-info);">
+                        <span class="nf-stat-label"><i class="bi bi-cloud-slash"></i> CO₂e Avoided</span>
+                        <span class="nf-stat-value" id="impStatCarbon" style="color: var(--nf-info);">0.0<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up">Landfill Methane Diverted</span>
+                    </div>
+                    <div class="nf-stat-card" style="border-top: 3px solid var(--nf-green-500);">
+                        <span class="nf-stat-label"><i class="bi bi-building-heart"></i> NGOs Supported</span>
+                        <span class="nf-stat-value" id="impStatRecipients">0</span>
+                        <span class="nf-stat-delta up" id="impPickupsSub">via 0 completed pickups</span>
+                    </div>
+                </div>
+
+                <!-- Real-world Environmental Equivalency Strip -->
+                <div class="row g-3" style="margin-bottom: 28px;">
+                    <div class="col-md-4">
+                        <div class="nf-eco-box">
+                            <div class="nf-eco-icon">
+                                <i class="bi bi-tree-fill"></i>
+                            </div>
+                            <div>
+                                <div class="nf-eco-title">Tree Seedling Equivalent</div>
+                                <div class="nf-eco-value" id="ecoTrees">0.0</div>
+                                <div class="nf-eco-sub">Trees absorbing carbon for 10 years</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="nf-eco-box">
+                            <div class="nf-eco-icon amber">
+                                <i class="bi bi-car-front-fill"></i>
+                            </div>
+                            <div>
+                                <div class="nf-eco-title">Vehicle Emissions Offset</div>
+                                <div class="nf-eco-value" id="ecoCarKm">0 km</div>
+                                <div class="nf-eco-sub">Equivalent passenger car kilometers</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="nf-eco-box">
+                            <div class="nf-eco-icon info">
+                                <i class="bi bi-droplet-fill"></i>
+                            </div>
+                            <div>
+                                <div class="nf-eco-title">Embedded Water Saved</div>
+                                <div class="nf-eco-value" id="ecoWater">0 L</div>
+                                <div class="nf-eco-sub">Agricultural water footprint conserved</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="row g-4" style="margin-bottom: 28px;">
+                    <div class="col-lg-8">
+                        <div class="nf-card" style="height: 100%;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title">Cumulative Food Rescue & Cost Trajectory</h3>
+                                    <div class="nf-card-subtitle">Growth in preserved meals and financial savings across dispatches</div>
+                                </div>
+                                <span class="nf-badge nf-badge-neutral">Audit Verified</span>
+                            </div>
+                            <div style="position: relative; height: 260px;">
+                                <canvas id="impTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="nf-card" style="height: 100%;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title">Rescue by Recipient NGO</h3>
+                                    <div class="nf-card-subtitle">Distribution share across partner shelters</div>
+                                </div>
+                            </div>
+                            <div style="position: relative; height: 220px;">
+                                <canvas id="impRecipientChart"></canvas>
+                            </div>
+                            <div style="font-size: 12px; color: var(--nf-ink-400); text-align: center; margin-top: 10px;">
+                                Verified distribution allocation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Itemized Audit Ledger Table -->
+                <div class="nf-card" style="padding: 0; overflow: hidden; margin-bottom: 24px;">
+                    <div style="padding: 16px 20px; border-bottom: 1px solid var(--nf-border); display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 class="nf-card-title" style="margin: 0;">Itemized Completed Pickups Impact Ledger</h3>
+                            <div class="nf-card-subtitle">Verified record per completed handover dispatch</div>
+                        </div>
+                        <span class="nf-badge nf-badge-success" id="impLedgerBadge">0 entries</span>
+                    </div>
+
+                    <div id="impListStatus"></div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="nf-table" style="border: none; margin: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Handover Date</th>
+                                    <th>Recipient NGO</th>
+                                    <th>Surplus Food Dish</th>
+                                    <th>Quantity Rescued</th>
+                                    <th>Cost Saved (₹)</th>
+                                    <th>CO₂e Avoided</th>
+                                    <th>Audit Verification</th>
+                                </tr>
+                            </thead>
+                            <tbody id="impTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Inspirational Mission Footer Banner -->
+                <div class="nf-ai-card" style="text-align: center; padding: 28px 20px;">
+                    <div style="font-family: var(--nf-font-display); font-size: 20px; font-weight: 700; color: var(--nf-green-900); margin-bottom: 6px;">
+                        "Predict better → Prepare smarter → Reduce waste → Redistribute food → Measure impact"
+                    </div>
+                    <div style="font-size: 14px; color: var(--nf-ink-600); max-width: 600px; margin: 0 auto;">
+                        NutriFlow closes the institutional food loop — empowering campus kitchens to eliminate food waste while nourishing local communities.
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/impact.js"></script>
+
+</body>
+</html>

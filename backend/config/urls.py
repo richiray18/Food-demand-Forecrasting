@@ -16,6 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +31,18 @@ urlpatterns = [
     path("api/v1/config/", include("config.urls_api")),
     path("api/forecasting/", include("forecasting.urls")),
     path("api-auth/", include("rest_framework.urls")),
+        # Frontend Web Routes
+    path('', views.login_view, name='login'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('forecast/', views.forecast_view, name='forecast'),
+    path('preparation/', views.preparation_view, name='preparation'),
+    path('surplus/', views.surplus_view, name='surplus'),
+    path('recipients/', views.recipients_view, name='recipients'),
+    path('pickups/', views.pickups_view, name='pickups'),
+    path('impact/', views.impact_view, name='impact'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.STATIC_URL,
+        document_root=settings.STATICFILES_DIRS[0]
+    )

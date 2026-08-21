@@ -1,0 +1,21 @@
+/* ==========================================================================
+   NutriFlow — forecast.css
+   AI Demand Forecasting interface layout, factor chips, and parameter styling.
+   ========================================================================== */
+
+.nf-factor-chip {
+  background: var(--nf-surface);
+  border: 1px solid var(--nf-border);
+  padding: 10px 14px;
+  border-radius: var(--nf-radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  transition: transform var(--nf-transition);
+}
+
+.nf-factor-chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--nf-green-500);
+}

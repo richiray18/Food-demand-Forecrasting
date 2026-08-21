@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickup Logistics & Verification — NutriFlow</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav">
+                <a href="/dashboard/" class="nf-nav-link" data-nav="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/forecast/" class="nf-nav-link" data-nav="forecast">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="/preparation/" class="nf-nav-link" data-nav="preparation">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Preparation</span>
+                </a>
+                <a href="/surplus/" class="nf-nav-link" data-nav="surplus">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Surplus</span>
+                </a>
+                <a href="/recipients/" class="nf-nav-link" data-nav="recipients">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Recipients</span>
+                </a>
+                <a href="/pickups/" class="nf-nav-link" data-nav="pickups">
+                    <i class="bi bi-truck"></i>
+                    <span>Pickups</span>
+                </a>
+                <a href="/impact/" class="nf-nav-link" data-nav="impact">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Impact</span>
+                </a>
+            </nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title" id="nfPageTitle">Pickup Logistics & Handover Gate</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Account</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content" id="nfContent">
+
+                <!-- Header Title -->
+                <div class="nf-filter-bar">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span class="nf-badge nf-badge-neutral"><i class="bi bi-truck"></i> Real-time Fleet Logistics</span>
+                            <span class="nf-badge nf-badge-success">Cryptographic Verification Handshake</span>
+                        </div>
+                        <h2 style="font-size: 22px; margin-bottom: 2px;">Redistribution Pickup Dispatches</h2>
+                        <p style="color: var(--nf-ink-400); margin: 0; font-size: 13.5px;">
+                            Tracks scheduled vehicle arrivals, verifies physical temperature at transfer, and authenticates handover security codes.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Visual Logistics Pipeline Overview -->
+                <div class="nf-card" style="margin-bottom: 24px; padding: 18px 24px;">
+                    <div style="font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--nf-ink-400); margin-bottom: 8px;">
+                        End-to-End Redistribution Handover Lifecycle
+                    </div>
+                    <div class="nf-pipeline">
+                        <div class="nf-pipeline-step completed">
+                            <div class="nf-pipeline-dot"><i class="bi bi-check-lg"></i></div>
+                            <span class="nf-pipeline-label">1. Match & Request</span>
+                        </div>
+                        <div class="nf-pipeline-step active">
+                            <div class="nf-pipeline-dot"><i class="bi bi-clock-history"></i></div>
+                            <span class="nf-pipeline-label">2. Scheduled Arrival</span>
+                        </div>
+                        <div class="nf-pipeline-step">
+                            <div class="nf-pipeline-dot"><i class="bi bi-thermometer-half"></i></div>
+                            <span class="nf-pipeline-label">3. Temperature Gate</span>
+                        </div>
+                        <div class="nf-pipeline-step">
+                            <div class="nf-pipeline-dot"><i class="bi bi-shield-lock"></i></div>
+                            <span class="nf-pipeline-label">4. Code Verification</span>
+                        </div>
+                        <div class="nf-pipeline-step">
+                            <div class="nf-pipeline-dot"><i class="bi bi-heart-pulse-fill"></i></div>
+                            <span class="nf-pipeline-label">5. Impact Logged</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logistics KPI Cards -->
+                <div class="nf-grid" style="margin-bottom: 24px;">
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-calendar2-event"></i> Active / Scheduled</span>
+                        <span class="nf-stat-value" id="pkpStatActive" style="color: var(--nf-amber-600);">0</span>
+                        <span class="nf-stat-delta up">Awaiting Handover</span>
+                    </div>
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-check2-all"></i> Successfully Completed</span>
+                        <span class="nf-stat-value" id="pkpStatCompleted" style="color: var(--nf-green-600);">0</span>
+                        <span class="nf-stat-delta up">Food Rescued</span>
+                    </div>
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-shield-x"></i> Safety Interventions</span>
+                        <span class="nf-stat-value" id="pkpStatRejected" style="color: var(--nf-danger);">0</span>
+                        <span class="nf-stat-delta down">Spoilage Prevented</span>
+                    </div>
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-box2-heart"></i> Total Transferred</span>
+                        <span class="nf-stat-value" id="pkpStatWeight">0.0<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up">Delivered to NGOs</span>
+                    </div>
+                </div>
+
+                <!-- Filter & Search Toolbar -->
+                <div class="nf-filter-bar" style="margin-bottom: 16px;">
+                    <div class="nf-filter-group" id="pkpStatusFilters">
+                        <button class="nf-btn nf-btn-primary nf-btn-sm" data-filter="all">All Dispatches</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="SCHEDULED">Scheduled / Active</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="COMPLETED">Completed</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="REJECTED_UNSAFE">Safety Rejections</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="CANCELLED">Cancelled</button>
+                    </div>
+                    <div class="nf-search-input">
+                        <input type="text" id="pkpSearchInput" class="form-control form-control-sm" placeholder="Filter by recipient or food dish...">
+                    </div>
+                </div>
+
+                <div id="pkpListStatus"></div>
+
+                <!-- Dispatches Table -->
+                <div class="nf-card" id="pkpTableCard" style="padding: 0; overflow: hidden;">
+                    <div style="overflow-x: auto;">
+                        <table class="nf-table" style="border: none; margin: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Pickup ID & Code</th>
+                                    <th>Recipient Organization</th>
+                                    <th>Surplus Food Allocated</th>
+                                    <th>Scheduled Time</th>
+                                    <th>Status</th>
+                                    <th>Safety Check</th>
+                                    <th style="text-align: right;">Handover Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pkpTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <!-- Handover Verification Modal -->
+    <div class="nf-modal-backdrop" id="confirmHandoverModal">
+        <div class="nf-modal">
+            <div class="nf-modal-header">
+                <h3 class="nf-modal-title"><i class="bi bi-shield-check" style="color: var(--nf-green-600);"></i> Food Handover Safety & Handshake Gate</h3>
+                <button type="button" class="nf-modal-close" onclick="NutriFlow.closeModal('confirmHandoverModal')">&times;</button>
+            </div>
+            <form id="confirmHandoverForm">
+                <div class="nf-modal-body">
+                    <input type="hidden" id="confPickupId">
+                    
+                    <div style="background: var(--nf-canvas); padding: 14px; border-radius: var(--nf-radius-md); margin-bottom: 18px; border: 1px solid var(--nf-border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="font-size: 15px; margin: 0;" id="confFoodTitle">Surplus Dish</h4>
+                                <div style="font-size: 13px; color: var(--nf-ink-600);" id="confRecipientTitle">Recipient NGO</div>
+                            </div>
+                            <div class="text-end">
+                                <span class="nf-badge nf-badge-neutral" style="font-family: var(--nf-font-mono); font-size: 13px;" id="confCodeDisplay">CODE: ——</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-sm-6 nf-field">
+                            <label for="confTempReading"><i class="bi bi-thermometer-half"></i> Handover Temp (°C)</label>
+                            <input type="number" id="confTempReading" step="0.1" placeholder="e.g. 62.0 or 4.0" required>
+                        </div>
+                        <div class="col-sm-6 nf-field">
+                            <label for="confQuantityCollected"><i class="bi bi-box-seam"></i> Quantity Collected (kg)</label>
+                            <input type="number" id="confQuantityCollected" step="0.1" min="0.1" required>
+                        </div>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="confVerifyCodeInput"><i class="bi bi-key-fill"></i> Driver Verification Code</label>
+                        <input type="text" id="confVerifyCodeInput" placeholder="Enter driver's 6-digit code" required style="font-family: var(--nf-font-mono); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
+                    </div>
+
+                    <div style="background: var(--nf-success-bg); border: 1px solid rgba(60,138,91,0.25); padding: 10px 14px; border-radius: var(--nf-radius-sm); font-size: 12.5px; color: var(--nf-success);">
+                        <i class="bi bi-info-circle-fill"></i> Finalizing handover automatically registers verified food recovery and updates campus ESG impact metrics.
+                    </div>
+                </div>
+                <div class="nf-modal-footer">
+                    <button type="button" class="nf-btn nf-btn-outline" onclick="NutriFlow.closeModal('confirmHandoverModal')">Cancel</button>
+                    <button type="submit" class="nf-btn nf-btn-primary" id="confSubmitBtn">
+                        <i class="bi bi-check2-circle"></i> Validate & Confirm Handover
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reject Pickup Modal -->
+    <div class="nf-modal-backdrop" id="rejectPickupModal">
+        <div class="nf-modal">
+            <div class="nf-modal-header">
+                <h3 class="nf-modal-title" style="color: var(--nf-danger);"><i class="bi bi-shield-x"></i> Reject Pickup on Safety Grounds</h3>
+                <button type="button" class="nf-modal-close" onclick="NutriFlow.closeModal('rejectPickupModal')">&times;</button>
+            </div>
+            <form id="rejectPickupForm">
+                <div class="nf-modal-body">
+                    <input type="hidden" id="rejPickupId">
+                    <p style="font-size: 13.5px; color: var(--nf-ink-700);">
+                        Reject this transfer if food temperature failed inspection, transport vehicle lacked insulation, or safe time expired.
+                    </p>
+                    <div class="nf-field">
+                        <label for="rejReason">Safety Rejection Reason</label>
+                        <select id="rejReason" class="form-select form-select-sm" required>
+                            <option value="Food exceeded safe time-temperature window during transit delay">Exceeded safe time-temperature window during transit</option>
+                            <option value="Vehicle lacked required refrigeration/thermal insulation">Vehicle lacked required insulation</option>
+                            <option value="Verification code mismatch / unauthorized driver">Verification code mismatch / unauthorized driver</option>
+                            <option value="Packaging compromised during loading">Packaging compromised during loading</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="nf-modal-footer">
+                    <button type="button" class="nf-btn nf-btn-outline" onclick="NutriFlow.closeModal('rejectPickupModal')">Back</button>
+                    <button type="submit" class="nf-btn nf-btn-danger" id="rejSubmitBtn">
+                        <i class="bi bi-x-octagon"></i> Confirm Rejection
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/pickups.js"></script>
+
+</body>
+</html>

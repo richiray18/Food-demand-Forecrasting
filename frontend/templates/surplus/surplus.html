@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surplus Food & HACCP Safety Tracking — NutriFlow</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav">
+                <a href="/dashboard/" class="nf-nav-link" data-nav="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/forecast/" class="nf-nav-link" data-nav="forecast">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="/preparation/" class="nf-nav-link" data-nav="preparation">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Preparation</span>
+                </a>
+                <a href="/surplus/" class="nf-nav-link" data-nav="surplus">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Surplus</span>
+                </a>
+                <a href="/recipients/" class="nf-nav-link" data-nav="recipients">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Recipients</span>
+                </a>
+                <a href="/pickups/" class="nf-nav-link" data-nav="pickups">
+                    <i class="bi bi-truck"></i>
+                    <span>Pickups</span>
+                </a>
+                <a href="/impact/" class="nf-nav-link" data-nav="impact">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Impact</span>
+                </a>
+            </nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title" id="nfPageTitle">Surplus Food Inventory & Safety Monitor</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Account</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content" id="nfContent">
+
+                <!-- Header Info & Action -->
+                <div class="nf-filter-bar">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span class="nf-badge nf-badge-warning"><i class="bi bi-shield-check"></i> HACCP TCS Control</span>
+                            <span class="nf-badge nf-badge-neutral">Danger Zone 5°C - 60°C Active Check</span>
+                        </div>
+                        <h2 style="font-size: 22px; margin-bottom: 2px;">Active Surplus & Shelf-Life Redistribution</h2>
+                        <p style="color: var(--nf-ink-400); margin: 0; font-size: 13.5px;">
+                            Monitors time-temperature safety countdowns and coordinates rapid recipient organization allocation.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="nf-btn nf-btn-primary" id="nfOpenAddSurplusModalBtn">
+                            <i class="bi bi-plus-lg"></i> Register Surplus Batch
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Status Cards -->
+                <div class="nf-grid" style="margin-bottom: 24px;">
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-box-seam"></i> Available Surplus</span>
+                        <span class="nf-stat-value" id="surplusStatAvailable" style="color: var(--nf-green-600);">0.0<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up">Ready for Allocation</span>
+                    </div>
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-alarm"></i> Critical Window</span>
+                        <span class="nf-stat-value" id="surplusStatCritical" style="color: var(--nf-danger);">0</span>
+                        <span class="nf-stat-delta down">&lt; 60 mins remaining</span>
+                    </div>
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-thermometer-half"></i> Temperature Checked</span>
+                        <span class="nf-stat-value" id="surplusStatMonitored">100%</span>
+                        <span class="nf-stat-delta up">HACCP Compliant</span>
+                    </div>
+                    <div class="nf-stat-card">
+                        <span class="nf-stat-label"><i class="bi bi-truck"></i> Reserved / Picked Up</span>
+                        <span class="nf-stat-value" id="surplusStatClaimed">0.0<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up">In Redistribution Flow</span>
+                    </div>
+                </div>
+
+                <!-- Filter & Status Tabs -->
+                <div class="nf-filter-bar" style="margin-bottom: 16px;">
+                    <div class="nf-filter-group" id="surplusStatusFilters">
+                        <button class="nf-btn nf-btn-primary nf-btn-sm" data-filter="all">All Batches</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="AVAILABLE">Available Only</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="RESERVED">Reserved</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="PICKED_UP">Picked Up</button>
+                        <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="EXPIRED">Expired / Discarded</button>
+                    </div>
+                    <div class="nf-search-input">
+                        <input type="text" id="surplusSearchInput" class="form-control form-control-sm" placeholder="Search food dish or location...">
+                    </div>
+                </div>
+
+                <div id="surplusListStatus"></div>
+
+                <!-- Surplus Inventory Table -->
+                <div class="nf-card" id="surplusTableCard" style="padding: 0; overflow: hidden;">
+                    <div style="overflow-x: auto;">
+                        <table class="nf-table" style="border: none; margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Food Item</th>
+                                    <th>Quantity</th>
+                                    <th>Storage & Temperature</th>
+                                    <th>HACCP Category</th>
+                                    <th>Safe Countdown</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Redistribution Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="surplusTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <!-- Register Surplus Batch Modal -->
+    <div class="nf-modal-backdrop" id="addSurplusModal">
+        <div class="nf-modal">
+            <div class="nf-modal-header">
+                <h3 class="nf-modal-title"><i class="bi bi-plus-circle" style="color: var(--nf-green-600);"></i> Register Surplus Food Batch</h3>
+                <button type="button" class="nf-modal-close" onclick="NutriFlow.closeModal('addSurplusModal')">&times;</button>
+            </div>
+            <form id="addSurplusForm">
+                <div class="nf-modal-body">
+                    <div class="nf-field">
+                        <label for="addFoodName">Food Item Name / Description</label>
+                        <input type="text" id="addFoodName" placeholder="e.g. Paneer Butter Masala" required>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-sm-6 nf-field">
+                            <label for="addQuantity">Quantity</label>
+                            <input type="number" id="addQuantity" step="0.1" min="0.1" placeholder="e.g. 15.0" required>
+                        </div>
+                        <div class="col-sm-6 nf-field">
+                            <label for="addUnit">Unit</label>
+                            <select id="addUnit">
+                                <option value="KG">Kilograms (KG)</option>
+                                <option value="LITRE">Litres</option>
+                                <option value="PORTION">Portions / Servings</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="addSafetyRule">Food Safety Classification (HACCP)</label>
+                        <select id="addSafetyRule" required>
+                            <option value="">Select food safety risk category...</option>
+                        </select>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="addStorageLoc">Storage Location</label>
+                        <input type="text" id="addStorageLoc" placeholder="e.g. Dining Hall 1 Cold Storage" required>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-sm-6 nf-field">
+                            <label for="addTemp">Current Temperature (°C)</label>
+                            <input type="number" id="addTemp" step="0.1" placeholder="e.g. 65.0 or 4.0">
+                        </div>
+                        <div class="col-sm-6">
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Holding Mode</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="addIsHotHeld">
+                                <label class="form-check-label" for="addIsHotHeld" style="font-size: 12.5px;">Hot Holding (≥60°C)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="addIsRefrigerated">
+                                <label class="form-check-label" for="addIsRefrigerated" style="font-size: 12.5px;">Refrigerated (≤5°C)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nf-modal-footer">
+                    <button type="button" class="nf-btn nf-btn-outline" onclick="NutriFlow.closeModal('addSurplusModal')">Cancel</button>
+                    <button type="submit" class="nf-btn nf-btn-primary" id="addSurplusSubmitBtn">
+                        <i class="bi bi-check-lg"></i> Register Batch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Log Temperature Check Modal -->
+    <div class="nf-modal-backdrop" id="logTempModal">
+        <div class="nf-modal">
+            <div class="nf-modal-header">
+                <h3 class="nf-modal-title"><i class="bi bi-thermometer-half" style="color: var(--nf-amber-600);"></i> Record HACCP Temperature Check</h3>
+                <button type="button" class="nf-modal-close" onclick="NutriFlow.closeModal('logTempModal')">&times;</button>
+            </div>
+            <form id="logTempForm">
+                <div class="nf-modal-body">
+                    <input type="hidden" id="tempSurplusId">
+                    <div style="margin-bottom: 14px;">
+                        <h4 id="tempFoodTitle" style="font-size: 16px; margin: 0;">Food Item</h4>
+                        <div style="font-size: 13px; color: var(--nf-ink-400);" id="tempLocationTitle">Location</div>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="tempInputCelsius">Probe Temperature Reading (°C)</label>
+                        <input type="number" id="tempInputCelsius" step="0.1" placeholder="e.g. 62.4" required autofocus>
+                    </div>
+
+                    <div style="background: var(--nf-canvas); padding: 12px; border-radius: var(--nf-radius-sm); font-size: 12.5px; color: var(--nf-ink-600);">
+                        <i class="bi bi-info-circle"></i> Readings between <strong>5°C and 60°C</strong> register danger zone exposure time. Ensure cooked meals remain above 60°C or below 5°C.
+                    </div>
+                </div>
+                <div class="nf-modal-footer">
+                    <button type="button" class="nf-btn nf-btn-outline" onclick="NutriFlow.closeModal('logTempModal')">Cancel</button>
+                    <button type="submit" class="nf-btn nf-btn-primary" id="logTempSubmitBtn">
+                        <i class="bi bi-save"></i> Save Temperature Reading
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Discard Batch Modal -->
+    <div class="nf-modal-backdrop" id="discardModal">
+        <div class="nf-modal">
+            <div class="nf-modal-header">
+                <h3 class="nf-modal-title" style="color: var(--nf-danger);"><i class="bi bi-trash3-fill"></i> Discard Surplus Food Batch</h3>
+                <button type="button" class="nf-modal-close" onclick="NutriFlow.closeModal('discardModal')">&times;</button>
+            </div>
+            <form id="discardForm">
+                <div class="nf-modal-body">
+                    <input type="hidden" id="discardSurplusId">
+                    <p style="font-size: 14px; color: var(--nf-ink-700);">
+                        Are you sure you want to mark this food batch as discarded / spoiled? This action cannot be reversed.
+                    </p>
+                    <div class="nf-field">
+                        <label for="discardReason">Reason for Disposal</label>
+                        <select id="discardReason" class="form-select form-select-sm" required>
+                            <option value="Exceeded safe time-temperature window">Exceeded safe time-temperature window (HACCP violation)</option>
+                            <option value="Physical contamination / packaging breach">Physical contamination / packaging breach</option>
+                            <option value="Organoleptic quality degradation">Organoleptic / sensory spoilage</option>
+                            <option value="No recipient claim within window">No recipient pickup completed in safe time</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="nf-modal-footer">
+                    <button type="button" class="nf-btn nf-btn-outline" onclick="NutriFlow.closeModal('discardModal')">Cancel</button>
+                    <button type="submit" class="nf-btn nf-btn-danger" id="discardSubmitBtn">
+                        <i class="bi bi-trash3"></i> Confirm Disposal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/surplus.js"></script>
+
+</body>
+</html>

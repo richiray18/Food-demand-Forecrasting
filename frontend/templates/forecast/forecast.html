@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Demand Forecast — NutriFlow</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/forecast.css">
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-leaf-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav">
+                <a href="/dashboard/" class="nf-nav-link" data-nav="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/forecast/" class="nf-nav-link" data-nav="forecast">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="/preparation/" class="nf-nav-link" data-nav="preparation">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Preparation</span>
+                </a>
+                <a href="/surplus/" class="nf-nav-link" data-nav="surplus">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Surplus</span>
+                </a>
+                <a href="/recipients/" class="nf-nav-link" data-nav="recipients">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Recipients</span>
+                </a>
+                <a href="/pickups/" class="nf-nav-link" data-nav="pickups">
+                    <i class="bi bi-truck"></i>
+                    <span>Pickups</span>
+                </a>
+                <a href="/impact/" class="nf-nav-link" data-nav="impact">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Impact</span>
+                </a>
+            </nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title" id="nfPageTitle">AI Food Demand Forecasting Engine</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Account</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content" id="nfContent">
+
+                <!-- Title Banner -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                        <span class="nf-ai-badge"><i class="bi bi-cpu"></i> ML Inference Model</span>
+                        <span class="nf-badge nf-badge-neutral">HACCP & Day-of-Week Calibrated</span>
+                    </div>
+                    <h2 style="font-size: 22px; margin-bottom: 4px;">Predictive Preparation Quantity Model</h2>
+                    <p style="color: var(--nf-ink-400); margin: 0; font-size: 14px;">
+                        Generates optimized kitchen preparation targets based on item history, session slots, academic calendars, and weather penalties.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+
+                    <!-- Left: Parameters Form Card -->
+                    <div class="col-lg-5">
+                        <div class="nf-card" style="height: 100%;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title">Forecast Parameters</h3>
+                                    <div class="nf-card-subtitle">Configure model inference factors</div>
+                                </div>
+                                <i class="bi bi-sliders2" style="font-size: 20px; color: var(--nf-green-600);"></i>
+                            </div>
+
+                            <form id="nfForecastForm" novalidate>
+
+                                <div class="nf-field">
+                                    <label for="fcDate"><i class="bi bi-calendar3"></i> Target Service Date</label>
+                                    <input type="date" id="fcDate" required>
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="fcSession"><i class="bi bi-clock-history"></i> Meal Session</label>
+                                    <select id="fcSession" required>
+                                        <option value="">Select session slot...</option>
+                                    </select>
+                                </div>
+
+                                <div class="nf-field">
+                                    <label for="fcItem"><i class="bi bi-egg-fried"></i> Menu Item / Dish</label>
+                                    <select id="fcItem" required>
+                                        <option value="">Select menu dish...</option>
+                                    </select>
+                                </div>
+
+                                <div style="background: var(--nf-canvas); padding: 14px 16px; border-radius: var(--nf-radius-sm); border: 1px solid var(--nf-border); margin-bottom: 18px;">
+                                    <div style="font-size: 13px; font-weight: 600; color: var(--nf-ink-700); margin-bottom: 10px;">
+                                        Academic & Environmental Factors
+                                    </div>
+
+                                    <div class="form-check form-switch" style="margin-bottom: 10px;">
+                                        <input class="form-check-input" type="checkbox" id="fcIsHoliday">
+                                        <label class="form-check-label" for="fcIsHoliday" style="font-size: 13.5px; font-weight: 500;">
+                                            Campus Holiday / Break <span style="color: var(--nf-amber-600); font-size: 12px;">(0.35x Multiplier)</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-switch" style="margin-bottom: 12px;">
+                                        <input class="form-check-input" type="checkbox" id="fcIsExam">
+                                        <label class="form-check-label" for="fcIsExam" style="font-size: 13.5px; font-weight: 500;">
+                                            Mid/End-Sem Exam Period <span style="color: var(--nf-ink-400); font-size: 12px;">(0.90x Multiplier)</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="nf-field" style="margin-bottom: 0;">
+                                        <label for="fcWeather" style="font-size: 12.5px;">Weather Forecast</label>
+                                        <select id="fcWeather" class="form-select form-select-sm">
+                                            <option value="">Normal / Clear Weather</option>
+                                            <option value="heavy rain">Heavy Rain (-10% turnout)</option>
+                                            <option value="extreme heat">Extreme Heat (-10% turnout)</option>
+                                            <option value="cold wave">Cold Wave (-10% turnout)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="nf-btn nf-btn-primary" style="width: 100%;" id="fcRunBtn">
+                                    <i class="bi bi-stars"></i> Compute AI Demand Forecast
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right: Prediction Result & Explanation Matrix -->
+                    <div class="col-lg-7">
+
+                        <!-- Initial Blank Placeholder State -->
+                        <div class="nf-empty-state" id="fcEmptyState" style="min-height: 480px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <div class="nf-empty-icon" style="color: var(--nf-green-500);">
+                                <i class="bi bi-cpu"></i>
+                            </div>
+                            <div class="nf-empty-title">Ready for Forecast Generation</div>
+                            <p class="nf-empty-text">Select a date, dining session, and menu dish on the left console to evaluate historical consumption averages and derive optimal preparation levels.</p>
+                            <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" id="fcSampleBtn">
+                                <i class="bi bi-magic"></i> Load Sample Prediction
+                            </button>
+                        </div>
+
+                        <!-- Result Card -->
+                        <div id="fcResultContainer" style="display: none;">
+
+                            <!-- AI Output Card -->
+                            <div class="nf-ai-card" style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                                    <div>
+                                        <span class="nf-ai-badge"><i class="bi bi-stars"></i> Optimal Preparation Target</span>
+                                        <h3 style="font-size: 18px; margin: 0;" id="fcResultItemName">Item Name</h3>
+                                        <div style="font-size: 13px; color: var(--nf-ink-600);" id="fcResultDateMeta">Date | Session</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="nf-badge nf-badge-success" id="fcConfidenceBadge">Model Ready</span>
+                                    </div>
+                                </div>
+
+                                <div class="row align-items-center g-3" style="background: var(--nf-surface); border: 1px solid var(--nf-border); border-radius: var(--nf-radius-md); padding: 18px; margin-bottom: 16px;">
+                                    <div class="col-md-7 border-end">
+                                        <div style="font-size: 12.5px; font-weight: 600; text-transform: uppercase; color: var(--nf-ink-400);">
+                                            Recommended Preparation
+                                        </div>
+                                        <div style="font-family: var(--nf-font-mono); font-size: 38px; font-weight: 700; color: var(--nf-green-700); line-height: 1.1; margin: 4px 0;" id="fcRecommendedKg">
+                                            0.0 <span style="font-size: 18px; font-weight: 500; color: var(--nf-ink-400);">kg</span>
+                                        </div>
+                                        <div style="font-size: 12.5px; color: var(--nf-ink-600);" id="fcEstimatedPortions">
+                                            ≈ 0 estimated dining portions
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div style="font-size: 12px; color: var(--nf-ink-400); margin-bottom: 2px;">Day-of-Week Baseline</div>
+                                        <div style="font-family: var(--nf-font-mono); font-size: 18px; font-weight: 600; color: var(--nf-ink-700);" id="fcBaselineKg">
+                                            0.0 kg
+                                        </div>
+                                        <div style="font-size: 12px; color: var(--nf-ink-400); margin-top: 8px; margin-bottom: 2px;">Net Multiplier Factor</div>
+                                        <div style="font-family: var(--nf-font-mono); font-size: 15px; font-weight: 600; color: var(--nf-amber-600);" id="fcMultiplierVal">
+                                            1.00x
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Factor Attribution Breakdown -->
+                                <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--nf-ink-700);">
+                                    Factor Attribution Breakdown
+                                </div>
+                                <div class="row g-2" id="fcFactorChips" style="margin-bottom: 18px;"></div>
+
+                                <!-- Action Buttons -->
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button type="button" class="nf-btn nf-btn-primary" id="fcApplyToPrepBtn" style="flex: 1;">
+                                        <i class="bi bi-clipboard2-check"></i> Transfer to Preparation Schedule
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Historical Trend Chart for this Dish -->
+                            <div class="nf-card">
+                                <div class="nf-card-header">
+                                    <div>
+                                        <h4 class="nf-card-title" style="font-size: 15px;">Historical Consumption Context</h4>
+                                        <div class="nf-card-subtitle">Recent preparation vs consumption log history for this dish</div>
+                                    </div>
+                                    <span class="nf-badge nf-badge-neutral">Trend Validation</span>
+                                </div>
+                                <div style="position: relative; height: 180px;">
+                                    <canvas id="fcTrendChart"></canvas>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/forecast.js"></script>
+
+</body>
+</html>
