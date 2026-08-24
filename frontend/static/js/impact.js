@@ -38,32 +38,26 @@ document.addEventListener('DOMContentLoaded', function () {
         var pickupsCount = parseInt(summary.pickups_completed, 10) || 0;
         var recipientCount = parseInt(summary.recipient_count, 10) || 0;
 
-        // Approx 2.5 kg CO2e per kg cooked food
         var carbonSaved = foodKg * 2.5;
 
-        // Render Hero KPIs
-        statRescued.innerHTML = foodKg.toFixed(1) + '<span class="unit">kg</span>';
+        if (statRescued) statRescued.innerHTML = foodKg.toFixed(1) + '<span class="unit">kg</span>';
         var mealsCount = Math.round(foodKg * 2.5);
-        portionsSub.textContent = '≈ ' + mealsCount.toLocaleString() + ' meals served to communities';
+        if (portionsSub) portionsSub.textContent = '≈ ' + mealsCount.toLocaleString() + ' meals served to communities';
 
-        statSavings.textContent = NutriFlow.formatCurrency(costSaved);
-        statCarbon.innerHTML = carbonSaved.toFixed(1) + '<span class="unit">kg</span>';
+        if (statSavings) statSavings.textContent = NutriFlow.formatCurrency(costSaved);
+        if (statCarbon) statCarbon.innerHTML = carbonSaved.toFixed(1) + '<span class="unit">kg</span>';
 
-        statRecipients.textContent = recipientCount.toString();
-        pickupsSub.textContent = 'via ' + pickupsCount + ' completed pickups';
+        if (statRecipients) statRecipients.textContent = recipientCount.toString();
+        if (pickupsSub) pickupsSub.textContent = 'via ' + pickupsCount + ' completed pickups';
 
-        // Render Environmental Equivalencies
-        // 1 mature tree absorbs ~21.77 kg CO2 / year
         var treesVal = (carbonSaved / 21.77).toFixed(1);
-        ecoTrees.textContent = treesVal + ' trees';
+        if (ecoTrees) ecoTrees.textContent = treesVal + ' trees';
 
-        // Average passenger vehicle emits ~0.192 kg CO2 / km
         var carKmVal = Math.round(carbonSaved / 0.192);
-        ecoCarKm.textContent = carKmVal.toLocaleString() + ' km';
+        if (ecoCarKm) ecoCarKm.textContent = carKmVal.toLocaleString() + ' km';
 
-        // Average embedded water ~850 Litres / kg of cooked diet
         var waterL = Math.round(foodKg * 850);
-        ecoWater.textContent = waterL.toLocaleString() + ' L';
+        if (ecoWater) ecoWater.textContent = waterL.toLocaleString() + ' L';
       })
       .catch(function (err) {
         console.error('Failed to load impact summary:', err);
@@ -71,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function loadImpactRecords() {
-    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-400); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading verified impact ledger...</div>';
+    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-600); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading verified impact ledger...</div>';
 
     NutriFlow.apiFetch('/api/impact/records/')
       .then(function (r) { return r.json(); })
@@ -79,10 +73,10 @@ document.addEventListener('DOMContentLoaded', function () {
         listStatus.innerHTML = '';
         var records = Array.isArray(data) ? data : (data.results || []);
 
-        ledgerBadge.textContent = records.length + (records.length === 1 ? ' entry' : ' entries');
+        if (ledgerBadge) ledgerBadge.textContent = records.length + (records.length === 1 ? ' entry' : ' entries');
 
         if (records.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--nf-ink-400); padding: 36px;">No completed pickup impact records yet. Complete pickups in the logistics tab to log impact.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="7">' + NutriFlow.createEmptyState('No completed pickup impact records yet', 'Complete surplus pickups in the logistics tab to record ESG impact.', 'bi-heart-pulse') + '</td></tr>';
           renderFallbackCharts();
           return;
         }
@@ -108,19 +102,18 @@ document.addEventListener('DOMContentLoaded', function () {
       var dateFormatted = rec.created_at ? formatRecordDate(rec.created_at) : 'Recent';
 
       tr.innerHTML = '<td><strong>' + dateFormatted + '</strong></td>' +
-        '<td><strong style="color: var(--nf-green-900);">' + (rec.recipient_name || 'Partner NGO') + '</strong></td>' +
+        '<td><strong style="color: var(--nf-ink-900);">' + (rec.recipient_name || 'Partner NGO') + '</strong></td>' +
         '<td>' + (rec.food_name || 'Surplus Meal Batch') + '</td>' +
-        '<td><strong style="color: var(--nf-green-700); font-family: var(--nf-font-mono);">' + foodKg.toFixed(1) + ' kg</strong></td>' +
-        '<td><strong style="color: var(--nf-amber-600); font-family: var(--nf-font-mono);">' + NutriFlow.formatCurrency(cost) + '</strong></td>' +
+        '<td><strong style="color: var(--nf-pink-600); font-family: var(--nf-font-mono);">' + foodKg.toFixed(1) + ' kg</strong></td>' +
+        '<td><strong style="color: var(--nf-peach-700); font-family: var(--nf-font-mono);">' + NutriFlow.formatCurrency(cost) + '</strong></td>' +
         '<td><span style="font-family: var(--nf-font-mono); font-weight: 600;">' + co2.toFixed(1) + ' kg CO₂e</span></td>' +
-        '<td><span class="nf-badge nf-badge-success"><i class="bi bi-shield-check"></i> Handover Verified</span></td>';
+        '<td><span class="nf-badge nf-badge-sage"><i class="bi bi-shield-check"></i> Handover Verified</span></td>';
 
       tableBody.appendChild(tr);
     });
   }
 
   function renderCharts(records) {
-    // 1. Cumulative Rescue Trend Line
     var ctxTrend = document.getElementById('impTrendChart');
     if (ctxTrend) {
       if (trendChartInstance) trendChartInstance.destroy();
@@ -150,8 +143,8 @@ document.addEventListener('DOMContentLoaded', function () {
             {
               label: 'Cumulative Rescued (kg)',
               data: kgTrend,
-              borderColor: '#3c8a5b',
-              backgroundColor: 'rgba(60, 138, 91, 0.1)',
+              borderColor: '#7A1C1C',
+              backgroundColor: 'rgba(122, 28, 28, 0.12)',
               yAxisID: 'yKg',
               fill: true,
               tension: 0.3
@@ -159,8 +152,8 @@ document.addEventListener('DOMContentLoaded', function () {
             {
               label: 'Cumulative Cost Saved (₹)',
               data: costTrend,
-              borderColor: '#e2a63b',
-              backgroundColor: 'rgba(226, 166, 59, 0.05)',
+              borderColor: '#C06C2F',
+              backgroundColor: 'rgba(192, 108, 47, 0.05)',
               yAxisID: 'yCost',
               fill: false,
               tension: 0.3
@@ -188,7 +181,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // 2. Recipient Distribution Doughnut
     var ctxRecip = document.getElementById('impRecipientChart');
     if (ctxRecip) {
       if (recipientChartInstance) recipientChartInstance.destroy();
@@ -205,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
           labels: Object.keys(recipTotals),
           datasets: [{
             data: Object.values(recipTotals),
-            backgroundColor: ['#234830', '#4c8c63', '#e2a63b', '#2e6e8e', '#c4442e']
+            backgroundColor: ['#7A1C1C', '#C06C2F', '#57534E', '#4a7c66', '#a55722']
           }]
         },
         options: {
@@ -229,16 +221,13 @@ document.addEventListener('DOMContentLoaded', function () {
           datasets: [{
             label: 'Cumulative Rescued (kg)',
             data: [15, 38, 72, 110],
-            borderColor: '#3c8a5b',
-            backgroundColor: 'rgba(60, 138, 91, 0.1)',
+            borderColor: '#7A1C1C',
+            backgroundColor: 'rgba(122, 28, 28, 0.12)',
             fill: true,
             tension: 0.3
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
-        }
+        options: { responsive: true, maintainAspectRatio: false }
       });
     }
 
@@ -248,15 +237,9 @@ document.addEventListener('DOMContentLoaded', function () {
         type: 'doughnut',
         data: {
           labels: ['City Food Bank', 'Youth Shelter', 'Community Kitchen'],
-          datasets: [{
-            data: [45, 35, 20],
-            backgroundColor: ['#234830', '#4c8c63', '#e2a63b']
-          }]
+          datasets: [{ data: [45, 35, 20], backgroundColor: ['#7A1C1C', '#C06C2F', '#57534E'] }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
-        }
+        options: { responsive: true, maintainAspectRatio: false }
       });
     }
   }

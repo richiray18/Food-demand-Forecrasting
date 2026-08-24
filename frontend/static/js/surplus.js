@@ -49,33 +49,41 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  statusFilterGroup.addEventListener('click', function (e) {
-    if (e.target.tagName === 'BUTTON') {
-      Array.from(statusFilterGroup.children).forEach(function (b) {
-        b.className = 'nf-btn nf-btn-outline nf-btn-sm';
-      });
-      e.target.className = 'nf-btn nf-btn-primary nf-btn-sm';
-      currentFilter = e.target.getAttribute('data-filter');
-      applyFilters();
-    }
-  });
+  if (statusFilterGroup) {
+    statusFilterGroup.addEventListener('click', function (e) {
+      if (e.target.tagName === 'BUTTON') {
+        Array.from(statusFilterGroup.children).forEach(function (b) {
+          b.className = 'nf-btn nf-btn-outline nf-btn-sm';
+        });
+        e.target.className = 'nf-btn nf-btn-primary nf-btn-sm';
+        currentFilter = e.target.getAttribute('data-filter');
+        applyFilters();
+      }
+    });
+  }
 
-  searchInput.addEventListener('input', applyFilters);
+  if (searchInput) searchInput.addEventListener('input', applyFilters);
 
-  addSurplusForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    createSurplusBatch();
-  });
+  if (addSurplusForm) {
+    addSurplusForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      createSurplusBatch();
+    });
+  }
 
-  logTempForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    submitTemperatureLog();
-  });
+  if (logTempForm) {
+    logTempForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitTemperatureLog();
+    });
+  }
 
-  discardForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    submitDiscardAction();
-  });
+  if (discardForm) {
+    discardForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitDiscardAction();
+    });
+  }
 
   function loadSafetyRules() {
     NutriFlow.apiFetch('/api/surplus/safety-rules/')
@@ -96,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function loadSurplusData() {
-    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-400); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading active surplus inventory...</div>';
+    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-600); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading active surplus inventory...</div>';
 
     NutriFlow.apiFetch('/api/surplus/surplus-food/')
       .then(function (r) { return r.json(); })
@@ -136,20 +144,18 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    statAvailable.innerHTML = availKg.toFixed(1) + '<span class="unit">kg</span>';
-    statCritical.textContent = criticalCount.toString();
-    statClaimed.innerHTML = claimedKg.toFixed(1) + '<span class="unit">kg</span>';
+    if (statAvailable) statAvailable.innerHTML = availKg.toFixed(1) + '<span class="unit">kg</span>';
+    if (statCritical) statCritical.textContent = criticalCount.toString();
+    if (statClaimed) statClaimed.innerHTML = claimedKg.toFixed(1) + '<span class="unit">kg</span>';
   }
 
   function applyFilters() {
-    var searchVal = (searchInput.value || '').toLowerCase().trim();
+    var searchVal = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
     var filtered = rawSurplusList.filter(function (item) {
-      // Status Filter
       if (currentFilter !== 'all' && item.status !== currentFilter) {
         return false;
       }
-      // Search Query
       if (searchVal) {
         var foodMatch = (item.food_name || '').toLowerCase().includes(searchVal);
         var locMatch = (item.storage_location || '').toLowerCase().includes(searchVal);
@@ -163,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function renderTable(list) {
     if (list.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--nf-ink-400); padding: 36px;">No surplus batches match the selected criteria.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="7">' + NutriFlow.createEmptyState('No surplus food batches available right now', 'All cooked meal portions are fully consumed or distributed.', 'bi-box-seam') + '</td></tr>';
       return;
     }
 
@@ -172,8 +178,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     list.forEach(function (item) {
       var tr = document.createElement('tr');
+      var imgUrl = NutriFlow.getFoodImage(item.food_name);
 
-      // Countdown & Urgency
       var countdownHtml = '<span class="nf-badge nf-badge-neutral">—</span>';
       if (item.safe_until) {
         var safeUntil = new Date(item.safe_until);
@@ -181,32 +187,29 @@ document.addEventListener('DOMContentLoaded', function () {
         var diffMins = Math.floor(diffMs / 60000);
 
         if (item.status === 'EXPIRED' || item.status === 'DISCARDED' || diffMs <= 0) {
-          countdownHtml = '<span class="nf-countdown critical"><i class="bi bi-x-circle-fill"></i> Expired</span>';
+          countdownHtml = '<span class="nf-badge nf-badge-danger"><i class="bi bi-x-circle-fill"></i> Expired</span>';
         } else if (diffMins <= 30) {
-          countdownHtml = '<span class="nf-countdown critical"><i class="bi bi-alarm-fill"></i> ' + diffMins + 'm left</span>';
+          countdownHtml = '<span class="nf-badge nf-badge-danger"><i class="bi bi-alarm-fill"></i> ' + diffMins + 'm left</span>';
         } else if (diffMins <= 90) {
-          countdownHtml = '<span class="nf-countdown warning"><i class="bi bi-clock-history"></i> ' + diffMins + 'm left</span>';
+          countdownHtml = '<span class="nf-badge nf-badge-peach"><i class="bi bi-clock-history"></i> ' + diffMins + 'm left</span>';
         } else {
           var hours = Math.floor(diffMins / 60);
           var mins = diffMins % 60;
-          countdownHtml = '<span class="nf-countdown safe"><i class="bi bi-shield-check"></i> ' + hours + 'h ' + mins + 'm safe</span>';
+          countdownHtml = '<span class="nf-badge nf-badge-sage"><i class="bi bi-shield-check"></i> ' + hours + 'h ' + mins + 'm safe</span>';
         }
       }
 
-      // Storage & Temperature Badge
       var tempVal = item.current_temperature_c !== null ? (parseFloat(item.current_temperature_c).toFixed(1) + '°C') : 'Not probed';
-      var modeBadge = item.is_hot_held ? '<span class="nf-badge nf-badge-warning">Hot-held</span>' :
-        (item.is_refrigerated ? '<span class="nf-badge nf-badge-info">Refrigerated</span>' : '<span class="nf-badge nf-badge-neutral">Ambient</span>');
+      var modeBadge = item.is_hot_held ? '<span class="nf-badge nf-badge-pink">Hot-held</span>' :
+        (item.is_refrigerated ? '<span class="nf-badge nf-badge-sage">Refrigerated</span>' : '<span class="nf-badge nf-badge-neutral">Ambient</span>');
 
-      // Status Badge
       var statusBadge = '';
       if (item.status === 'AVAILABLE') statusBadge = '<span class="nf-badge nf-badge-success"><i class="bi bi-check-circle"></i> Available</span>';
-      else if (item.status === 'RESERVED') statusBadge = '<span class="nf-badge nf-badge-warning"><i class="bi bi-lock-fill"></i> Reserved</span>';
-      else if (item.status === 'PICKED_UP') statusBadge = '<span class="nf-badge nf-badge-info"><i class="bi bi-truck"></i> Picked Up</span>';
+      else if (item.status === 'RESERVED') statusBadge = '<span class="nf-badge nf-badge-peach"><i class="bi bi-lock-fill"></i> Reserved</span>';
+      else if (item.status === 'PICKED_UP') statusBadge = '<span class="nf-badge nf-badge-sage"><i class="bi bi-truck"></i> Picked Up</span>';
       else if (item.status === 'EXPIRED') statusBadge = '<span class="nf-badge nf-badge-danger"><i class="bi bi-exclamation-triangle"></i> Expired</span>';
       else statusBadge = '<span class="nf-badge nf-badge-danger"><i class="bi bi-trash"></i> Discarded</span>';
 
-      // Actions
       var isActionable = (item.status === 'AVAILABLE' && item.is_safe);
       var actionsHtml = '<div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">';
 
@@ -221,16 +224,16 @@ document.addEventListener('DOMContentLoaded', function () {
         '</button>';
 
       if (item.status !== 'DISCARDED' && item.status !== 'PICKED_UP') {
-        actionsHtml += '<button class="nf-btn nf-btn-outline nf-btn-sm" onclick="window.NutriFlowSurplus.openDiscardModal(\'' + item.id + '\')" style="font-size: 12px; padding: 4px 8px; color: var(--nf-danger); border-color: rgba(196,68,46,0.3);" title="Discard Food">' +
+        actionsHtml += '<button class="nf-btn nf-btn-outline nf-btn-sm" onclick="window.NutriFlowSurplus.openDiscardModal(\'' + item.id + '\')" style="font-size: 12px; padding: 4px 8px; color: var(--nf-danger); border-color: rgba(185,56,56,0.3);" title="Discard Food">' +
           '<i class="bi bi-trash3"></i>' +
           '</button>';
       }
 
       actionsHtml += '</div>';
 
-      tr.innerHTML = '<td><strong style="color: var(--nf-green-900); font-size: 14.5px;">' + (item.food_name || 'Batch') + '</strong><br><span style="font-size: 12px; color: var(--nf-ink-400);">' + (item.storage_location || 'Main Pantry') + '</span></td>' +
-        '<td><strong>' + parseFloat(item.quantity_remaining).toFixed(1) + ' ' + (item.unit || 'KG') + '</strong><br><span style="font-size: 11.5px; color: var(--nf-ink-400);">of ' + parseFloat(item.quantity).toFixed(1) + ' ' + item.unit + ' initial</span></td>' +
-        '<td>' + modeBadge + ' <strong style="font-family: var(--nf-font-mono); font-size: 13px;">' + tempVal + '</strong></td>' +
+      tr.innerHTML = '<td><div class="nf-food-cell"><img src="' + imgUrl + '" class="nf-food-thumb" alt="Dish"><div><strong style="color: var(--nf-ink-900); font-size: 14.5px;">' + (item.food_name || 'Batch') + '</strong><div style="font-size: 12px; color: var(--nf-ink-600);">' + (item.storage_location || 'Main Pantry') + '</div></div></div></td>' +
+        '<td><strong>' + parseFloat(item.quantity_remaining).toFixed(1) + ' ' + (item.unit || 'KG') + '</strong><br><span style="font-size: 11.5px; color: var(--nf-ink-600);">of ' + parseFloat(item.quantity).toFixed(1) + ' ' + item.unit + ' initial</span></td>' +
+        '<td>' + modeBadge + ' <strong style="font-family: var(--nf-font-mono); font-size: 13px; margin-left: 4px;">' + tempVal + '</strong></td>' +
         '<td><span style="font-size: 13px; font-weight: 500;">' + (item.safety_rule_name || 'TCS High Risk') + '</span></td>' +
         '<td>' + countdownHtml + '</td>' +
         '<td>' + statusBadge + '</td>' +
@@ -244,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(function () {
       applyFilters();
-    }, 60000); // refresh every minute
+    }, 60000);
   }
 
   function createSurplusBatch() {
@@ -373,7 +376,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
-  // Global namespace for inline onclick handlers
   window.NutriFlowSurplus = {
     openTempModal: function (id, foodNameEnc, locEnc) {
       tempSurplusId.value = id;

@@ -1,0 +1,267 @@
+<!-- NutriFlow — Product Landing Page Fragment -->
+<div class="nf-landing-wrapper">
+
+    <!-- Top Navigation Header -->
+    <header style="padding: 24px 0; display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; border-bottom: 1px solid var(--nf-border);">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--nf-radius-md); background: var(--nf-brand-primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 14px rgba(122, 28, 28, 0.3);">
+                <i class="bi bi-cup-hot-fill"></i>
+            </div>
+            <div>
+                <span style="font-family: var(--nf-font-display); font-size: 26px; font-weight: 700; color: var(--nf-ink-900); letter-spacing: -0.02em;">NutriFlow</span>
+                <span class="nf-badge nf-badge-amber" style="margin-left: 8px;">Indian Campus Food Engine</span>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <button type="button" class="nf-btn nf-btn-outline" onclick="NutriFlowPortal.showView('login')">Sign In</button>
+            <button type="button" class="nf-btn nf-btn-primary" onclick="NutriFlowPortal.showView('register')">Register Account</button>
+        </div>
+    </header>
+
+    <!-- Editorial Asymmetric Hero Section -->
+    <div class="row align-items-center g-5" style="margin-bottom: 72px;">
+        <!-- Left: Hero Content & Text Flow CTA -->
+        <div class="col-lg-6">
+            <!-- Real Credibility Marker (Replaced AI Sparkle Tag) -->
+            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--nf-accent-bg); border: 1px solid rgba(192, 108, 47, 0.3); border-radius: var(--nf-radius-pill); font-size: 12px; font-weight: 700; color: var(--nf-accent-amber); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 20px;">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background-color: var(--nf-accent-amber);"></span>
+                Indian Campus Dining Ecosystem • 94.2% Forecast Accuracy
+            </div>
+
+            <!-- Distinctive Typography Headline -->
+            <h1 style="font-size: 52px; font-weight: 800; color: var(--nf-ink-900); line-height: 1.12; margin-bottom: 22px; letter-spacing: -0.03em;">
+                Predict Indian Meal Demand.
+                <span style="display: inline-block; background-color: var(--nf-accent-bg); color: var(--nf-brand-primary); padding: 2px 12px; border-radius: 10px; border-bottom: 4px solid var(--nf-accent-amber); margin: 4px 0;">Rescue Surplus.</span>
+                Feed Communities.
+            </h1>
+
+            <p style="font-size: 18px; color: var(--nf-ink-600); margin-bottom: 36px; line-height: 1.65; max-width: 540px;">
+                NutriFlow empowers university canteens and institutional kitchens across India to eliminate food waste — using machine learning to forecast exact batch quantities of Paneer, Dal, Rice, and Roti, and fast-routing surplus food under strict HACCP safety rules to verified local shelters.
+            </p>
+
+            <!-- Text-Flow Integrated Action CTA (Replaced Floating Button Pair) -->
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 44px;">
+                <button type="button" class="nf-btn nf-btn-primary" style="padding: 16px 32px; font-size: 16px; border-radius: var(--nf-radius-pill);" onclick="NutriFlowPortal.showView('login')">
+                    <span>Launch Staff Operations Portal</span>
+                    <span style="width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; margin-left: 6px;">
+                        <i class="bi bi-arrow-right-short" style="font-size: 18px;"></i>
+                    </span>
+                </button>
+                <a href="#simulator" style="color: var(--nf-ink-900); font-weight: 700; font-size: 15px; text-decoration: underline; text-decoration-color: var(--nf-accent-amber); text-underline-offset: 6px;">
+                    Explore Impact Simulator <i class="bi bi-arrow-down-right" style="color: var(--nf-accent-amber);"></i>
+                </a>
+            </div>
+
+            <!-- Annotated Metric Strip (Replaced Repetitive Centered Stat Cards) -->
+            <div style="padding-top: 24px; border-top: 1px solid var(--nf-border); display: flex; align-items: center; gap: 32px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-family: var(--nf-font-display); font-size: 32px; font-weight: 800; color: var(--nf-brand-primary); line-height: 1;">94.2%</div>
+                    <div style="font-size: 12.5px; color: var(--nf-ink-600); font-weight: 600; line-height: 1.3;">Batch Cooking<br>Accuracy</div>
+                </div>
+                <div style="width: 1px; height: 36px; background-color: var(--nf-border);"></div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-family: var(--nf-font-display); font-size: 32px; font-weight: 800; color: var(--nf-accent-amber); line-height: 1;">0.0<span style="font-size: 18px;">kg</span></div>
+                    <div style="font-size: 12.5px; color: var(--nf-ink-600); font-weight: 600; line-height: 1.3;">HACCP Safe<br>Food Wasted</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Asymmetric Editorial Photo Arrangement (Replaced 2x2 Grid) -->
+        <div class="col-lg-6">
+            <div style="position: relative; padding: 20px 10px;">
+                <!-- Main Feature Photo: Tilted & Shadowed -->
+                <div style="border-radius: var(--nf-radius-xl); overflow: hidden; box-shadow: var(--nf-shadow-lg); border: 4px solid var(--nf-surface); transform: rotate(-2.5deg); transition: transform 0.3s ease;">
+                    <img src="https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80" alt="Paneer Butter Masala" style="width: 100%; height: 340px; object-fit: cover; display: block;">
+                </div>
+
+                <!-- Overlapping Secondary Dish Photo: Counter-Rotated -->
+                <div style="position: absolute; bottom: -30px; right: -10px; width: 55%; border-radius: var(--nf-radius-lg); overflow: hidden; box-shadow: 0 20px 40px rgba(28, 25, 23, 0.15); border: 4px solid var(--nf-surface); transform: rotate(3deg);">
+                    <img src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=500&q=80" alt="Dal Tadka Thali" style="width: 100%; height: 210px; object-fit: cover; display: block;">
+                </div>
+
+                <!-- Floating Editorial Badge -->
+                <div style="position: absolute; top: -15px; left: -10px; background: var(--nf-surface); padding: 10px 18px; border-radius: var(--nf-radius-pill); border: 1px solid var(--nf-border); box-shadow: var(--nf-shadow-md); display: flex; align-items: center; gap: 10px;">
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);"></span>
+                    <span style="font-size: 13px; font-weight: 700; color: var(--nf-ink-900);">Live Dining Service Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stakeholders Section -->
+    <div style="margin-bottom: 72px;">
+        <div style="text-align: center; max-width: 640px; margin: 0 auto 44px;">
+            <span class="nf-badge nf-badge-amber" style="margin-bottom: 10px;">Tailored Institutional Workflows</span>
+            <h2 style="font-size: 34px; font-weight: 800; color: var(--nf-ink-900);">Built specifically for campus food ecosystems</h2>
+            <p style="font-size: 15.5px; color: var(--nf-ink-600);">Connects canteen chefs, university admins, verified NGO shelters, and ESG compliance leads in real time.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="nf-card" style="height: 100%; border-top: 4px solid var(--nf-brand-primary);">
+                    <div style="width: 44px; height: 44px; border-radius: var(--nf-radius-md); background: var(--nf-maroon-50); color: var(--nf-brand-primary); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px;">
+                        <i class="bi bi-egg-fried"></i>
+                    </div>
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Kitchen Chefs & Staff</h3>
+                    <p style="font-size: 13.5px; color: var(--nf-ink-600); margin: 0;">Log prepared vs consumed weights per meal session; receive ML batch recommendations to prevent overcooking.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="nf-card" style="height: 100%; border-top: 4px solid var(--nf-accent-amber);">
+                    <div style="width: 44px; height: 44px; border-radius: var(--nf-radius-md); background: var(--nf-accent-bg); color: var(--nf-accent-amber); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px;">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Campus Administrators</h3>
+                    <p style="font-size: 13.5px; color: var(--nf-ink-600); margin: 0;">Monitor kitchen procurement budgets, menu item trends, and compliance metrics across multiple dining halls.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="nf-card" style="height: 100%; border-top: 4px solid var(--nf-brand-primary);">
+                    <div style="width: 44px; height: 44px; border-radius: var(--nf-radius-md); background: var(--nf-maroon-50); color: var(--nf-brand-primary); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px;">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">NGO Recipient Partners</h3>
+                    <p style="font-size: 13.5px; color: var(--nf-ink-600); margin: 0;">Receive instant alerts when safe surplus food is available; accept matches based on location & vehicle capacity.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="nf-card" style="height: 100%; border-top: 4px solid var(--nf-accent-amber);">
+                    <div style="width: 44px; height: 44px; border-radius: var(--nf-radius-md); background: var(--nf-accent-bg); color: var(--nf-accent-amber); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px;">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Sustainability & ESG Leads</h3>
+                    <p style="font-size: 13.5px; color: var(--nf-ink-600); margin: 0;">Track audit-ready CO₂e landfill avoidance, water footprint savings, and meals redistributed for ESG reports.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Food Redistribution Showcase Section -->
+    <div style="background-color: var(--nf-surface); border-radius: var(--nf-radius-xl); padding: 48px 36px; border: 1px solid var(--nf-border); box-shadow: var(--nf-shadow-sm); margin-bottom: 64px;">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                    <div style="height: 200px; border-radius: var(--nf-radius-lg); overflow: hidden; box-shadow: var(--nf-shadow-sm);">
+                        <img src="https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=500&q=80" alt="Indian Food Thali Serving" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="height: 200px; border-radius: var(--nf-radius-lg); overflow: hidden; box-shadow: var(--nf-shadow-sm);">
+                        <img src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=500&q=80" alt="Biryani Preparation" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <span class="nf-badge nf-badge-amber" style="margin-bottom: 12px;">HACCP Safe Food Rescue Protocol</span>
+                <h2 style="font-size: 32px; font-weight: 800; color: var(--nf-ink-900); margin-bottom: 16px;">
+                    Guaranteed freshness from kitchen stove to community table
+                </h2>
+                <p style="font-size: 15px; color: var(--nf-ink-600); margin-bottom: 20px; line-height: 1.6;">
+                    NutriFlow enforces strict Time/Temperature Control for Safety (TCS) rules. Surpluses hot-held above 60°C or refrigerated below 5°C are dispatched with security verification codes, ensuring zero food safety compromises.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--nf-ink-900);">
+                        <i class="bi bi-check-circle-fill" style="color: var(--nf-accent-amber); font-size: 18px;"></i> Real-time 4-hour ambient countdown timer
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--nf-ink-900);">
+                        <i class="bi bi-check-circle-fill" style="color: var(--nf-accent-amber); font-size: 18px;"></i> Automated distance & capacity matching algorithms
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--nf-ink-900);">
+                        <i class="bi bi-check-circle-fill" style="color: var(--nf-accent-amber); font-size: 18px;"></i> OTP & QR security verification code for driver handovers
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Impact Simulator Section -->
+    <div id="simulator" style="background-color: var(--nf-surface); border-radius: var(--nf-radius-xl); padding: 48px 36px; border: 1px solid var(--nf-border); box-shadow: var(--nf-shadow-md); margin-bottom: 48px;">
+        <div style="text-align: center; max-width: 600px; margin: 0 auto 36px;">
+            <span class="nf-badge nf-badge-amber" style="margin-bottom: 8px;">Interactive Campus Calculator</span>
+            <h2 style="font-size: 32px; font-weight: 800; color: var(--nf-ink-900);">Calculate Your Campus Waste Reduction</h2>
+            <p style="font-size: 15px; color: var(--nf-ink-600);">Estimate annual food savings, meals served, and CO₂e offset based on daily dining hall headcount.</p>
+        </div>
+
+        <div class="row g-4 align-items-center">
+            <div class="col-md-5">
+                <div class="nf-field">
+                    <label for="simHeadcount">Daily Student & Staff Headcount:</label>
+                    <input type="number" id="simHeadcount" value="500" min="50" max="10000" step="50" style="font-size: 18px; font-weight: 700; padding: 12px 16px;">
+                </div>
+                <div class="nf-field">
+                    <label for="simMealsPerDay">Daily Meal Sessions:</label>
+                    <select id="simMealsPerDay" style="font-size: 15px; padding: 12px 16px;">
+                        <option value="2">2 Sessions (Lunch & Dinner)</option>
+                        <option value="3" selected>3 Sessions (Breakfast, Lunch, Dinner)</option>
+                        <option value="4">4 Sessions (Includes Evening Snack)</option>
+                    </select>
+                </div>
+                <button type="button" class="nf-btn nf-btn-primary" style="width: 100%; padding: 14px;" onclick="calculateLandingImpact()">
+                    <i class="bi bi-calculator"></i> Calculate Annual Impact
+                </button>
+            </div>
+
+            <div class="col-md-7">
+                <div style="background-color: var(--nf-canvas); padding: 28px; border-radius: var(--nf-radius-lg); border: 1px solid var(--nf-border);">
+                    <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--nf-brand-primary); margin-bottom: 20px;">
+                        Estimated Annual Campus Savings (NutriFlow ML Engine)
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div style="font-size: 12.5px; color: var(--nf-ink-600);">Food Rescued / Avoided</div>
+                            <div style="font-family: var(--nf-font-display); font-size: 32px; font-weight: 800; color: var(--nf-brand-primary);" id="simFoodKg">6,843 kg</div>
+                            <div style="font-size: 12px; color: var(--nf-accent-amber); font-weight: 600;" id="simMealsServed">≈ 17,107 meals served</div>
+                        </div>
+                        <div class="col-6">
+                            <div style="font-size: 12.5px; color: var(--nf-ink-600);">Procurement Cost Preserved</div>
+                            <div style="font-family: var(--nf-font-display); font-size: 32px; font-weight: 800; color: var(--nf-accent-amber);" id="simCostSavings">₹6,15,870</div>
+                            <div style="font-size: 12px; color: var(--nf-ink-600);">Raw ingredient budget</div>
+                        </div>
+                        <div class="col-6">
+                            <div style="font-size: 12.5px; color: var(--nf-ink-600);">CO₂e Emissions Prevented</div>
+                            <div style="font-family: var(--nf-font-display); font-size: 28px; font-weight: 700; color: var(--nf-ink-900);" id="simCo2Kg">17,107 kg</div>
+                            <div style="font-size: 12px; color: var(--nf-ink-600);" id="simTrees">≈ 785 trees equivalent</div>
+                        </div>
+                        <div class="col-6">
+                            <div style="font-size: 12.5px; color: var(--nf-ink-600);">Embedded Water Saved</div>
+                            <div style="font-family: var(--nf-font-display); font-size: 28px; font-weight: 700; color: var(--nf-ink-900);" id="simWaterL">5.8M Litres</div>
+                            <div style="font-size: 12px; color: var(--nf-ink-600);">Agricultural footprint</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="padding: 32px 0; border-top: 1px solid var(--nf-border); text-align: center; color: var(--nf-ink-600); font-size: 13.5px;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
+            <i class="bi bi-cup-hot-fill" style="color: var(--nf-brand-primary);"></i>
+            <strong style="color: var(--nf-ink-900);">NutriFlow Campus Food Demand & Surplus Rescue Platform</strong>
+        </div>
+        <div>Built for institutional dining halls, canteens, and verified community partner networks across India.</div>
+    </footer>
+
+</div>
+
+<script>
+function calculateLandingImpact() {
+    var hc = parseInt(document.getElementById('simHeadcount').value) || 500;
+    var sessions = parseInt(document.getElementById('simMealsPerDay').value) || 3;
+
+    var dailyKg = hc * sessions * 0.075 * 0.50;
+    var annualKg = dailyKg * 300;
+
+    var meals = Math.round(annualKg * 2.5);
+    var savings = Math.round(annualKg * 90);
+    var co2 = Math.round(annualKg * 2.5);
+    var trees = (co2 / 21.77).toFixed(0);
+    var waterL = (annualKg * 850 / 1000000).toFixed(1);
+
+    document.getElementById('simFoodKg').textContent = annualKg.toLocaleString('en-IN', {maximumFractionDigits: 0}) + ' kg';
+    document.getElementById('simMealsServed').textContent = '≈ ' + meals.toLocaleString('en-IN') + ' meals served';
+    document.getElementById('simCostSavings').textContent = '₹' + savings.toLocaleString('en-IN');
+    document.getElementById('simCo2Kg').textContent = co2.toLocaleString('en-IN') + ' kg';
+    document.getElementById('simTrees').textContent = '≈ ' + trees + ' trees equivalent';
+    document.getElementById('simWaterL').textContent = waterL + 'M Litres';
+}
+</script>

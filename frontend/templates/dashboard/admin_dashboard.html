@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Executive Operations Dashboard — NutriFlow</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥣</text></svg>">
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-cup-hot-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav"></nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title">Executive Control & Cross-Campus Oversight</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">Campus Admin</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content">
+
+                <!-- Admin Banner Header -->
+                <div style="background: linear-gradient(135deg, #7A1C1C 0%, #471111 100%); border-radius: var(--nf-radius-lg); padding: 24px 28px; color: #ffffff; margin-bottom: 24px; box-shadow: var(--nf-shadow-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <span class="nf-badge nf-badge-amber" style="margin-bottom: 8px;"><i class="bi bi-shield-lock-fill"></i> Executive Administrator Console</span>
+                        <h2 style="font-size: 24px; font-weight: 800; margin: 0; color: #ffffff;">Cross-Campus Dining & Safety Oversight</h2>
+                        <p style="margin: 4px 0 0; font-size: 14px; color: rgba(255, 255, 255, 0.85);">Monitor procurement budgets, HACCP temperature compliance, and NGO partner verification approvals.</p>
+                    </div>
+                    <a href="/admin/accounts/user/" target="_blank" class="nf-btn nf-btn-accent">
+                        <i class="bi bi-person-check-fill"></i> Django Admin User Management
+                    </a>
+                </div>
+
+                <!-- Executive KPI Grid -->
+                <div class="nf-grid" style="margin-bottom: 24px;">
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-brand-primary);">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-building"></i> Registered Campuses</span>
+                            <div class="nf-stat-icon-badge"><i class="bi bi-bank"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="adminStatCampuses">0</span>
+                        <span class="nf-stat-delta up"><i class="bi bi-check2"></i> Active Institutional Facilities</span>
+                    </div>
+
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-accent-amber);">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-shield-check"></i> HACCP Compliance</span>
+                            <div class="nf-stat-icon-badge"><i class="bi bi-shield-fill-check"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="adminStatCompliance">98.5<span class="unit">%</span></span>
+                        <span class="nf-stat-delta up"><i class="bi bi-thermometer-half"></i> TCS Temp Monitored</span>
+                    </div>
+
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-brand-primary);">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-people-fill"></i> Recipient NGO Partners</span>
+                            <div class="nf-stat-icon-badge"><i class="bi bi-people"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="adminStatNGOs">0</span>
+                        <span class="nf-stat-delta up" id="adminStatVerifiedSub">0 Verified</span>
+                    </div>
+
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-accent-amber);">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-currency-rupee"></i> Budget Value Saved</span>
+                            <div class="nf-stat-icon-badge"><i class="bi bi-cash-stack"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="adminStatBudget" style="color: var(--nf-brand-primary);">₹0</span>
+                        <span class="nf-stat-delta up"><i class="bi bi-graph-up-arrow"></i> Avoided Procurement Loss</span>
+                    </div>
+                </div>
+
+                <!-- Main Layout Grid -->
+                <div class="row g-4 style-main-row" style="margin-bottom: 28px;">
+
+                    <!-- Left Column: Procurement Trends & Cross Campus Directory -->
+                    <div class="col-lg-7">
+                        <div class="nf-card" style="margin-bottom: 24px;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-graph-up-arrow" style="color: var(--nf-brand-primary);"></i> Menu Item Intake & Procurement Trends</h3>
+                                    <div class="nf-card-subtitle">Aggregated student consumption patterns per dish</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Cross-Campus Analytics</span>
+                            </div>
+                            <div class="nf-chart-wrapper">
+                                <canvas id="adminTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Campus Directory Summary Table -->
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-building"></i> Registered Campus Dining Facilities</h3>
+                                    <div class="nf-card-subtitle">Configured dining halls and student capacity</div>
+                                </div>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table class="nf-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Campus Facility</th>
+                                            <th>Location Code</th>
+                                            <th>Capacity</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminCampusesTbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Compliance Snapshot & Recipient NGO Verification Panel -->
+                    <div class="col-lg-5">
+                        
+                        <!-- Compliance Snapshot -->
+                        <div class="nf-card" style="margin-bottom: 24px; border-top: 4px solid var(--nf-accent-amber);">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-shield-check" style="color: var(--nf-accent-amber);"></i> HACCP Food Safety Compliance</h3>
+                                    <div class="nf-card-subtitle">Safe vs. Expired / Discarded surplus entries</div>
+                                </div>
+                            </div>
+                            <div class="row text-center g-2" style="margin-bottom: 16px;">
+                                <div class="col-4">
+                                    <div style="background: var(--nf-canvas); padding: 12px; border-radius: var(--nf-radius-md); border: 1px solid var(--nf-border);">
+                                        <div style="font-size: 11px; color: var(--nf-ink-600);">Available Safe</div>
+                                        <div style="font-family: var(--nf-font-display); font-size: 20px; font-weight: 800; color: #22c55e;" id="compStatAvailable">0</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div style="background: var(--nf-canvas); padding: 12px; border-radius: var(--nf-radius-md); border: 1px solid var(--nf-border);">
+                                        <div style="font-size: 11px; color: var(--nf-ink-600);">Claimed / Dispatched</div>
+                                        <div style="font-family: var(--nf-font-display); font-size: 20px; font-weight: 800; color: var(--nf-brand-primary);" id="compStatClaimed">0</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div style="background: var(--nf-canvas); padding: 12px; border-radius: var(--nf-radius-md); border: 1px solid var(--nf-border);">
+                                        <div style="font-size: 11px; color: var(--nf-ink-600);">Expired / Discarded</div>
+                                        <div style="font-family: var(--nf-font-display); font-size: 20px; font-weight: 800; color: var(--nf-danger);" id="compStatExpired">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 180px;">
+                                <canvas id="adminComplianceChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Recipient Verification Panel -->
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-people-fill"></i> NGO Partner Verification Status</h3>
+                                    <div class="nf-card-subtitle">Review organization verification (`is_verified`)</div>
+                                </div>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table class="nf-table" style="font-size: 13px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Organization</th>
+                                            <th>Capacity</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminRecipientsTbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/dashboard_admin.js"></script>
+
+</body>
+</html>

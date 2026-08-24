@@ -1,27 +1,90 @@
 /* ==========================================================================
    NutriFlow — dashboard.css
-   Dashboard-specific grid tweaks, pulse animations, and chart container styling.
+   Dashboard-specific grid, action shortcuts, and card styling.
    ========================================================================== */
 
-.nf-dash-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
-  margin-bottom: 24px;
+.nf-action-card {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--nf-surface);
+  border: 1px solid var(--nf-border);
+  border-radius: var(--nf-radius-lg);
+  box-shadow: var(--nf-shadow-sm);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: var(--nf-ink-900);
 }
 
-.nf-chart-wrapper {
-  position: relative;
-  width: 100%;
-  height: 280px;
+.nf-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--nf-shadow-hover);
+  border-color: var(--nf-accent-amber);
+  color: var(--nf-brand-primary);
 }
 
-.nf-badge-pulse {
-  animation: nfBadgePulse 2s infinite;
+.nf-action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--nf-radius-md);
+  background-color: var(--nf-accent-bg);
+  color: var(--nf-accent-amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
 }
 
-@keyframes nfBadgePulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.04); }
-  100% { transform: scale(1); }
+/* --------------------------------------------------------------------------
+   3D Motion & Elevation for Dashboard Action Cards & Icons
+   -------------------------------------------------------------------------- */
+
+.nf-action-card {
+  perspective: 600px;
+}
+
+.nf-action-icon {
+  transform-style: preserve-3d;
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+              background-color 0.2s ease,
+              color 0.2s ease;
+  will-change: transform, box-shadow;
+  box-shadow: 0 4px 12px rgba(122, 28, 28, 0.15), 0 2px 4px rgba(28, 25, 23, 0.05);
+}
+
+.nf-action-icon i {
+  display: inline-block;
+  transform: translateZ(6px);
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Staggered 3D Load-in Animation */
+@keyframes nfIcon3DEntrance {
+  0% {
+    opacity: 0;
+    transform: perspective(600px) rotateX(24deg) translateY(14px) scale(0.85);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(600px) rotateX(0deg) translateY(0) scale(1);
+    box-shadow: 0 4px 12px rgba(122, 28, 28, 0.15), 0 2px 4px rgba(28, 25, 23, 0.05);
+  }
+}
+
+.col-md-3:nth-child(1) .nf-action-icon { animation: nfIcon3DEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0ms backwards; }
+.col-md-3:nth-child(2) .nf-action-icon { animation: nfIcon3DEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) 80ms backwards; }
+.col-md-3:nth-child(3) .nf-action-icon { animation: nfIcon3DEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) 160ms backwards; }
+.col-md-3:nth-child(4) .nf-action-icon { animation: nfIcon3DEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) 240ms backwards; }
+
+/* Accessibility Fallback for Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .nf-action-icon {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }

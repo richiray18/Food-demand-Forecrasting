@@ -3,205 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in — NutriFlow</title>
+    <title>NutriFlow — Campus Food Demand & Surplus Rescue</title>
 
-    <!-- Bootstrap Icons (for the brand mark, matching the sidebar) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-    <!-- Project CSS (defines fonts, color tokens, .nf-field, .nf-btn, .nf-alert, etc.) -->
     <link rel="stylesheet" href="/static/css/style.css">
-
-    <style>
-        .nf-auth-shell {
-            min-height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background: var(--nf-canvas);
-        }
-
-        .nf-auth-card {
-            width: 100%;
-            max-width: 400px;
-            background: var(--nf-surface);
-            border: 1px solid var(--nf-border);
-            border-radius: var(--nf-radius-lg);
-            box-shadow: var(--nf-shadow-lg);
-            padding: 36px 32px;
-        }
-
-        .nf-auth-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: var(--nf-font-display);
-            font-weight: 700;
-            font-size: 20px;
-            color: var(--nf-green-800);
-            margin-bottom: 28px;
-        }
-
-        .nf-auth-brand i {
-            font-size: 24px;
-            color: var(--nf-amber-500);
-        }
-
-        .nf-auth-title {
-            font-size: 22px;
-            margin-bottom: 4px;
-        }
-
-        .nf-auth-subtitle {
-            font-size: 14px;
-            color: var(--nf-ink-400);
-            margin-bottom: 24px;
-        }
-
-        .nf-auth-card .nf-btn {
-            width: 100%;
-            margin-top: 4px;
-        }
-
-        .nf-auth-error {
-            display: none;
-            margin-bottom: 18px;
-        }
-
-        @media (max-width: 480px) {
-            .nf-auth-card {
-                padding: 28px 22px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/forms.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥣</text></svg>">
 </head>
-<body>
+<body style="background-color: var(--nf-canvas);">
 
-    <div class="nf-auth-shell">
-        <div class="nf-auth-card">
+    <div class="container py-4">
 
-            <div class="nf-auth-brand">
-                <i class="bi bi-leaf-fill"></i>
-                <span>NutriFlow</span>
-                <span class="nf-badge nf-badge-neutral" style="font-size: 11px; margin-left: auto;">SIH 2026</span>
-            </div>
-
-            <h1 class="nf-auth-title">Enterprise Portal</h1>
-            <p class="nf-auth-subtitle" style="margin-bottom: 8px;"><strong>Predict Better. Prepare Smarter. Waste Less.</strong></p>
-            <p class="nf-auth-subtitle" style="font-size: 13px;">Sign in to access real-time forecasting, surplus routing, and impact analytics.</p>
-
-            <div class="nf-alert nf-alert-error nf-auth-error" id="nfLoginError"></div>
-
-            <form id="nfLoginForm" novalidate>
-                <div class="nf-field">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="e.g. kitchen_staff or admin" autocomplete="username" required>
-                </div>
-
-                <div class="nf-field">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
-                </div>
-
-                <button type="submit" class="nf-btn nf-btn-primary" id="nfLoginBtn">
-                    <span id="nfLoginBtnText">Sign In to NutriFlow</span>
-                </button>
-            </form>
-
-            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--nf-border); font-size: 12.5px; color: var(--nf-ink-400);">
-                <div style="font-weight: 600; margin-bottom: 6px; color: var(--nf-ink-700);">Quick Demo Credentials:</div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" onclick="document.getElementById('username').value='admin'; document.getElementById('password').value='admin123';" style="font-size: 12px; padding: 4px 8px;">
-                        <i class="bi bi-shield-lock"></i> Admin
-                    </button>
-                    <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" onclick="document.getElementById('username').value='kitchen_staff'; document.getElementById('password').value='staff123';" style="font-size: 12px; padding: 4px 8px;">
-                        <i class="bi bi-egg-fried"></i> Kitchen Staff
-                    </button>
-                </div>
-            </div>
-
+        <!-- VIEW 1: LANDING PAGE -->
+        <div id="nfViewLanding" style="display: block;">
+            {% include "landing/landing.html" %}
         </div>
+
+        <!-- VIEW 2: SIGN IN PORTAL -->
+        <div id="nfViewLogin" style="display: none; min-height: 85vh; padding: 40px 0;" class="align-items-center justify-content-center">
+            <div class="row g-0 w-100 style-split-card" style="max-width: 1020px; background: var(--nf-surface); border-radius: var(--nf-radius-xl); border: 1px solid var(--nf-border); box-shadow: var(--nf-shadow-lg); overflow: hidden; margin: 0 auto;">
+                
+                <!-- Left: Authentic Indian Food Operations Showcase -->
+                <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-between p-5" style="background: linear-gradient(135deg, #2b0808 0%, #471111 100%); color: #ffffff; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -50px; right: -50px; width: 220px; height: 220px; border-radius: 50%; background: rgba(192, 108, 47, 0.15); pointer-events: none;"></div>
+
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+                            <div style="width: 42px; height: 42px; border-radius: var(--nf-radius-md); background: var(--nf-accent-amber); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                                <i class="bi bi-cup-hot-fill"></i>
+                            </div>
+                            <span style="font-family: var(--nf-font-display); font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">NutriFlow</span>
+                        </div>
+
+                        <h2 style="font-size: 32px; font-weight: 800; color: #ffffff; line-height: 1.25; margin-bottom: 16px;">
+                            Campus Meal Demand & Surplus Rescue Operations
+                        </h2>
+                        <p style="color: rgba(255, 255, 255, 0.8); font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+                            Connecting university canteens, kitchen staff, campus admins, and NGO partners under a unified machine learning & HACCP compliance workflow.
+                        </p>
+                    </div>
+
+                    <!-- Live Campus Operations Card -->
+                    <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--nf-radius-lg); padding: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);"></span>
+                            <span style="font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--nf-accent-bg);">Active Dining Hall Status</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div>
+                                <div style="font-size: 20px; font-weight: 800; color: #ffffff;">Hostel Hall 1 & 2</div>
+                                <div style="font-size: 13px; color: rgba(255, 255, 255, 0.75);">Lunch Service • 420 Headcount</div>
+                            </div>
+                            <div style="font-family: var(--nf-font-display); font-size: 22px; font-weight: 800; color: var(--nf-accent-bg);">94.2% <span style="font-size: 11px; font-family: var(--nf-font-body); font-weight: 600; display: block; text-align: right; color: rgba(255,255,255,0.7);">Accuracy</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Sign In Form -->
+                <div class="col-lg-6 p-4 p-sm-5 d-flex flex-column justify-content-center">
+                    <div style="margin-bottom: 24px;">
+                        <h2 style="font-size: 26px; font-weight: 800; color: var(--nf-ink-900); margin-bottom: 6px;">Institutional Sign In</h2>
+                        <p style="color: var(--nf-ink-600); font-size: 14px; margin-bottom: 16px;">Access kitchen operations, demand forecasts & surplus dispatches</p>
+                        
+                        <!-- Integrated 4-Role Demo Quick-Login Pills -->
+                        <div style="background: var(--nf-canvas); padding: 12px 14px; border-radius: var(--nf-radius-md); border: 1px solid var(--nf-border);">
+                            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--nf-brand-primary); letter-spacing: 0.05em; margin-bottom: 8px;">
+                                One-Click Quick Role Demo Login:
+                            </div>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                <button type="button" class="nf-badge nf-badge-amber" style="cursor: pointer; border: none; padding: 6px 12px; font-size: 12px; transition: transform 0.15s ease;" onclick="NutriFlowPortal.fillDemo('kitchen_staff', true)" title="Quick login as Kitchen Staff">
+                                    <i class="bi bi-egg-fried"></i> Staff
+                                </button>
+                                <button type="button" class="nf-badge nf-badge-amber" style="cursor: pointer; border: none; padding: 6px 12px; font-size: 12px; transition: transform 0.15s ease;" onclick="NutriFlowPortal.fillDemo('admin', true)" title="Quick login as Campus Admin">
+                                    <i class="bi bi-shield-lock"></i> Admin
+                                </button>
+                                <button type="button" class="nf-badge nf-badge-amber" style="cursor: pointer; border: none; padding: 6px 12px; font-size: 12px; transition: transform 0.15s ease;" onclick="NutriFlowPortal.fillDemo('ngo_robinhood', true)" title="Quick login as NGO Partner">
+                                    <i class="bi bi-handshake"></i> NGO Partner
+                                </button>
+                                <button type="button" class="nf-badge nf-badge-amber" style="cursor: pointer; border: none; padding: 6px 12px; font-size: 12px; transition: transform 0.15s ease;" onclick="NutriFlowPortal.fillDemo('esg_test', true)" title="Quick login as ESG Lead">
+                                    <i class="bi bi-leaf"></i> ESG Lead
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="loginMessages"></div>
+
+                    <form id="nfLoginForm" novalidate>
+                        {% csrf_token %}
+                        <div class="nf-field" style="margin-bottom: 18px;">
+                            <label for="loginUsername">Username / Staff ID</label>
+                            <input type="text" id="loginUsername" placeholder="e.g. kitchen_staff or admin" required autofocus style="border-radius: var(--nf-radius-md); padding: 12px 16px;">
+                        </div>
+
+                        <div class="nf-field" style="margin-bottom: 24px;">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" placeholder="••••••••" required style="border-radius: var(--nf-radius-md); padding: 12px 16px;">
+                        </div>
+
+                        <button type="submit" class="nf-btn nf-btn-primary" style="width: 100%; padding: 14px; font-size: 15px; border-radius: var(--nf-radius-md);" id="loginSubmitBtn">
+                            Sign In to Operations Portal <i class="bi bi-box-arrow-in-right"></i>
+                        </button>
+                    </form>
+
+                    <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--nf-border); font-size: 13.5px; color: var(--nf-ink-600);">
+                        New institution or NGO partner? <a href="#" onclick="NutriFlowPortal.showView('register')" style="color: var(--nf-brand-primary); font-weight: 700; text-decoration: none;">Register Account</a>
+                        <br>
+                        <a href="#" onclick="NutriFlowPortal.showView('landing')" style="display: inline-block; margin-top: 12px; color: var(--nf-ink-600); text-decoration: none; font-weight: 500;">
+                            <i class="bi bi-arrow-left"></i> Back to Product Overview
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: REGISTER ACCOUNT -->
+        <div id="nfViewRegister" style="display: none; min-height: 85vh; padding: 40px 0;" class="align-items-center justify-content-center">
+            <div class="nf-auth-card my-auto" style="max-width: 540px; margin: 0 auto; border-radius: var(--nf-radius-xl); border: 1px solid var(--nf-border); box-shadow: var(--nf-shadow-lg);">
+                <div class="nf-auth-brand">
+                    <i class="bi bi-cup-hot-fill" style="color: var(--nf-brand-primary);"></i>
+                    <span>NutriFlow</span>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 26px; font-weight: 800; color: var(--nf-ink-900); margin-bottom: 4px;">Register Partner Account</h2>
+                    <p style="color: var(--nf-ink-600); font-size: 14px; margin: 0;">Join the campus food demand & surplus rescue network</p>
+                </div>
+
+                <div id="registerMessages"></div>
+
+                <form id="nfRegisterForm" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-2">
+                        <div class="col-sm-6 nf-field">
+                            <label for="regUsername">Account Username</label>
+                            <input type="text" id="regUsername" placeholder="e.g. city_foodbank" required>
+                        </div>
+                        <div class="col-sm-6 nf-field">
+                            <label for="regEmail">Email Address</label>
+                            <input type="email" id="regEmail" placeholder="contact@org.org" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-sm-6 nf-field">
+                            <label for="regPassword">Password</label>
+                            <input type="password" id="regPassword" placeholder="••••••••" required>
+                        </div>
+                        <div class="col-sm-6 nf-field">
+                            <label for="regRole">Role</label>
+                            <select id="regRole" required>
+                                <option value="STAFF">Kitchen Operations Staff</option>
+                                <option value="ADMIN">Campus Canteen Admin</option>
+                                <option value="RECIPIENT">NGO Recipient Representative</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="regOrgName">Organization / Dining Hall Name</label>
+                        <input type="text" id="regOrgName" placeholder="e.g. City Care NGO or Hostel Dining 1" required>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="regPhone">Contact Phone Number</label>
+                        <input type="tel" id="regPhone" placeholder="+91 98765 43210">
+                    </div>
+
+                    <button type="submit" class="nf-btn nf-btn-primary" style="width: 100%; padding: 12px;" id="regSubmitBtn">
+                        Create Account & Access System <i class="bi bi-check-lg"></i>
+                    </button>
+                </form>
+
+                <div style="text-align: center; margin-top: 20px; font-size: 13.5px; color: var(--nf-ink-600);">
+                    Already registered? <a href="#" onclick="NutriFlowPortal.showView('login')">Sign In</a>
+                    <br>
+                    <a href="#" onclick="NutriFlowPortal.showView('landing')" style="display: inline-block; margin-top: 8px; color: var(--nf-ink-600);">
+                        <i class="bi bi-arrow-left"></i> Back to Product Overview
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Project JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/main.js"></script>
-
     <script>
-        (function () {
-            var LOGIN_URL = '/api/v1/accounts/login/';
-            var DASHBOARD_URL = '/dashboard/';
+    var NutriFlowPortal = {
+        showView: function(viewName) {
+            document.getElementById('nfViewLanding').style.display = 'none';
+            document.getElementById('nfViewLogin').style.display = 'none';
+            document.getElementById('nfViewRegister').style.display = 'none';
 
-            var form = document.getElementById('nfLoginForm');
-            var errorBox = document.getElementById('nfLoginError');
-            var loginBtn = document.getElementById('nfLoginBtn');
-            var loginBtnText = document.getElementById('nfLoginBtnText');
+            if (viewName === 'login') {
+                document.getElementById('nfViewLogin').style.display = 'flex';
+                window.location.hash = '#login';
+            } else if (viewName === 'register') {
+                document.getElementById('nfViewRegister').style.display = 'flex';
+                window.location.hash = '#register';
+            } else {
+                document.getElementById('nfViewLanding').style.display = 'block';
+                window.location.hash = '#landing';
+            }
+        },
 
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-                hideError();
+        fillDemo: function(role, autoSubmit) {
+            var userEl = document.getElementById('loginUsername');
+            var passEl = document.getElementById('loginPassword');
 
-                var username = document.getElementById('username').value.trim();
-                var password = document.getElementById('password').value;
-
-                setLoading(true);
-
-                fetch(LOGIN_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password
-                    })
-                })
-                    .then(function (response) {
-                        return response.json().then(function (data) {
-                            return { ok: response.ok, data: data };
-                        });
-                    })
-                    .then(function (result) {
-                        setLoading(false);
-
-                        if (!result.ok || !result.data.access || !result.data.refresh) {
-                            showError(result.data);
-                            return;
-                        }
-
-                        localStorage.setItem('access_token', result.data.access);
-                        localStorage.setItem('refresh_token', result.data.refresh);
-
-                        window.location.href = DASHBOARD_URL;
-                    })
-                    .catch(function () {
-                        setLoading(false);
-                        showError(null);
-                    });
-            });
-
-            function setLoading(isLoading) {
-                loginBtn.disabled = isLoading;
-                loginBtnText.textContent = isLoading ? 'Logging in...' : 'Log in';
+            if (role === 'kitchen_staff' || role === 'staff') {
+                userEl.value = 'kitchen_staff';
+                passEl.value = 'staff123';
+            } else if (role === 'admin') {
+                userEl.value = 'admin';
+                passEl.value = 'sih12345678';
+            } else if (role === 'ngo_robinhood' || role === 'ngo' || role === 'recipient') {
+                userEl.value = 'ngo_robinhood';
+                passEl.value = 'ri12345678';
+            } else if (role === 'esg_test' || role === 'esg' || role === 'esg_lead') {
+                userEl.value = 'esg_test';
+                passEl.value = 'test1234';
             }
 
-            function showError(data) {
-                var message = 'Unable to log in. Please check your username and password and try again.';
-
-                if (data && typeof data === 'object' && data.detail) {
-                    message = data.detail;
+            if (autoSubmit) {
+                var form = document.getElementById('nfLoginForm');
+                if (form) {
+                    var submitBtn = document.getElementById('loginSubmitBtn');
+                    if (submitBtn) submitBtn.click();
+                    else form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
                 }
+            }
+        }
+    };
 
-                errorBox.textContent = message;
-                errorBox.style.display = 'flex';
+    document.addEventListener('DOMContentLoaded', function() {
+        if (NutriFlow.isAuthenticated() && !window.location.hash) {
+            window.location.href = '/dashboard/';
+            return;
+        }
+
+        var hash = window.location.hash;
+        if (hash === '#login') NutriFlowPortal.showView('login');
+        else if (hash === '#register') NutriFlowPortal.showView('register');
+        else NutriFlowPortal.showView('landing');
+
+        // Handle Login Submission
+        document.getElementById('nfLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var user = document.getElementById('loginUsername').value.trim();
+            var pass = document.getElementById('loginPassword').value;
+
+            if (!user || !pass) {
+                NutriFlow.showAlert('warning', 'Please enter username and password.', 'loginMessages');
+                return;
             }
 
-            function hideError() {
-                errorBox.style.display = 'none';
-                errorBox.textContent = '';
+            var btn = document.getElementById('loginSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Signing in...';
+
+            NutriFlow.apiFetch('/api/v1/accounts/login/', {
+                method: 'POST',
+                body: { username: user, password: pass }
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error('Invalid credentials or inactive account.');
+                return res.json();
+            })
+            .then(function(data) {
+                if (data.access) {
+                    NutriFlow.setAuthToken(data.access);
+                    window.location.href = '/dashboard/';
+                } else {
+                    throw new Error('Authentication token missing from response');
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.innerHTML = 'Sign In to Operations Portal <i class="bi bi-box-arrow-in-right"></i>';
+                NutriFlow.showAlert('error', err.message, 'loginMessages');
+            });
+        });
+
+        // Handle Registration Submission
+        document.getElementById('nfRegisterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var user = document.getElementById('regUsername').value.trim();
+            var email = document.getElementById('regEmail').value.trim();
+            var pass = document.getElementById('regPassword').value;
+            var role = document.getElementById('regRole').value;
+            var org = document.getElementById('regOrgName').value.trim();
+            var phone = document.getElementById('regPhone').value.trim();
+
+            if (!user || !email || !pass || !org) {
+                NutriFlow.showAlert('warning', 'Please fill in all required account fields.', 'registerMessages');
+                return;
             }
-        })();
+
+            var btn = document.getElementById('regSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating account...';
+
+            var payload = {
+                username: user,
+                email: email,
+                password: pass,
+                role: role,
+                organization_name: org,
+                phone_number: phone
+            };
+
+            NutriFlow.apiFetch('/api/v1/accounts/register/', {
+                method: 'POST',
+                body: payload
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error('Registration failed. Username or email may already be registered.');
+                return res.json();
+            })
+            .then(function() {
+                NutriFlow.showAlert('success', 'Account created successfully! Please sign in with your credentials.', 'loginMessages');
+                NutriFlowPortal.showView('login');
+                document.getElementById('loginUsername').value = user;
+                document.getElementById('loginPassword').value = pass;
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.innerHTML = 'Create Account & Access System <i class="bi bi-check-lg"></i>';
+                NutriFlow.showAlert('error', err.message, 'registerMessages');
+            });
+        });
+    });
     </script>
-
 </body>
 </html>

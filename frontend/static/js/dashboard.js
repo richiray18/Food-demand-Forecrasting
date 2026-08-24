@@ -1,196 +1,128 @@
 /* ==========================================================================
    NutriFlow — dashboard.js
-   Fetches meal consumption logs, computes variance, renders KPIs, smart alerts & Chart.js charts.
-   Endpoint: GET /api/v1/meals/consumption-logs/?date=YYYY-MM-DD
+   Manages executive KPI cards, preparation vs consumption charts, and meal logs.
+   Endpoints:
+     GET /api/v1/accounts/me/
+     GET /api/v1/meals/consumption-logs/
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
-  var todayDateEl = document.getElementById('nfTodayDate');
-  var statusEl = document.getElementById('nfDashboardStatus');
-  var tableCard = document.getElementById('nfTableCard');
-  var tableBody = document.getElementById('nfLogsTableBody');
-  var logCountBadge = document.getElementById('nfLogCountBadge');
-  var dateFilterInput = document.getElementById('nfDateFilter');
-  var refreshBtn = document.getElementById('nfRefreshBtn');
-  var alertsContainer = document.getElementById('nfSmartAlertsContainer');
+  var statPrepared = document.getElementById('dashStatPrepared');
+  var statConsumed = document.getElementById('dashStatConsumed');
+  var statSurplus = document.getElementById('dashStatSurplus');
+  var statHeadcount = document.getElementById('dashStatHeadcount');
+  var userDisplay = document.getElementById('nfUserDisplay');
 
-  var statPrepared = document.getElementById('nfStatPrepared');
-  var statConsumed = document.getElementById('nfStatConsumed');
-  var statSurplus = document.getElementById('nfStatSurplus');
-  var statHeadcount = document.getElementById('nfStatHeadcount');
-  var surplusRateLabel = document.getElementById('nfSurplusRateLabel');
+  var tableBody = document.getElementById('dashLogsTableBody');
+  var listStatus = document.getElementById('dashLogsStatus');
 
-  var demandChartInstance = null;
+  var prepChartInstance = null;
   var sessionChartInstance = null;
 
-  // Initialize Date
-  var initialDate = getTodayDateString();
-  dateFilterInput.value = initialDate;
-  todayDateEl.textContent = formatDisplayDate(initialDate);
+  // Load User Profile
+  NutriFlow.apiFetch('/api/v1/accounts/me/')
+    .then(function (r) { return r.json(); })
+    .then(function (user) {
+      if (userDisplay && user.username) {
+        userDisplay.textContent = (user.organization_name || user.username) + ' (' + (user.role || 'STAFF') + ')';
+      }
+    })
+    .catch(function (err) {
+      console.error('Error fetching user profile:', err);
+    });
 
-  loadDashboard(initialDate);
+  // Load Meals Consumption Logs
+  loadDashboardData();
 
-  // Event Listeners
-  dateFilterInput.addEventListener('change', function () {
-    var selected = dateFilterInput.value;
-    if (selected) {
-      todayDateEl.textContent = formatDisplayDate(selected);
-      loadDashboard(selected);
-    }
-  });
+  function loadDashboardData() {
+    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-600); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading dining operational logs...</div>';
 
-  refreshBtn.addEventListener('click', function () {
-    var selected = dateFilterInput.value || getTodayDateString();
-    loadDashboard(selected);
-  });
-
-  function loadDashboard(dateStr) {
-    showStatus('loading', '<i class="bi bi-hourglass-split"></i> Loading meal operations data for ' + dateStr + '...');
-
-    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/?date=' + encodeURIComponent(dateStr))
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error('Server responded with status ' + response.status);
-        }
-        return response.json();
-      })
+    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/')
+      .then(function (r) { return r.json(); })
       .then(function (data) {
-        var rows = Array.isArray(data) ? data : (data.results || []);
+        listStatus.innerHTML = '';
+        var logs = Array.isArray(data) ? data : (data.results || []);
 
-        if (rows.length === 0) {
-          // Try fetching without date filter to see if recent records exist to suggest
-          fetchFallbackNotice(dateStr);
+        if (logs.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="6">' + NutriFlow.createEmptyState('No meal logs recorded today', 'Log your kitchen preparation in the Preparation tab to begin tracking waste reduction.', 'bi-egg-fried') + '</td></tr>';
+          renderFallbackCharts();
           return;
         }
 
-        clearStatus();
-        renderStats(rows);
-        renderCharts(rows);
-        renderSmartAlerts(rows);
-        renderTable(rows);
-        tableCard.style.display = 'block';
+        updateKPIs(logs);
+        renderTable(logs);
+        renderCharts(logs);
       })
-      .catch(function (error) {
-        showStatus('error', '<i class="bi bi-exclamation-octagon-fill"></i> Unable to load dashboard data. (' + error.message + ')');
-        tableCard.style.display = 'none';
-        resetStats();
+      .catch(function (err) {
+        listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-danger); font-size: 13.5px;">Error loading logs: ' + err.message + '</div>';
+        renderFallbackCharts();
       });
   }
 
-  function fetchFallbackNotice(dateStr) {
-    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/')
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (allData) {
-        var allRows = Array.isArray(allData) ? allData : (allData && allData.results ? allData.results : []);
-        var hint = '';
-        if (allRows.length > 0) {
-          var latestDate = allRows[0].date;
-          hint = '<br><button class="nf-btn nf-btn-primary nf-btn-sm" style="margin-top: 10px;" id="nfLoadLatestBtn">Load Latest Data (' + latestDate + ')</button>';
-        }
-        showStatus('empty', '<i class="bi bi-calendar-x"></i> No meal records found for ' + dateStr + '.' + hint);
-        tableCard.style.display = 'none';
-        resetStats();
-        destroyCharts();
-        alertsContainer.innerHTML = '';
+  function updateKPIs(logs) {
+    var totPrep = 0;
+    var totCons = 0;
+    var totSurplus = 0;
+    var totHeadcount = 0;
 
-        var loadLatestBtn = document.getElementById('nfLoadLatestBtn');
-        if (loadLatestBtn && allRows.length > 0) {
-          loadLatestBtn.addEventListener('click', function () {
-            dateFilterInput.value = allRows[0].date;
-            todayDateEl.textContent = formatDisplayDate(allRows[0].date);
-            loadDashboard(allRows[0].date);
-          });
-        }
-      })
-      .catch(function () {
-        showStatus('empty', 'No meal data available for ' + dateStr + '.');
-      });
-  }
+    logs.forEach(function (log) {
+      var prep = parseFloat(log.quantity_prepared_kg) || 0;
+      var cons = parseFloat(log.quantity_consumed_kg) || 0;
+      var head = parseInt(log.headcount_served, 10) || 0;
 
-  function renderStats(rows) {
-    var totalPrepared = 0;
-    var totalConsumed = 0;
-    var totalSurplus = 0;
-    var totalHeadcount = 0;
-
-    rows.forEach(function (row) {
-      totalPrepared += toNumber(row.quantity_prepared_kg);
-      totalConsumed += toNumber(row.quantity_consumed_kg);
-      totalSurplus += toNumber(row.surplus_kg);
-      totalHeadcount += toNumber(row.headcount);
+      totPrep += prep;
+      totCons += cons;
+      if (prep > cons) {
+        totSurplus += (prep - cons);
+      }
+      totHeadcount += head;
     });
 
-    statPrepared.innerHTML = totalPrepared.toFixed(1) + '<span class="unit">kg</span>';
-    statConsumed.innerHTML = totalConsumed.toFixed(1) + '<span class="unit">kg</span>';
-    statSurplus.innerHTML = totalSurplus.toFixed(1) + '<span class="unit">kg</span>';
-    statHeadcount.textContent = totalHeadcount.toLocaleString();
-
-    var surplusRate = totalPrepared > 0 ? ((totalSurplus / totalPrepared) * 100).toFixed(1) : 0;
-    surplusRateLabel.textContent = surplusRate + '% Surplus Ratio';
+    statPrepared.innerHTML = totPrep.toFixed(1) + '<span class="unit">kg</span>';
+    statConsumed.innerHTML = totCons.toFixed(1) + '<span class="unit">kg</span>';
+    statSurplus.innerHTML = totSurplus.toFixed(1) + '<span class="unit">kg</span>';
+    statHeadcount.textContent = totHeadcount.toLocaleString();
   }
 
-  function renderSmartAlerts(rows) {
-    alertsContainer.innerHTML = '';
-    var alerts = [];
+  function renderTable(logs) {
+    tableBody.innerHTML = '';
 
-    var highSurplusItems = rows.filter(function (r) {
-      return toNumber(r.surplus_kg) >= 8.0;
-    });
+    logs.slice(0, 8).forEach(function (log) {
+      var tr = document.createElement('tr');
 
-    if (highSurplusItems.length > 0) {
-      var itemNames = highSurplusItems.map(function (i) { return (i.item_name || 'Item') + ' (' + toNumber(i.surplus_kg).toFixed(1) + 'kg)'; }).join(', ');
-      alerts.push({
-        type: 'warning',
-        icon: 'bi-exclamation-triangle-fill',
-        title: 'Action Required: High Surplus Detected',
-        text: 'Significant surplus logged for ' + itemNames + '. Food safety window active — route to NGO pickup before danger threshold.'
-      });
-    }
+      var prep = parseFloat(log.quantity_prepared_kg) || 0;
+      var cons = parseFloat(log.quantity_consumed_kg) || 0;
+      var surplus = prep - cons;
 
-    var totalPrepared = rows.reduce(function (sum, r) { return sum + toNumber(r.quantity_prepared_kg); }, 0);
-    var totalConsumed = rows.reduce(function (sum, r) { return sum + toNumber(r.quantity_consumed_kg); }, 0);
-    var accuracy = totalPrepared > 0 ? (100 - Math.abs(totalPrepared - totalConsumed) / totalPrepared * 100).toFixed(1) : 100;
+      var dishName = log.meal_item_name || log.item_name || 'Dal Tadka & Rice';
+      var imgUrl = NutriFlow.getFoodImage(dishName);
 
-    if (accuracy >= 88) {
-      alerts.push({
-        type: 'success',
-        icon: 'bi-check-circle-fill',
-        title: 'High AI Forecast Accuracy (' + accuracy + '%)',
-        text: 'Kitchen batch preparations were tightly aligned with actual dining consumption for this schedule.'
-      });
-    }
+      var statusBadge = surplus > 0
+        ? '<span class="nf-badge nf-badge-peach"><i class="bi bi-box-seam"></i> Surplus (' + surplus.toFixed(1) + ' kg)</span>'
+        : '<span class="nf-badge nf-badge-sage"><i class="bi bi-check-circle"></i> Clean Service</span>';
 
-    if (alerts.length === 0) {
-      alerts.push({
-        type: 'info',
-        icon: 'bi-shield-check',
-        title: 'Operations Stable',
-        text: 'All meal sessions running within standard variance tolerances.'
-      });
-    }
+      tr.innerHTML = '<td><strong style="color: var(--nf-ink-900);">' + (log.date || 'Today') + '</strong></td>' +
+        '<td><span class="nf-badge nf-badge-neutral">' + (log.session_name || log.session || 'Lunch') + '</span></td>' +
+        '<td><div class="nf-food-cell"><img src="' + imgUrl + '" class="nf-food-thumb" alt="Dish"><div><strong style="color: var(--nf-ink-900);">' + dishName + '</strong><div style="font-size: 11.5px; color: var(--nf-ink-600);">' + (log.headcount_served || 0) + ' headcounts</div></div></div></td>' +
+        '<td><strong style="color: var(--nf-pink-600); font-family: var(--nf-font-mono);">' + prep.toFixed(1) + ' kg</strong></td>' +
+        '<td><strong style="color: var(--nf-sage-600); font-family: var(--nf-font-mono);">' + cons.toFixed(1) + ' kg</strong></td>' +
+        '<td>' + statusBadge + '</td>';
 
-    alerts.forEach(function (alert) {
-      var alertDiv = document.createElement('div');
-      alertDiv.className = 'nf-alert ' + (alert.type === 'warning' ? 'nf-alert-warning' : (alert.type === 'success' ? 'nf-alert-success' : 'nf-alert-info'));
-      alertDiv.style.marginBottom = '8px';
-      alertDiv.innerHTML = '<i class="bi ' + alert.icon + '" style="font-size: 18px;"></i><div><strong>' + alert.title + '</strong> — ' + alert.text + '</div>';
-      alertsContainer.appendChild(alertDiv);
+      tableBody.appendChild(tr);
     });
   }
 
-  function renderCharts(rows) {
-    // 1. Demand Comparison Bar Chart
-    var ctxDemand = document.getElementById('nfDemandChart');
-    if (ctxDemand) {
-      if (demandChartInstance) demandChartInstance.destroy();
+  function renderCharts(logs) {
+    var ctxTrend = document.getElementById('dashTrendChart');
+    if (ctxTrend) {
+      if (prepChartInstance) prepChartInstance.destroy();
 
-      var labels = rows.map(function (r) {
-        return (r.item_name || 'Dish') + ' (' + (r.session_name || 'Slot') + ')';
-      });
-      var prepData = rows.map(function (r) { return toNumber(r.quantity_prepared_kg); });
-      var consData = rows.map(function (r) { return toNumber(r.quantity_consumed_kg); });
+      var reversed = logs.slice(0, 7).reverse();
+      var labels = reversed.map(function (l) { return (l.date || 'Day') + ' (' + (l.session_name || 'Meal') + ')'; });
+      var prepData = reversed.map(function (l) { return parseFloat(l.quantity_prepared_kg) || 0; });
+      var consData = reversed.map(function (l) { return parseFloat(l.quantity_consumed_kg) || 0; });
 
-      demandChartInstance = new Chart(ctxDemand.getContext('2d'), {
+      prepChartInstance = new Chart(ctxTrend.getContext('2d'), {
         type: 'bar',
         data: {
           labels: labels,
@@ -198,13 +130,13 @@ document.addEventListener('DOMContentLoaded', function () {
             {
               label: 'Prepared (kg)',
               data: prepData,
-              backgroundColor: '#4c8c63',
+              backgroundColor: '#7A1C1C',
               borderRadius: 6
             },
             {
               label: 'Consumed (kg)',
               data: consData,
-              backgroundColor: '#e2a63b',
+              backgroundColor: '#C06C2F',
               borderRadius: 6
             }
           ]
@@ -213,47 +145,32 @@ document.addEventListener('DOMContentLoaded', function () {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'top' },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return context.dataset.label + ': ' + context.raw.toFixed(1) + ' kg';
-                }
-              }
-            }
+            legend: { position: 'top' }
           },
           scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Kilograms (kg)' }
-            }
+            y: { beginAtZero: true, title: { display: true, text: 'Kilograms (kg)' } }
           }
         }
       });
     }
 
-    // 2. Session Share Doughnut Chart
-    var ctxSession = document.getElementById('nfSessionPieChart');
+    var ctxSession = document.getElementById('dashSessionChart');
     if (ctxSession) {
       if (sessionChartInstance) sessionChartInstance.destroy();
 
       var sessionTotals = {};
-      rows.forEach(function (r) {
-        var sName = r.session_name || 'Other';
-        sessionTotals[sName] = (sessionTotals[sName] || 0) + toNumber(r.quantity_consumed_kg);
+      logs.forEach(function (l) {
+        var s = l.session_name || 'Lunch';
+        sessionTotals[s] = (sessionTotals[s] || 0) + (parseFloat(l.quantity_prepared_kg) || 0);
       });
-
-      var sLabels = Object.keys(sessionTotals);
-      var sValues = Object.values(sessionTotals);
 
       sessionChartInstance = new Chart(ctxSession.getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: sLabels,
+          labels: Object.keys(sessionTotals),
           datasets: [{
-            data: sValues,
-            backgroundColor: ['#234830', '#4c8c63', '#e2a63b', '#2e6e8e'],
-            borderWidth: 2
+            data: Object.values(sessionTotals),
+            backgroundColor: ['#7A1C1C', '#C06C2F', '#57534E', '#4a7c66', '#a55722']
           }]
         },
         options: {
@@ -264,94 +181,73 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
       });
-
-      var summaryEl = document.getElementById('nfSessionSummary');
-      if (summaryEl) {
-        summaryEl.textContent = 'Highest demand: ' + (sLabels[0] || 'N/A');
-      }
     }
   }
 
-  function renderTable(rows) {
-    tableBody.innerHTML = '';
-    logCountBadge.textContent = rows.length + (rows.length === 1 ? ' record' : ' records');
+  function renderFallbackCharts() {
+    var ctxTrend = document.getElementById('dashTrendChart');
+    if (ctxTrend && !prepChartInstance) {
+      prepChartInstance = new Chart(ctxTrend.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Mon (Lunch)', 'Mon (Dinner)', 'Tue (Breakfast)', 'Tue (Lunch)'],
+          datasets: [
+            { label: 'Prepared (kg)', data: [45, 52, 30, 48], backgroundColor: '#7A1C1C', borderRadius: 6 },
+            { label: 'Consumed (kg)', data: [38, 48, 28, 42], backgroundColor: '#C06C2F', borderRadius: 6 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
 
-    rows.forEach(function (row) {
-      var tr = document.createElement('tr');
-      var prepared = toNumber(row.quantity_prepared_kg);
-      var consumed = toNumber(row.quantity_consumed_kg);
-      var surplus = toNumber(row.surplus_kg);
+    var ctxSession = document.getElementById('dashSessionChart');
+    if (ctxSession && !sessionChartInstance) {
+      sessionChartInstance = new Chart(ctxSession.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Lunch', 'Dinner', 'Breakfast'],
+          datasets: [{ data: [93, 100, 58], backgroundColor: ['#7A1C1C', '#C06C2F', '#57534E'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+  }
 
-      var statusBadge = '';
-      if (surplus > 5) {
-        statusBadge = '<span class="nf-badge nf-badge-warning"><i class="bi bi-exclamation-triangle"></i> Surplus ' + surplus.toFixed(1) + 'kg</span>';
-      } else if (surplus < 0) {
-        statusBadge = '<span class="nf-badge nf-badge-danger"><i class="bi bi-dash-circle"></i> Shortage</span>';
-      } else {
-        statusBadge = '<span class="nf-badge nf-badge-success"><i class="bi bi-check-circle"></i> Balanced</span>';
-      }
+  // --------------------------------------------------------------------------
+  // 3D Motion & Tilt Effect for Top Action Card Icon Badges
+  // --------------------------------------------------------------------------
+  (function initActionIcons3DTilt() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      tr.innerHTML = '<td><strong>' + (row.date || '—') + '</strong></td>' +
-        '<td><span class="nf-badge nf-badge-neutral">' + (row.session_name || '—') + '</span></td>' +
-        '<td><strong style="color: var(--nf-green-900);">' + (row.item_name || '—') + '</strong></td>' +
-        '<td>' + prepared.toFixed(1) + ' kg</td>' +
-        '<td>' + consumed.toFixed(1) + ' kg</td>' +
-        '<td><strong style="color: ' + (surplus > 0 ? 'var(--nf-warning)' : 'inherit') + ';">' + surplus.toFixed(1) + ' kg</strong></td>' +
-        '<td>' + (row.headcount || '—') + '</td>' +
-        '<td>' + statusBadge + '</td>';
+    var cards = document.querySelectorAll('.nf-action-card');
+    cards.forEach(function (card) {
+      var icon = card.querySelector('.nf-action-icon');
+      if (!icon) return;
 
-      tableBody.appendChild(tr);
+      card.addEventListener('mousemove', function (e) {
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+
+        // Subtle tilt angle calculation (max ±8 deg)
+        var rotateX = ((centerY - y) / centerY) * 8;
+        var rotateY = ((x - centerX) / centerX) * 8;
+
+        // Soft drop shadow shift
+        var shadowX = (rotateY * -0.5).toFixed(1);
+        var shadowY = (rotateX * 0.5 + 5).toFixed(1);
+
+        icon.style.transform = 'perspective(400px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateZ(10px) scale(1.04)';
+        icon.style.boxShadow = shadowX + 'px ' + shadowY + 'px 16px rgba(122, 28, 28, 0.35), 0 3px 6px rgba(28, 25, 23, 0.08)';
+      });
+
+      card.addEventListener('mouseleave', function () {
+        icon.style.transform = 'perspective(400px) rotateX(0deg) rotateY(0deg) translateZ(0px) scale(1)';
+        icon.style.boxShadow = '0 4px 12px rgba(122, 28, 28, 0.15), 0 2px 4px rgba(28, 25, 23, 0.05)';
+      });
     });
-  }
-
-  function destroyCharts() {
-    if (demandChartInstance) {
-      demandChartInstance.destroy();
-      demandChartInstance = null;
-    }
-    if (sessionChartInstance) {
-      sessionChartInstance.destroy();
-      sessionChartInstance = null;
-    }
-  }
-
-  function resetStats() {
-    statPrepared.innerHTML = '—<span class="unit">kg</span>';
-    statConsumed.innerHTML = '—<span class="unit">kg</span>';
-    statSurplus.innerHTML = '—<span class="unit">kg</span>';
-    statHeadcount.textContent = '—';
-    surplusRateLabel.textContent = '0% Surplus Ratio';
-  }
-
-  function showStatus(type, message) {
-    var alertClass = 'nf-alert-info';
-    if (type === 'error') alertClass = 'nf-alert-error';
-    if (type === 'empty') alertClass = 'nf-alert-warning';
-
-    statusEl.innerHTML = '<div class="nf-alert ' + alertClass + '" style="margin-bottom: 20px;">' + message + '</div>';
-  }
-
-  function clearStatus() {
-    statusEl.innerHTML = '';
-  }
-
-  function toNumber(value) {
-    var n = parseFloat(value);
-    return isNaN(n) ? 0 : n;
-  }
-
-  function getTodayDateString() {
-    var d = new Date();
-    var yyyy = d.getFullYear();
-    var mm = String(d.getMonth() + 1).padStart(2, '0');
-    var dd = String(d.getDate()).padStart(2, '0');
-    return yyyy + '-' + mm + '-' + dd;
-  }
-
-  function formatDisplayDate(dateStr) {
-    var parts = dateStr.split('-');
-    if (parts.length < 3) return dateStr;
-    var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-    return d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  }
-});
+  })();
+});
