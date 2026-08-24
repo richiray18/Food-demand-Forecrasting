@@ -1,8 +1,12 @@
 /* ==========================================================================
    NutriFlow — Design System & Global Stylesheet
    Theme: Deep Maroon (#7A1C1C) & Warm Amber (#C06C2F) on Warm Cream (#FBF9F4)
-   Typography: Fraunces (Serif Display) + Plus Jakarta Sans (Body Sans)
    ========================================================================== */
+
+/* Native Multi-Page View Transition API Support for Chromium MPAs */
+@view-transition {
+  navigation: auto;
+}
 
 :root {
   /* Exact Primary Color Tokens */
@@ -646,20 +650,33 @@ a:hover {
   visibility: visible;
 }
 
+.nf-modal-backdrop.closing {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
 .nf-modal {
   background-color: var(--nf-surface);
   border-radius: var(--nf-radius-xl);
   width: 100%;
   max-width: 540px;
   box-shadow: var(--nf-shadow-lg);
-  transform: scale(0.95);
-  transition: transform 0.2s ease;
+  transform: scale(0.95) translateY(8px);
+  opacity: 0;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
   overflow: hidden;
   border: 1px solid var(--nf-border-teal);
 }
 
 .nf-modal-backdrop.active .nf-modal {
-  transform: scale(1);
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.nf-modal-backdrop.closing .nf-modal {
+  transform: scale(0.95) translateY(6px);
+  opacity: 0;
 }
 
 .nf-modal-header {
@@ -794,5 +811,61 @@ a:hover {
   }
   .nf-content {
     padding: 20px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Page Load Fade-In & Staggered Food Item Card Fade-Up Animations
+   -------------------------------------------------------------------------- */
+
+@keyframes nfPageFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nf-landing-wrapper,
+.nf-content {
+  animation: nfPageFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes nfCardFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#recipAvailableFeed > div {
+  animation: nfCardFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+#recipAvailableFeed > div:nth-child(1)  { animation-delay: 0.08s; }
+#recipAvailableFeed > div:nth-child(2)  { animation-delay: 0.16s; }
+#recipAvailableFeed > div:nth-child(3)  { animation-delay: 0.24s; }
+#recipAvailableFeed > div:nth-child(4)  { animation-delay: 0.32s; }
+#recipAvailableFeed > div:nth-child(5)  { animation-delay: 0.40s; }
+#recipAvailableFeed > div:nth-child(6)  { animation-delay: 0.48s; }
+#recipAvailableFeed > div:nth-child(7)  { animation-delay: 0.56s; }
+#recipAvailableFeed > div:nth-child(8)  { animation-delay: 0.64s; }
+#recipAvailableFeed > div:nth-child(9)  { animation-delay: 0.72s; }
+#recipAvailableFeed > div:nth-child(10) { animation-delay: 0.80s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-landing-wrapper,
+  .nf-content,
+  #recipAvailableFeed > div {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

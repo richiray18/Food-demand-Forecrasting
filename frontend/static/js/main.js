@@ -13,23 +13,23 @@
     'paneer': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=500&q=80',          // Paneer Butter Masala curry bowl
     'dal': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=500&q=80',             // Yellow Dal Tadka
     'rice': 'https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?auto=format&fit=crop&w=500&q=80',            // Steamed White Basmati Rice
-    'roti': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=80',          // Indian Roti / Chapati (Flatbread)
-    'naan': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=80',          // Indian Roti / Chapati (Flatbread)
-    'chapati': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=80',       // Indian Roti / Chapati (Flatbread)
+    'roti': 'https://images.unsplash.com/photo-1617692855027-33b14f061079?auto=format&fit=crop&w=500&q=80',          // Indian Roti / Chapati (Flatbread)
+    'naan': 'https://images.unsplash.com/photo-1617692855027-33b14f061079?auto=format&fit=crop&w=500&q=80',          // Indian Roti / Chapati (Flatbread)
+    'chapati': 'https://images.unsplash.com/photo-1617692855027-33b14f061079?auto=format&fit=crop&w=500&q=80',       // Indian Roti / Chapati (Flatbread)
     'curd': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',            // Fresh Yogurt / Curd bowl
     'yogurt': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',          // Fresh Yogurt / Curd bowl
     'dahi': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',            // Fresh Yogurt / Curd bowl
     'tea': 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80',             // Masala Chai / Tea
     'chai': 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80',            // Masala Chai / Tea
-    'gulab': 'https://images.unsplash.com/photo-1627886403430-b57a16fb4ce3?auto=format&fit=crop&w=500&q=80',           // Gulab Jamun sweet balls in sugar syrup
-    'jamun': 'https://images.unsplash.com/photo-1627886403430-b57a16fb4ce3?auto=format&fit=crop&w=500&q=80',           // Gulab Jamun sweet balls in sugar syrup
+    'gulab': 'https://images.unsplash.com/photo-1605194000384-439c3ced8d15?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',           // Gulab Jamun sweet balls in sugar syrup
+    'jamun': 'https://images.unsplash.com/photo-1605194000384-439c3ced8d15?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',           // Gulab Jamun sweet balls in sugar syrup
     'chicken': 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=500&q=80',         // Indian Chicken Curry / Chicken Hyderabadi
     'hyderabadi': 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=500&q=80',      // Indian Chicken Curry / Chicken Hyderabadi
     'coffee': 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80',          // Hot Brewed Coffee
     'salad': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80',           // Fresh Green Salad bowl
     'sandwich': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80',        // Grilled Cheese Sandwich
     'cheese': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80',          // Grilled Cheese Sandwich
-    'upma': 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=500&q=80',           // Indian Suji Upma garnished with curry leaves
+    'upma': 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=500&q=80',           // South Indian Upma / Breakfast dish
     'biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=500&q=80',        // Dum Biryani
     'chole': 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=500&q=80',         // Chole Bhature
     'thali': 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=500&q=80',         // Indian Thali Feast
@@ -167,6 +167,7 @@
     openModal: function (modalId) {
       var modal = document.getElementById(modalId);
       if (modal) {
+        modal.classList.remove('closing');
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
       }
@@ -175,8 +176,12 @@
     closeModal: function (modalId) {
       var modal = document.getElementById(modalId);
       if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
+        modal.classList.add('closing');
+        setTimeout(function () {
+          modal.classList.remove('active');
+          modal.classList.remove('closing');
+          document.body.style.overflow = '';
+        }, 180);
       }
     },
 
@@ -337,9 +342,42 @@
       logoutBtn.addEventListener('click', function (e) {
         e.preventDefault();
         NutriFlow.clearAuth();
-        window.location.href = '/';
+        var mainContent = document.querySelector('.nf-content') || document.querySelector('.nf-landing-wrapper');
+        if (mainContent) {
+          mainContent.style.transition = 'opacity 180ms ease, transform 180ms ease';
+          mainContent.style.opacity = '0';
+          mainContent.style.transform = 'translateY(-6px)';
+        }
+        setTimeout(function () {
+          window.location.href = '/';
+        }, 180);
       });
     }
+
+    // Handle smooth internal navigation page transitions
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('a[href]');
+      if (!link) return;
+
+      var href = link.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:') || link.target === '_blank' || href.startsWith('data:')) return;
+
+      if (href.startsWith('/') || href.startsWith(window.location.origin)) {
+        var targetPath = href.startsWith('http') ? new URL(href).pathname : href;
+        if (targetPath !== window.location.pathname) {
+          e.preventDefault();
+          var mainContent = document.querySelector('.nf-content') || document.querySelector('.nf-landing-wrapper');
+          if (mainContent) {
+            mainContent.style.transition = 'opacity 180ms ease, transform 180ms ease';
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'translateY(-6px)';
+          }
+          setTimeout(function () {
+            window.location.href = href;
+          }, 180);
+        }
+      }
+    });
   });
 
   window.NutriFlow = NutriFlow;
