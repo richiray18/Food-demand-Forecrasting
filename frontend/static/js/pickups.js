@@ -44,32 +44,37 @@ document.addEventListener('DOMContentLoaded', function () {
   loadPickups();
 
   // Filter & Search listeners
-  statusFilterGroup.addEventListener('click', function (e) {
-    if (e.target.tagName === 'BUTTON') {
-      Array.from(statusFilterGroup.children).forEach(function (b) {
-        b.className = 'nf-btn nf-btn-outline nf-btn-sm';
-      });
-      e.target.className = 'nf-btn nf-btn-primary nf-btn-sm';
-      currentFilter = e.target.getAttribute('data-filter');
-      applyFilters();
-    }
-  });
+  if (statusFilterGroup) {
+    statusFilterGroup.addEventListener('click', function (e) {
+      if (e.target.tagName === 'BUTTON') {
+        Array.from(statusFilterGroup.children).forEach(function (b) {
+          b.className = 'nf-btn nf-btn-outline nf-btn-sm';
+        });
+        e.target.className = 'nf-btn nf-btn-primary nf-btn-sm';
+        currentFilter = e.target.getAttribute('data-filter');
+        applyFilters();
+      }
+    });
+  }
 
-  searchInput.addEventListener('input', applyFilters);
+  if (searchInput) searchInput.addEventListener('input', applyFilters);
 
-  // Form Submissions
-  confirmHandoverForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    submitHandoverConfirmation();
-  });
+  if (confirmHandoverForm) {
+    confirmHandoverForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitHandoverConfirmation();
+    });
+  }
 
-  rejectPickupForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    submitRejection();
-  });
+  if (rejectPickupForm) {
+    rejectPickupForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitRejection();
+    });
+  }
 
   function loadPickups() {
-    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-400); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading pickup logistics records...</div>';
+    listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-600); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading pickup logistics records...</div>';
 
     NutriFlow.apiFetch('/api/pickups/pickups/')
       .then(function (r) { return r.json(); })
@@ -101,14 +106,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    statActive.textContent = activeCount.toString();
-    statCompleted.textContent = completedCount.toString();
-    statRejected.textContent = rejectedCount.toString();
-    statWeight.innerHTML = totalRescuedKg.toFixed(1) + '<span class="unit">kg</span>';
+    if (statActive) statActive.textContent = activeCount.toString();
+    if (statCompleted) statCompleted.textContent = completedCount.toString();
+    if (statRejected) statRejected.textContent = rejectedCount.toString();
+    if (statWeight) statWeight.innerHTML = totalRescuedKg.toFixed(1) + '<span class="unit">kg</span>';
   }
 
   function applyFilters() {
-    var searchVal = (searchInput.value || '').toLowerCase().trim();
+    var searchVal = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
     var filtered = rawPickupsList.filter(function (p) {
       if (currentFilter !== 'all') {
@@ -133,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function renderTable(list) {
     if (list.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--nf-ink-400); padding: 36px;">No pickup dispatches match the selected filter.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="7">' + NutriFlow.createEmptyState('No pickup dispatches scheduled', 'Schedule surplus dispatches from the Recipients tab.', 'bi-truck') + '</td></tr>';
       return;
     }
 
@@ -145,53 +150,44 @@ document.addEventListener('DOMContentLoaded', function () {
       var codeDisplay = p.verification_code
         ? '<span class="nf-badge nf-badge-neutral" style="font-family: var(--nf-font-mono); font-weight: 700; font-size: 11.5px;">CODE: ' + p.verification_code + '</span>'
         : '';
+      var imgUrl = NutriFlow.getFoodImage(p.food_name);
 
-      // Format Scheduled Time
       var timeStr = p.scheduled_time ? formatDateTime(p.scheduled_time) : 'Immediate';
 
-      // Status Badge
       var statusBadge = '';
-      if (p.status === 'COMPLETED') statusBadge = '<span class="nf-badge nf-badge-success"><i class="bi bi-check-circle-fill"></i> Completed</span>';
-      else if (p.status === 'SCHEDULED') statusBadge = '<span class="nf-badge nf-badge-warning"><i class="bi bi-clock"></i> Scheduled</span>';
-      else if (p.status === 'IN_TRANSIT') statusBadge = '<span class="nf-badge nf-badge-info"><i class="bi bi-truck"></i> In Transit</span>';
-      else if (p.status === 'REJECTED_UNSAFE') statusBadge = '<span class="nf-badge nf-badge-danger"><i class="bi bi-shield-x"></i> Rejected Unsafe</span>';
-      else statusBadge = '<span class="nf-badge nf-badge-neutral">' + p.status + '</span>';
+      if (p.status === 'SCHEDULED' || p.status === 'REQUESTED') statusBadge = '<span class="nf-badge nf-badge-peach"><i class="bi bi-clock-history"></i> Scheduled</span>';
+      else if (p.status === 'IN_TRANSIT') statusBadge = '<span class="nf-badge nf-badge-pink"><i class="bi bi-truck"></i> Driver En Route</span>';
+      else if (p.status === 'COMPLETED') statusBadge = '<span class="nf-badge nf-badge-sage"><i class="bi bi-check-circle-fill"></i> Completed</span>';
+      else if (p.status === 'REJECTED_UNSAFE') statusBadge = '<span class="nf-badge nf-badge-danger"><i class="bi bi-shield-x"></i> Rejected (Unsafe)</span>';
+      else statusBadge = '<span class="nf-badge nf-badge-neutral">Cancelled</span>';
 
-      // Safety status
-      var safetyHtml = '';
-      if (p.safety_check_passed === true) {
-        safetyHtml = '<span style="color: var(--nf-success); font-size: 13px; font-weight: 600;"><i class="bi bi-check2"></i> Passed (' + (p.temperature_at_pickup_c ? p.temperature_at_pickup_c + '°C' : 'Verified') + ')</span>';
-      } else if (p.safety_check_passed === false) {
-        safetyHtml = '<span style="color: var(--nf-danger); font-size: 12.5px;"><i class="bi bi-x-circle"></i> ' + (p.rejection_reason || 'Safety Failed') + '</span>';
-      } else {
-        safetyHtml = '<span style="color: var(--nf-ink-400); font-size: 12.5px;">Pending Gate Check</span>';
-      }
+      var safetyBadge = p.pickup_temperature_c !== null
+        ? '<span style="font-family: var(--nf-font-mono); font-size: 12.5px; font-weight: 600;">' + parseFloat(p.pickup_temperature_c).toFixed(1) + '°C</span>'
+        : '<span style="font-size: 12px; color: var(--nf-ink-600);">Pending Probe</span>';
 
-      // Action Buttons
-      var actionsHtml = '<div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">';
       var isPending = (p.status === 'SCHEDULED' || p.status === 'REQUESTED' || p.status === 'IN_TRANSIT');
+      var actionsHtml = '<div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">';
 
       if (isPending) {
-        actionsHtml += '<button class="nf-btn nf-btn-primary nf-btn-sm" onclick="window.NutriFlowPickups.openConfirmModal(\'' + p.id + '\', \'' + encodeURIComponent(p.food_name || 'Batch') + '\', \'' + encodeURIComponent(p.recipient_name || 'Recipient') + '\', \'' + (p.verification_code || '') + '\', \'' + (p.quantity_requested || 10) + '\')" style="font-size: 12px; padding: 4px 10px;">' +
-          '<i class="bi bi-shield-check"></i> Handover' +
+        actionsHtml += '<button class="nf-btn nf-btn-primary nf-btn-sm" onclick="window.NutriFlowPickups.openConfirmModal(\'' + p.id + '\', \'' + encodeURIComponent(p.food_name || 'Food') + '\', \'' + encodeURIComponent(p.recipient_name || 'NGO') + '\', \'' + (p.verification_code || '') + '\', \'' + (p.quantity_requested || 0) + '\')" style="font-size: 12px; padding: 4px 10px;">' +
+          '<i class="bi bi-shield-check"></i> Verify Handover' +
           '</button>';
 
-        actionsHtml += '<button class="nf-btn nf-btn-outline nf-btn-sm" onclick="window.NutriFlowPickups.openRejectModal(\'' + p.id + '\')" style="font-size: 12px; padding: 4px 8px; color: var(--nf-danger); border-color: rgba(196,68,46,0.3);" title="Reject Unsafe Food">' +
-          '<i class="bi bi-x-circle"></i>' +
+        actionsHtml += '<button class="nf-btn nf-btn-outline nf-btn-sm" onclick="window.NutriFlowPickups.openRejectModal(\'' + p.id + '\')" style="font-size: 12px; padding: 4px 8px; color: var(--nf-danger); border-color: rgba(185,56,56,0.3);" title="Reject on Safety Grounds">' +
+          '<i class="bi bi-x-octagon"></i>' +
           '</button>';
-      } else if (p.status === 'COMPLETED') {
-        actionsHtml += '<button class="nf-btn nf-btn-outline nf-btn-sm" onclick="window.location.href=\'/impact/\'" style="font-size: 11.5px; padding: 3px 8px;">' +
-          '<i class="bi bi-heart-pulse"></i> View Impact' +
-          '</button>';
+      } else {
+        actionsHtml += '<span style="font-size: 12px; color: var(--nf-ink-600); font-style: italic;">Log Closed</span>';
       }
+
       actionsHtml += '</div>';
 
-      tr.innerHTML = '<td><strong style="font-family: var(--nf-font-mono);">#' + shortId + '</strong><br>' + codeDisplay + '</td>' +
-        '<td><strong style="color: var(--nf-green-900);">' + (p.recipient_name || 'Recipient Organization') + '</strong></td>' +
-        '<td><strong>' + parseFloat(p.quantity_requested).toFixed(1) + ' kg</strong> of ' + (p.food_name || 'Surplus Dish') + '</td>' +
+      tr.innerHTML = '<td><strong style="font-family: var(--nf-font-mono); font-size: 13px;">#' + shortId + '</strong><br>' + codeDisplay + '</td>' +
+        '<td><strong style="color: var(--nf-ink-900);">' + (p.recipient_name || 'NGO Partner') + '</strong></td>' +
+        '<td><div class="nf-food-cell"><img src="' + imgUrl + '" class="nf-food-thumb" alt="Dish"><div><strong style="color: var(--nf-ink-900);">' + (p.food_name || 'Surplus Dish') + '</strong><div style="font-size: 11.5px; color: var(--nf-ink-600);">' + parseFloat(p.quantity_requested || 0).toFixed(1) + ' kg</div></div></div></td>' +
         '<td><span style="font-size: 13px;">' + timeStr + '</span></td>' +
         '<td>' + statusBadge + '</td>' +
-        '<td>' + safetyHtml + '</td>' +
+        '<td>' + safetyBadge + '</td>' +
         '<td>' + actionsHtml + '</td>';
 
       tableBody.appendChild(tr);
@@ -199,35 +195,38 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function submitHandoverConfirmation() {
-    var pId = confPickupId.value;
-    var tempVal = parseFloat(confTempReading.value);
-    var qtyVal = parseFloat(confQuantityCollected.value);
-    var codeVal = confVerifyCodeInput.value.trim().toUpperCase();
+    var pickupId = confPickupId.value;
+    var tempC = parseFloat(confTempReading.value);
+    var qtyColl = parseFloat(confQuantityCollected.value);
+    var enteredCode = (confVerifyCodeInput.value || '').trim().toUpperCase();
 
-    if (isNaN(tempVal) || isNaN(qtyVal) || qtyVal <= 0 || !codeVal) {
-      NutriFlow.showAlert('warning', 'Please provide temperature reading, collected quantity, and verification code.');
+    if (isNaN(tempC) || isNaN(qtyColl) || qtyColl <= 0) {
+      NutriFlow.showAlert('warning', 'Please enter valid temperature probe reading and collected quantity.');
       return;
     }
 
-    if (expectedVerificationCode && codeVal !== expectedVerificationCode) {
-      NutriFlow.showAlert('error', 'Verification code mismatch! Ensure code matches the driver authorization code.');
+    if (expectedVerificationCode && enteredCode !== expectedVerificationCode.toUpperCase()) {
+      NutriFlow.showAlert('error', 'Security Code Mismatch! Verification code does not match driver dispatch authorization.');
       return;
     }
 
     confSubmitBtn.disabled = true;
-    confSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying Handshake...';
+    confSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Authenticating...';
 
-    NutriFlow.apiFetch('/api/pickups/pickups/' + pId + '/confirm/', {
+    var payload = {
+      pickup_temperature_c: tempC,
+      quantity_collected: qtyColl,
+      verification_code: enteredCode
+    };
+
+    NutriFlow.apiFetch('/api/pickups/pickups/' + pickupId + '/confirm/', {
       method: 'POST',
-      body: {
-        temperature_c: tempVal,
-        quantity_collected: qtyVal
-      }
+      body: payload
     })
       .then(function (res) {
         if (!res.ok) {
           return res.json().then(function (err) {
-            throw new Error(err.detail || (typeof err === 'object' ? Object.values(err).flat().join(' ') : 'Handover verification rejected on safety checks.'));
+            throw new Error(err.detail || 'Handover verification failed');
           });
         }
         return res.json();
@@ -236,37 +235,36 @@ document.addEventListener('DOMContentLoaded', function () {
         confSubmitBtn.disabled = false;
         confSubmitBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Validate & Confirm Handover';
         NutriFlow.closeModal('confirmHandoverModal');
-        NutriFlow.showAlert('success', 'Handover successfully verified and finalized! Impact record automatically logged.');
+        NutriFlow.showAlert('success', 'Food handover verified! ESG impact metrics updated in Sustainability Ledger.');
         loadPickups();
       })
       .catch(function (err) {
         confSubmitBtn.disabled = false;
         confSubmitBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Validate & Confirm Handover';
         NutriFlow.showAlert('error', err.message);
-        loadPickups();
       });
   }
 
   function submitRejection() {
-    var pId = rejPickupId.value;
-    var reasonVal = rejReason.value;
+    var pickupId = rejPickupId.value;
+    var reason = rejReason.value;
 
     rejSubmitBtn.disabled = true;
-    rejSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting Rejection...';
+    rejSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing Rejection...';
 
-    NutriFlow.apiFetch('/api/pickups/pickups/' + pId + '/reject/', {
+    NutriFlow.apiFetch('/api/pickups/pickups/' + pickupId + '/reject/', {
       method: 'POST',
-      body: { reason: reasonVal }
+      body: { rejection_reason: reason }
     })
       .then(function (res) {
-        if (!res.ok) throw new Error('Rejection request failed.');
+        if (!res.ok) throw new Error('Rejection failed with status ' + res.status);
         return res.json();
       })
       .then(function () {
         rejSubmitBtn.disabled = false;
         rejSubmitBtn.innerHTML = '<i class="bi bi-x-octagon"></i> Confirm Rejection';
         NutriFlow.closeModal('rejectPickupModal');
-        NutriFlow.showAlert('info', 'Pickup marked as rejected on safety criteria. Handover intercepted.');
+        NutriFlow.showAlert('info', 'Pickup rejected on safety grounds. Food batch flagged for safety audit.');
         loadPickups();
       })
       .catch(function (err) {
@@ -277,23 +275,22 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function formatDateTime(isoStr) {
+    if (!isoStr) return '—';
     var d = new Date(isoStr);
-    if (isNaN(d.getTime())) return isoStr;
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' at ' +
       d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   }
 
-  // Global bindings
   window.NutriFlowPickups = {
-    openConfirmModal: function (id, foodEnc, recEnc, code, qty) {
+    openConfirmModal: function (id, foodEnc, rcpEnc, code, qtyReq) {
       confPickupId.value = id;
       confFoodTitle.textContent = decodeURIComponent(foodEnc);
-      confRecipientTitle.textContent = decodeURIComponent(recEnc);
-      confCodeDisplay.textContent = 'EXPECTED: ' + code;
-      expectedVerificationCode = code;
-      confQuantityCollected.value = qty;
+      confRecipientTitle.textContent = decodeURIComponent(rcpEnc);
+      expectedVerificationCode = code || '';
+      confCodeDisplay.textContent = code ? ('CODE: ' + code) : 'CODE: —';
+      confQuantityCollected.value = parseFloat(qtyReq) || '';
       confTempReading.value = '62.0';
-      confVerifyCodeInput.value = code; // prefill for easy demo, can be edited
+      confVerifyCodeInput.value = code || '';
       NutriFlow.openModal('confirmHandoverModal');
     },
     openRejectModal: function (id) {

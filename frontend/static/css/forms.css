@@ -1,49 +1,53 @@
 /* ==========================================================================
    NutriFlow — forms.css
-   Specialized form controls, switches, validation feedback, and input groups.
+   Form inputs, toggle switches, and focus states styled for Soft Pastel Pink.
    ========================================================================== */
 
-.nf-form-section {
+.nf-auth-container {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--nf-canvas);
+  padding: 40px 20px;
+}
+
+.nf-auth-card {
+  background-color: var(--nf-surface);
+  border-radius: var(--nf-radius-xl);
+  border: 1px solid var(--nf-border);
+  padding: 40px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--nf-shadow-lg);
+}
+
+.nf-auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 24px;
 }
 
-.nf-form-section-title {
-  font-size: 15px;
+.nf-auth-brand i {
+  font-size: 32px;
+  color: var(--nf-brand-primary);
+}
+
+.nf-auth-brand span {
+  font-family: var(--nf-font-display);
+  font-size: 28px;
   font-weight: 700;
-  color: var(--nf-green-900);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: var(--nf-ink-900);
 }
 
-.nf-input-group {
-  position: relative;
-  display: flex;
-  align-items: stretch;
-  width: 100%;
+.form-check-input:checked {
+  background-color: var(--nf-brand-primary);
+  border-color: var(--nf-brand-primary);
 }
 
-.nf-input-addon {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--nf-ink-400);
-  background: var(--nf-canvas);
-  border: 1px solid var(--nf-border-strong);
-  border-left: none;
-  border-radius: 0 var(--nf-radius-sm) var(--nf-radius-sm) 0;
-}
-
-.nf-switch-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--nf-canvas);
-  border: 1px solid var(--nf-border);
-  border-radius: var(--nf-radius-sm);
-  margin-bottom: 10px;
+.form-check-input:focus {
+  border-color: var(--nf-brand-primary);
+  box-shadow: 0 0 0 0.25rem rgba(122, 28, 28, 0.2);
 }

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability & ESG Impact Dashboard — NutriFlow</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥣</text></svg>">
+    <style>
+        @media print {
+            .nf-sidebar, .nf-topbar, .nf-btn, .esg-filter-bar { display: none !important; }
+            .nf-main { margin-left: 0 !important; }
+            .nf-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nf-layout">
+
+        <aside class="nf-sidebar" id="nfSidebar">
+            <div class="nf-sidebar-brand">
+                <i class="bi bi-cup-hot-fill"></i>
+                <span>NutriFlow</span>
+            </div>
+
+            <nav class="nf-nav"></nav>
+
+            <div class="nf-sidebar-footer">
+                <a href="#" class="nf-nav-link" id="nfLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="nf-main">
+
+            <header class="nf-topbar">
+                <button class="nf-sidebar-toggle" id="nfSidebarToggle" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="nf-page-title">Sustainability & ESG Executive Audit Report</h1>
+
+                <div class="nf-topbar-user">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nfUserDisplay">ESG Lead</span>
+                </div>
+            </header>
+
+            <div class="nf-messages" id="nfMessages"></div>
+
+            <main class="nf-content">
+
+                <!-- Header Banner -->
+                <div style="background: linear-gradient(135deg, #7A1C1C 0%, #2b0808 100%); border-radius: var(--nf-radius-lg); padding: 28px 32px; color: #ffffff; margin-bottom: 24px; box-shadow: var(--nf-shadow-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <span class="nf-badge nf-badge-amber" style="margin-bottom: 8px;"><i class="bi bi-globe-americas"></i> Sustainability & ESG Reporting Console</span>
+                        <h2 style="font-size: 26px; font-weight: 800; margin: 0; color: #ffffff;">Campus Environmental & Financial Impact Summary</h2>
+                        <p style="margin: 6px 0 0; font-size: 14.5px; color: rgba(255, 255, 255, 0.85);">Audit-ready metrics tracking CO₂e landfill avoidance, embedded water savings, and food rescue value.</p>
+                    </div>
+                    <button type="button" class="nf-btn nf-btn-accent" onclick="window.print()">
+                        <i class="bi bi-printer-fill"></i> Export ESG Audit Report (PDF)
+                    </button>
+                </div>
+
+                <!-- Selectable Time Range Bar -->
+                <div class="esg-filter-bar" style="background: var(--nf-surface); border: 1px solid var(--nf-border); border-radius: var(--nf-radius-md); padding: 12px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="font-size: 13.5px; font-weight: 700; color: var(--nf-ink-900); display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-calendar3" style="color: var(--nf-brand-primary);"></i> Aggregation Time Range:
+                    </div>
+                    <div style="display: flex; gap: 8px;" id="esgTimeRangeBtnGroup">
+                        <button type="button" class="nf-btn nf-btn-outline nf-btn-sm active" data-range="week">This Week</button>
+                        <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" data-range="month">This Month</button>
+                        <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" data-range="term">Academic Term</button>
+                        <button type="button" class="nf-btn nf-btn-outline nf-btn-sm" data-range="all">All-Time Cumulative</button>
+                    </div>
+                </div>
+
+                <!-- Reporting-Grade Impact Cards -->
+                <div class="nf-grid" style="margin-bottom: 28px;">
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-brand-primary);">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-currency-rupee"></i> Financial Value Preserved</span>
+                            <div class="nf-stat-icon-badge"><i class="bi bi-cash-stack"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="esgStatCost" style="color: var(--nf-brand-primary);">₹0</span>
+                        <span class="nf-stat-delta up"><i class="bi bi-graph-up-arrow"></i> Raw Ingredient Cost Preserved</span>
+                    </div>
+
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-accent-amber);">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-cloud-arrow-down-fill"></i> CO₂e Avoidance</span>
+                            <div class="nf-stat-icon-badge" style="background: var(--nf-accent-bg); color: var(--nf-accent-amber);"><i class="bi bi-tree-fill"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="esgStatCo2">0.0<span class="unit">kg CO₂e</span></span>
+                        <span class="nf-stat-delta up" id="esgStatTrees">≈ 0 trees equivalent</span>
+                    </div>
+
+                    <div class="nf-stat-card">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-droplet-fill"></i> Embedded Water Saved</span>
+                            <div class="nf-stat-icon-badge"><i class="bi bi-droplet"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="esgStatWater">0<span class="unit">L</span></span>
+                        <span class="nf-stat-delta up"><i class="bi bi-droplet-half"></i> Agricultural Footprint</span>
+                    </div>
+
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-accent-amber);">
+                        <div class="nf-stat-card-header">
+                            <span class="nf-stat-label"><i class="bi bi-heart-fill"></i> Meals Redistributed</span>
+                            <div class="nf-stat-icon-badge"><i class="bi bi-egg-fried"></i></div>
+                        </div>
+                        <span class="nf-stat-value" id="esgStatMeals">0<span class="unit">meals</span></span>
+                        <span class="nf-stat-delta up"><i class="bi bi-people"></i> Delivered to Verified NGO Shelters</span>
+                    </div>
+                </div>
+
+                <!-- Cumulative Impact Trend Section -->
+                <div class="row g-4 style-main-row" style="margin-bottom: 28px;">
+                    <div class="col-lg-8">
+                        <div class="nf-card" style="height: 100%;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-graph-up" style="color: var(--nf-brand-primary);"></i> Cumulative Financial Value Preserved (₹)</h3>
+                                    <div class="nf-card-subtitle">Tracking cumulative financial savings over time</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Audit Grade</span>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 320px;">
+                                <canvas id="esgCumulativeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="nf-card" style="height: 100%;">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-pie-chart" style="color: var(--nf-accent-amber);"></i> Rescue Share by Recipient NGO</h3>
+                                    <div class="nf-card-subtitle">Redistribution share across partner shelters</div>
+                                </div>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 220px;">
+                                <canvas id="esgShareChart"></canvas>
+                            </div>
+                            <div style="font-size: 12px; color: var(--nf-ink-600); text-align: center; margin-top: 14px;">
+                                Fast-routed via verified NGO partner network
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary ESG Trends Row: CO2e Trajectory & Cumulative Meals Rescued Area Chart -->
+                <div class="row g-4 style-main-row" style="margin-bottom: 28px;">
+                    <div class="col-lg-6">
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-cloud-arrow-down-fill" style="color: var(--nf-accent-amber);"></i> CO₂e Avoided Over Time (kg CO₂e)</h3>
+                                    <div class="nf-card-subtitle">Emissions prevented from organic landfill decomposition</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Landfill Mitigation</span>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 260px;">
+                                <canvas id="esgCo2TrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-egg-fried" style="color: var(--nf-brand-primary);"></i> Cumulative Food & Meals Rescued</h3>
+                                    <div class="nf-card-subtitle">Growth trajectory of total kg food & meal units rescued</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Cumulative Rescue</span>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 260px;">
+                                <canvas id="esgCumulativeMealsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exportable Summary Audit Table -->
+                <div class="nf-card">
+                    <div class="nf-card-header">
+                        <div>
+                            <h3 class="nf-card-title"><i class="bi bi-file-earmark-bar-graph"></i> Executive ESG Impact Audit Log</h3>
+                            <div class="nf-card-subtitle">Completed surplus dispatches and environmental offset records</div>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="nf-table">
+                            <thead>
+                                <tr>
+                                    <th>Audit Date</th>
+                                    <th>Recipient NGO Partner</th>
+                                    <th>Rescued Weight</th>
+                                    <th>Financial Value Saved</th>
+                                    <th>CO₂e Avoided</th>
+                                    <th>Water Saved</th>
+                                </tr>
+                            </thead>
+                            <tbody id="esgAuditTbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/dashboard_esg.js"></script>
+
+</body>
+</html>

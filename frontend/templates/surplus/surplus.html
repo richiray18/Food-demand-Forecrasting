@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Surplus Food & HACCP Safety Tracking — NutriFlow</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/surplus.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥣</text></svg>">
 </head>
 <body>
 
@@ -16,7 +22,7 @@
 
         <aside class="nf-sidebar" id="nfSidebar">
             <div class="nf-sidebar-brand">
-                <i class="bi bi-leaf-fill"></i>
+                <i class="bi bi-cup-hot-fill"></i>
                 <span>NutriFlow</span>
             </div>
 
@@ -46,7 +52,7 @@
                     <span>Pickups</span>
                 </a>
                 <a href="/impact/" class="nf-nav-link" data-nav="impact">
-                    <i class="bi bi-heart-pulse-fill"></i>
+                    <i class="bi bi-globe-americas"></i>
                     <span>Impact</span>
                 </a>
             </nav>
@@ -54,7 +60,7 @@
             <div class="nf-sidebar-footer">
                 <a href="#" class="nf-nav-link" id="nfLogoutBtn">
                     <i class="bi bi-box-arrow-right"></i>
-                    <span>Logout</span>
+                    <span>Sign Out</span>
                 </a>
             </div>
         </aside>
@@ -70,7 +76,7 @@
 
                 <div class="nf-topbar-user">
                     <i class="bi bi-person-circle"></i>
-                    <span id="nfUserDisplay">Account</span>
+                    <span id="nfUserDisplay">Staff Account</span>
                 </div>
             </header>
 
@@ -82,11 +88,11 @@
                 <div class="nf-filter-bar">
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                            <span class="nf-badge nf-badge-warning"><i class="bi bi-shield-check"></i> HACCP TCS Control</span>
-                            <span class="nf-badge nf-badge-neutral">Danger Zone 5°C - 60°C Active Check</span>
+                            <span class="nf-badge nf-badge-pink"><i class="bi bi-shield-check"></i> HACCP TCS Safety Control</span>
+                            <span class="nf-badge nf-badge-peach">Danger Zone 5°C - 60°C Active Check</span>
                         </div>
-                        <h2 style="font-size: 22px; margin-bottom: 2px;">Active Surplus & Shelf-Life Redistribution</h2>
-                        <p style="color: var(--nf-ink-400); margin: 0; font-size: 13.5px;">
+                        <h2 style="font-size: 24px; margin-bottom: 2px;">Active Surplus & Shelf-Life Redistribution</h2>
+                        <p style="color: var(--nf-ink-600); margin: 0; font-size: 14px;">
                             Monitors time-temperature safety countdowns and coordinates rapid recipient organization allocation.
                         </p>
                     </div>
@@ -101,27 +107,27 @@
                 <div class="nf-grid" style="margin-bottom: 24px;">
                     <div class="nf-stat-card">
                         <span class="nf-stat-label"><i class="bi bi-box-seam"></i> Available Surplus</span>
-                        <span class="nf-stat-value" id="surplusStatAvailable" style="color: var(--nf-green-600);">0.0<span class="unit">kg</span></span>
-                        <span class="nf-stat-delta up">Ready for Allocation</span>
+                        <span class="nf-stat-value" id="surplusStatAvailable" style="color: var(--nf-pink-600);">0.0<span class="unit">kg</span></span>
+                        <span class="nf-stat-delta up">Ready for NGO Allocation</span>
                     </div>
-                    <div class="nf-stat-card">
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-peach-500);">
                         <span class="nf-stat-label"><i class="bi bi-alarm"></i> Critical Window</span>
-                        <span class="nf-stat-value" id="surplusStatCritical" style="color: var(--nf-danger);">0</span>
+                        <span class="nf-stat-value" id="surplusStatCritical" style="color: var(--nf-peach-700);">0</span>
                         <span class="nf-stat-delta down">&lt; 60 mins remaining</span>
                     </div>
-                    <div class="nf-stat-card">
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-sage-500);">
                         <span class="nf-stat-label"><i class="bi bi-thermometer-half"></i> Temperature Checked</span>
-                        <span class="nf-stat-value" id="surplusStatMonitored">100%</span>
-                        <span class="nf-stat-delta up">HACCP Compliant</span>
+                        <span class="nf-stat-value" id="surplusStatMonitored" style="color: var(--nf-sage-700);">100%</span>
+                        <span class="nf-stat-delta up">HACCP Probed</span>
                     </div>
-                    <div class="nf-stat-card">
+                    <div class="nf-stat-card" style="border-left-color: var(--nf-pink-700);">
                         <span class="nf-stat-label"><i class="bi bi-truck"></i> Reserved / Picked Up</span>
                         <span class="nf-stat-value" id="surplusStatClaimed">0.0<span class="unit">kg</span></span>
                         <span class="nf-stat-delta up">In Redistribution Flow</span>
                     </div>
                 </div>
 
-                <!-- Filter & Status Tabs -->
+                <!-- Filter Toolbar -->
                 <div class="nf-filter-bar" style="margin-bottom: 16px;">
                     <div class="nf-filter-group" id="surplusStatusFilters">
                         <button class="nf-btn nf-btn-primary nf-btn-sm" data-filter="all">All Batches</button>
@@ -131,7 +137,7 @@
                         <button class="nf-btn nf-btn-outline nf-btn-sm" data-filter="EXPIRED">Expired / Discarded</button>
                     </div>
                     <div class="nf-search-input">
-                        <input type="text" id="surplusSearchInput" class="form-control form-control-sm" placeholder="Search food dish or location...">
+                        <input type="text" id="surplusSearchInput" class="form-control form-control-sm" placeholder="Search food dish or location..." style="border-radius: var(--nf-radius-md);">
                     </div>
                 </div>
 
@@ -145,7 +151,7 @@
                                 <tr>
                                     <th>Food Item</th>
                                     <th>Quantity</th>
-                                    <th>Storage & Temperature</th>
+                                    <th>Storage & Temp</th>
                                     <th>HACCP Category</th>
                                     <th>Safe Countdown</th>
                                     <th>Status</th>
@@ -166,7 +172,7 @@
     <div class="nf-modal-backdrop" id="addSurplusModal">
         <div class="nf-modal">
             <div class="nf-modal-header">
-                <h3 class="nf-modal-title"><i class="bi bi-plus-circle" style="color: var(--nf-green-600);"></i> Register Surplus Food Batch</h3>
+                <h3 class="nf-modal-title"><i class="bi bi-plus-circle" style="color: var(--nf-pink-500);"></i> Register Surplus Food Batch</h3>
                 <button type="button" class="nf-modal-close" onclick="NutriFlow.closeModal('addSurplusModal')">&times;</button>
             </div>
             <form id="addSurplusForm">
@@ -235,15 +241,15 @@
     <div class="nf-modal-backdrop" id="logTempModal">
         <div class="nf-modal">
             <div class="nf-modal-header">
-                <h3 class="nf-modal-title"><i class="bi bi-thermometer-half" style="color: var(--nf-amber-600);"></i> Record HACCP Temperature Check</h3>
+                <h3 class="nf-modal-title"><i class="bi bi-thermometer-half" style="color: var(--nf-peach-600);"></i> Record HACCP Temperature Check</h3>
                 <button type="button" class="nf-modal-close" onclick="NutriFlow.closeModal('logTempModal')">&times;</button>
             </div>
             <form id="logTempForm">
                 <div class="nf-modal-body">
                     <input type="hidden" id="tempSurplusId">
                     <div style="margin-bottom: 14px;">
-                        <h4 id="tempFoodTitle" style="font-size: 16px; margin: 0;">Food Item</h4>
-                        <div style="font-size: 13px; color: var(--nf-ink-400);" id="tempLocationTitle">Location</div>
+                        <h4 id="tempFoodTitle" style="font-size: 16px; margin: 0; color: var(--nf-ink-900);">Food Item</h4>
+                        <div style="font-size: 13px; color: var(--nf-ink-600);" id="tempLocationTitle">Location</div>
                     </div>
 
                     <div class="nf-field">
@@ -251,14 +257,14 @@
                         <input type="number" id="tempInputCelsius" step="0.1" placeholder="e.g. 62.4" required autofocus>
                     </div>
 
-                    <div style="background: var(--nf-canvas); padding: 12px; border-radius: var(--nf-radius-sm); font-size: 12.5px; color: var(--nf-ink-600);">
+                    <div style="background: var(--nf-canvas-warm); padding: 12px; border-radius: var(--nf-radius-md); font-size: 12.5px; color: var(--nf-ink-600); border: 1px solid var(--nf-border-pink);">
                         <i class="bi bi-info-circle"></i> Readings between <strong>5°C and 60°C</strong> register danger zone exposure time. Ensure cooked meals remain above 60°C or below 5°C.
                     </div>
                 </div>
                 <div class="nf-modal-footer">
                     <button type="button" class="nf-btn nf-btn-outline" onclick="NutriFlow.closeModal('logTempModal')">Cancel</button>
                     <button type="submit" class="nf-btn nf-btn-primary" id="logTempSubmitBtn">
-                        <i class="bi bi-save"></i> Save Temperature Reading
+                        <i class="bi bi-save"></i> Save Probe Reading
                     </button>
                 </div>
             </form>
@@ -275,7 +281,7 @@
             <form id="discardForm">
                 <div class="nf-modal-body">
                     <input type="hidden" id="discardSurplusId">
-                    <p style="font-size: 14px; color: var(--nf-ink-700);">
+                    <p style="font-size: 14px; color: var(--nf-ink-800);">
                         Are you sure you want to mark this food batch as discarded / spoiled? This action cannot be reversed.
                     </p>
                     <div class="nf-field">

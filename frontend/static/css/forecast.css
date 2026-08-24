@@ -1,21 +1,52 @@
 /* ==========================================================================
    NutriFlow — forecast.css
-   AI Demand Forecasting interface layout, factor chips, and parameter styling.
+   AI Demand Forecasting factor attribution chips and recommendation banner.
    ========================================================================== */
 
 .nf-factor-chip {
-  background: var(--nf-surface);
-  border: 1px solid var(--nf-border);
-  padding: 10px 14px;
-  border-radius: var(--nf-radius-sm);
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--nf-canvas-warm);
+  border: 1px solid var(--nf-border-pink);
+  border-radius: var(--nf-radius-pill);
   font-size: 13px;
-  transition: transform var(--nf-transition);
+  font-weight: 600;
+  color: var(--nf-ink-800);
 }
 
-.nf-factor-chip:hover {
-  transform: translateY(-1px);
-  border-color: var(--nf-green-500);
+.nf-factor-chip.positive {
+  background-color: var(--nf-sage-100);
+  border-color: var(--nf-sage-200);
+  color: var(--nf-sage-900);
+}
+
+.nf-factor-chip.negative {
+  background-color: var(--nf-peach-100);
+  border-color: var(--nf-peach-200);
+  color: var(--nf-peach-900);
+}
+
+.nf-ai-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fde8ec 100%);
+  border: 1px solid var(--nf-pink-200);
+  border-radius: var(--nf-radius-lg);
+  padding: 24px;
+  box-shadow: var(--nf-shadow-md);
+}
+
+.nf-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, var(--nf-pink-500) 0%, var(--nf-pink-600) 100%);
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: var(--nf-radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
 }
