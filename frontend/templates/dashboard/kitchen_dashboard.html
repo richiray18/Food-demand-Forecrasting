@@ -213,6 +213,41 @@
                     </div>
                 </div>
 
+                <!-- Kitchen Prep & Surplus Data Visualizations Row -->
+                <div class="row g-4 style-main-row" style="margin-bottom: 28px;">
+                    <!-- Prepared vs Consumed History -->
+                    <div class="col-lg-7">
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-bar-chart-fill" style="color: var(--nf-brand-primary);"></i> Recent Kitchen Prep vs. Consumed Accuracy (kg)</h3>
+                                    <div class="nf-card-subtitle">Comparing cooked batch weight against actual diner intake</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Recent Logs</span>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 280px;">
+                                <canvas id="kitchPrepVsConsumedChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Surplus Trend -->
+                    <div class="col-lg-5">
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-graph-up-arrow" style="color: var(--nf-accent-amber);"></i> Daily Surplus Generated (kg)</h3>
+                                    <div class="nf-card-subtitle">Tracking daily unconsumed food gap</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Surplus Trend</span>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 280px;">
+                                <canvas id="kitchSurplusTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </main>
 
         </div>

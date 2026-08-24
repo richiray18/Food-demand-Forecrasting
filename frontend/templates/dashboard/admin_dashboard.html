@@ -109,15 +109,15 @@
                 <!-- Main Layout Grid -->
                 <div class="row g-4 style-main-row" style="margin-bottom: 28px;">
 
-                    <!-- Left Column: Procurement Trends & Cross Campus Directory -->
+                    <!-- Left Column: Meal Session Prep Totals & Cross Campus Directory -->
                     <div class="col-lg-7">
                         <div class="nf-card" style="margin-bottom: 24px;">
                             <div class="nf-card-header">
                                 <div>
-                                    <h3 class="nf-card-title"><i class="bi bi-graph-up-arrow" style="color: var(--nf-brand-primary);"></i> Menu Item Intake & Procurement Trends</h3>
-                                    <div class="nf-card-subtitle">Aggregated student consumption patterns per dish</div>
+                                    <h3 class="nf-card-title"><i class="bi bi-bar-chart-steps" style="color: var(--nf-brand-primary);"></i> Meal Session Prep & Intake Totals (kg)</h3>
+                                    <div class="nf-card-subtitle">Comparing food preparation totals across meal sessions</div>
                                 </div>
-                                <span class="nf-badge nf-badge-amber">Cross-Campus Analytics</span>
+                                <span class="nf-badge nf-badge-amber">Session Breakdown</span>
                             </div>
                             <div class="nf-chart-wrapper">
                                 <canvas id="adminTrendChart"></canvas>
@@ -157,8 +157,8 @@
                         <div class="nf-card" style="margin-bottom: 24px; border-top: 4px solid var(--nf-accent-amber);">
                             <div class="nf-card-header">
                                 <div>
-                                    <h3 class="nf-card-title"><i class="bi bi-shield-check" style="color: var(--nf-accent-amber);"></i> HACCP Food Safety Compliance</h3>
-                                    <div class="nf-card-subtitle">Safe vs. Expired / Discarded surplus entries</div>
+                                    <h3 class="nf-card-title"><i class="bi bi-shield-check" style="color: var(--nf-accent-amber);"></i> Surplus Safety & Status Breakdown</h3>
+                                    <div class="nf-card-subtitle">Available, Claimed/Picked Up, Expired & Discarded</div>
                                 </div>
                             </div>
                             <div class="row text-center g-2" style="margin-bottom: 16px;">
@@ -170,7 +170,7 @@
                                 </div>
                                 <div class="col-4">
                                     <div style="background: var(--nf-canvas); padding: 12px; border-radius: var(--nf-radius-md); border: 1px solid var(--nf-border);">
-                                        <div style="font-size: 11px; color: var(--nf-ink-600);">Claimed / Dispatched</div>
+                                        <div style="font-size: 11px; color: var(--nf-ink-600);">Claimed / Picked Up</div>
                                         <div style="font-family: var(--nf-font-display); font-size: 20px; font-weight: 800; color: var(--nf-brand-primary);" id="compStatClaimed">0</div>
                                     </div>
                                 </div>
@@ -191,8 +191,11 @@
                             <div class="nf-card-header">
                                 <div>
                                     <h3 class="nf-card-title"><i class="bi bi-people-fill"></i> NGO Partner Verification Status</h3>
-                                    <div class="nf-card-subtitle">Review organization verification (`is_verified`)</div>
+                                    <div class="nf-card-subtitle">Verified vs. Unverified NGO Partner Breakdown</div>
                                 </div>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 160px; margin-bottom: 16px;">
+                                <canvas id="adminRecipientVerificationChart"></canvas>
                             </div>
                             <div style="overflow-x: auto;">
                                 <table class="nf-table" style="font-size: 13px;">

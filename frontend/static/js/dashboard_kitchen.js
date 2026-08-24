@@ -108,12 +108,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  var kitchPrepChartInstance = null;
+  var kitchSurplusChartInstance = null;
+
   function loadRecentLogs() {
     NutriFlow.apiFetch('/api/v1/meals/consumption-logs/')
       .then(function (res) { return res.json(); })
       .then(function (data) {
         var logs = data.results || data || [];
         renderLogsTableAndStats(logs);
+        renderKitchenCharts(logs);
       })
       .catch(function (err) {
         console.warn('Error loading consumption logs:', err);
@@ -169,6 +173,132 @@ document.addEventListener('DOMContentLoaded', function () {
     if (prepEl) prepEl.innerHTML = totalPrepToday.toFixed(1) + '<span class="unit">kg</span>';
     if (hcEl) hcEl.innerHTML = totalHeadcountToday;
     if (surEl) surEl.innerHTML = totalSurplusToday.toFixed(1) + '<span class="unit">kg</span>';
+  }
+
+  function renderKitchenCharts(logs) {
+    if (!logs || logs.length === 0) return;
+
+    // Group logs by date to compute daily prep, consumed, and surplus
+    var dateMap = {};
+    logs.forEach(function (l) {
+      var d = l.date || 'Today';
+      if (!dateMap[d]) {
+        dateMap[d] = { prep: 0, cons: 0, surplus: 0 };
+      }
+      var p = parseFloat(l.quantity_prepared_kg) || 0;
+      var c = parseFloat(l.quantity_consumed_kg) || 0;
+      dateMap[d].prep += p;
+      dateMap[d].cons += c;
+      dateMap[d].surplus += Math.max(0, p - c);
+    });
+
+    var dates = Object.keys(dateMap).sort().slice(-14);
+    var prepData = dates.map(function (d) { return dateMap[d].prep; });
+    var consData = dates.map(function (d) { return dateMap[d].cons; });
+    var surplusData = dates.map(function (d) { return dateMap[d].surplus; });
+
+    // Chart 1: Prepared vs Consumed (Bar Chart)
+    var ctxPrep = document.getElementById('kitchPrepVsConsumedChart');
+    if (ctxPrep) {
+      if (kitchPrepChartInstance) kitchPrepChartInstance.destroy();
+
+      kitchPrepChartInstance = new Chart(ctxPrep.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Prepared (kg)',
+              data: prepData,
+              backgroundColor: '#7A1C1C',
+              borderRadius: 6,
+              borderSkipped: false
+            },
+            {
+              label: 'Consumed (kg)',
+              data: consData,
+              backgroundColor: '#C06C2F',
+              borderRadius: 6,
+              borderSkipped: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 750, easing: 'easeInOutQuart' },
+          plugins: {
+            legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Plus Jakarta Sans', size: 12 } } },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return ' ' + context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' kg';
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+              title: { display: true, text: 'Kilograms (kg)', font: { family: 'Plus Jakarta Sans', size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Chart 2: Daily Surplus Trend (Line Chart)
+    var ctxSurplus = document.getElementById('kitchSurplusTrendChart');
+    if (ctxSurplus) {
+      if (kitchSurplusChartInstance) kitchSurplusChartInstance.destroy();
+
+      kitchSurplusChartInstance = new Chart(ctxSurplus.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Surplus Generated (kg)',
+              data: surplusData,
+              borderColor: '#C06C2F',
+              backgroundColor: 'rgba(192, 108, 47, 0.12)',
+              fill: true,
+              tension: 0.35,
+              pointBackgroundColor: '#7A1C1C',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 7
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 750, easing: 'easeInOutQuart' },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return ' Surplus Gap: ' + context.parsed.y.toFixed(1) + ' kg';
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+              title: { display: true, text: 'Surplus Gap (kg)', font: { family: 'Plus Jakarta Sans', size: 11 } }
+            }
+          }
+        }
+      });
+    }
   }
 
   function setupQuickLogForm() {

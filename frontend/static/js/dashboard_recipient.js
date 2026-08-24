@@ -132,6 +132,8 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
+  var recipPickupChartInstance = null;
+
   function loadMyPickups(recipientId) {
     var url = '/api/pickups/pickups/';
     if (recipientId) {
@@ -143,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(function (data) {
         var pickups = data.results || data || [];
         renderMyPickupsTable(pickups);
+        renderRecipientPickupChart(pickups);
       })
       .catch(function (err) {
         console.warn('Error loading recipient pickups:', err);
@@ -157,10 +160,43 @@ document.addEventListener('DOMContentLoaded', function () {
     if (claimsCountEl) claimsCountEl.innerHTML = pickups.length + '<span class="unit">total</span>';
 
     var totalKg = 0;
+    var now = new Date();
+    var curMonth = now.getMonth();
+    var curYear = now.getFullYear();
+
+    var thisMonthKg = 0;
+    var lastMonthKg = 0;
+
     pickups.forEach(function (p) {
-      totalKg += parseFloat(p.quantity_collected || p.surplus_food_quantity || 0);
+      var qty = parseFloat(p.quantity_collected || p.quantity_requested || 0);
+      totalKg += qty;
+
+      var pDate = new Date(p.scheduled_time || p.created_at || Date.now());
+      if (pDate.getFullYear() === curYear && pDate.getMonth() === curMonth) {
+        thisMonthKg += qty;
+      } else if (pDate.getFullYear() === curYear && pDate.getMonth() === (curMonth - 1)) {
+        lastMonthKg += qty;
+      }
     });
-    if (rescuedKgEl) rescuedKgEl.innerHTML = totalKg.toFixed(1) + '<span class="unit">kg</span>';
+
+    if (rescuedKgEl) {
+      rescuedKgEl.innerHTML = totalKg.toFixed(1) + '<span class="unit">kg</span>';
+
+      // Update stat card subtitle if real prior-month data exists
+      var rescuedCard = rescuedKgEl.closest('.nf-stat-card');
+      if (rescuedCard) {
+        var deltaEl = rescuedCard.querySelector('.nf-stat-delta');
+        if (deltaEl) {
+          if (lastMonthKg > 0) {
+            var diff = thisMonthKg - lastMonthKg;
+            var sign = diff >= 0 ? '+' : '';
+            deltaEl.innerHTML = '<i class="bi bi-graph-up-arrow"></i> ' + sign + diff.toFixed(1) + ' kg vs last month (' + lastMonthKg.toFixed(1) + 'kg)';
+          } else {
+            deltaEl.innerHTML = '<i class="bi bi-heart"></i> Total Food Rescued';
+          }
+        }
+      }
+    }
 
     if (!tbody) return;
 
@@ -175,17 +211,81 @@ document.addEventListener('DOMContentLoaded', function () {
       if (p.status === 'COMPLETED') stBadge = '<span class="nf-badge nf-badge-amber" style="background:#22c55e; color:#fff;"><i class="bi bi-check-circle-fill"></i> COMPLETED</span>';
       else if (p.status === 'CONFIRMED' || p.status === 'CLAIMED') stBadge = '<span class="nf-badge nf-badge-amber"><i class="bi bi-clock-history"></i> SCHEDULED</span>';
 
+      var fName = p.food_name || p.surplus_food_name || 'Surplus Batch';
+
       html += '<tr>' +
-                '<td><code>' + p.id.substring(0, 8) + '...</code></td>' +
-                '<td><strong>' + (p.surplus_food_name || 'Surplus Batch') + '</strong></td>' +
-                '<td>' + new Date(p.scheduled_time).toLocaleString() + '</td>' +
-                '<td>' + (p.quantity_collected || p.surplus_food_quantity || '10') + ' kg</td>' +
+                '<td><code>' + (p.id ? p.id.substring(0, 8) + '...' : '#') + '</code></td>' +
+                '<td><strong>' + fName + '</strong></td>' +
+                '<td>' + new Date(p.scheduled_time || Date.now()).toLocaleString() + '</td>' +
+                '<td>' + (parseFloat(p.quantity_collected || p.quantity_requested || 0)).toFixed(1) + ' kg</td>' +
                 '<td>' + (p.pickup_location || 'Campus Canteen') + '</td>' +
                 '<td>' + stBadge + '</td>' +
               '</tr>';
     });
 
     tbody.innerHTML = html;
+  }
+
+  function renderRecipientPickupChart(pickups) {
+    var ctx = document.getElementById('recipPickupHistoryChart');
+    if (!ctx) return;
+
+    if (recipPickupChartInstance) recipPickupChartInstance.destroy();
+
+    if (!pickups || pickups.length === 0) {
+      return;
+    }
+
+    var sorted = pickups.slice().sort(function (a, b) {
+      return new Date(a.scheduled_time || a.created_at) - new Date(b.scheduled_time || b.created_at);
+    });
+
+    var labels = sorted.map(function (p, idx) {
+      var d = new Date(p.scheduled_time || p.created_at);
+      var fName = p.food_name || p.surplus_food_name || ('Pickup ' + (idx + 1));
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' (' + fName.substring(0, 15) + ')';
+    });
+
+    var dataValues = sorted.map(function (p) {
+      return parseFloat(p.quantity_collected || p.quantity_requested || 0);
+    });
+
+    recipPickupChartInstance = new Chart(ctx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Quantity Collected (kg)',
+          data: dataValues,
+          backgroundColor: '#7A1C1C',
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 750, easing: 'easeInOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return ' Rescued: ' + context.parsed.y.toFixed(1) + ' kg';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+            title: { display: true, text: 'Quantity (kg)', font: { family: 'Plus Jakarta Sans', size: 11 } }
+          }
+        }
+      }
+    });
   }
 
   window.openClaimModal = function (surplusId, foodName, qty, unit, location) {

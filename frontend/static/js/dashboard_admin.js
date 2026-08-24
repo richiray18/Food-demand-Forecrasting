@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var complianceChartInstance = null;
   var trendChartInstance = null;
+  var verificationChartInstance = null;
 
   initAdminDashboard();
 
@@ -57,12 +58,14 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(function (data) {
         var items = data.results || data || [];
         var availableCount = 0;
-        var claimedCount = 0;
+        var reservedCount = 0;
+        var pickedUpCount = 0;
         var expiredCount = 0;
 
         items.forEach(function (it) {
           if (it.status === 'AVAILABLE') availableCount++;
-          else if (it.status === 'CLAIMED' || it.status === 'COMPLETED') claimedCount++;
+          else if (it.status === 'RESERVED') reservedCount++;
+          else if (it.status === 'PICKED_UP' || it.status === 'COMPLETED' || it.status === 'CLAIMED') pickedUpCount++;
           else if (it.status === 'EXPIRED' || it.status === 'DISCARDED') expiredCount++;
         });
 
@@ -70,42 +73,57 @@ document.addEventListener('DOMContentLoaded', function () {
         var claimEl = document.getElementById('compStatClaimed');
         var expEl = document.getElementById('compStatExpired');
 
+        var claimedTotal = reservedCount + pickedUpCount;
+
         if (availEl) availEl.textContent = availableCount;
-        if (claimEl) claimEl.textContent = claimedCount;
+        if (claimEl) claimEl.textContent = claimedTotal;
         if (expEl) expEl.textContent = expiredCount;
 
-        var total = availableCount + claimedCount + expiredCount;
-        var compRate = total > 0 ? (((availableCount + claimedCount) / total) * 100).toFixed(1) : 98.5;
+        var total = availableCount + claimedTotal + expiredCount;
+        var compRate = total > 0 ? (((availableCount + claimedTotal) / total) * 100).toFixed(1) : 100.0;
         var compRateEl = document.getElementById('adminStatCompliance');
         if (compRateEl) compRateEl.innerHTML = compRate + '<span class="unit">%</span>';
 
-        renderComplianceChart(availableCount, claimedCount, expiredCount);
+        renderComplianceChart(availableCount, reservedCount, pickedUpCount, expiredCount);
       })
       .catch(function (err) {
         console.warn('Error loading surplus compliance:', err);
       });
   }
 
-  function renderComplianceChart(avail, claimed, expired) {
+  function renderComplianceChart(avail, reserved, pickedUp, expired) {
     var ctx = document.getElementById('adminComplianceChart');
     if (!ctx) return;
 
     if (complianceChartInstance) complianceChartInstance.destroy();
 
+    var hasData = (avail + reserved + pickedUp + expired) > 0;
+    var dataValues = hasData ? [avail, reserved, pickedUp, expired] : [0, 0, 0, 0];
+
     complianceChartInstance = new Chart(ctx.getContext('2d'), {
       type: 'doughnut',
       data: {
-        labels: ['Available Safe', 'Claimed / Rescued', 'Expired / Discarded'],
+        labels: ['Available Safe', 'Reserved', 'Picked Up', 'Expired / Discarded'],
         datasets: [{
-          data: [avail || 5, claimed || 12, expired || 1],
-          backgroundColor: ['#22c55e', '#7A1C1C', '#991b1b']
+          data: dataValues,
+          backgroundColor: ['#4A7C66', '#D97706', '#7A1C1C', '#DC2626'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 750, easing: 'easeInOutQuart' },
         plugins: {
-          legend: { position: 'bottom' }
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Plus Jakarta Sans', size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return ' ' + context.label + ': ' + context.parsed + ' items';
+              }
+            }
+          }
         }
       }
     });
@@ -123,10 +141,14 @@ document.addEventListener('DOMContentLoaded', function () {
           if (r.is_verified) verifiedCount++;
         });
 
+        var unverifiedCount = totalCount - verifiedCount;
+
         var ngosEl = document.getElementById('adminStatNGOs');
         var subEl = document.getElementById('adminStatVerifiedSub');
         if (ngosEl) ngosEl.textContent = totalCount;
         if (subEl) subEl.innerHTML = '<i class="bi bi-check2-all"></i> ' + verifiedCount + ' Verified';
+
+        renderRecipientVerificationChart(verifiedCount, unverifiedCount);
 
         var tbody = document.getElementById('adminRecipientsTbody');
         if (!tbody) return;
@@ -156,12 +178,47 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
+  function renderRecipientVerificationChart(verified, unverified) {
+    var ctx = document.getElementById('adminRecipientVerificationChart');
+    if (!ctx) return;
+
+    if (verificationChartInstance) verificationChartInstance.destroy();
+
+    verificationChartInstance = new Chart(ctx.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Verified Partners', 'Pending / Unverified'],
+        datasets: [{
+          data: [verified, unverified],
+          backgroundColor: ['#4A7C66', '#C06C2F'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 750, easing: 'easeInOutQuart' },
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Plus Jakarta Sans', size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return ' ' + context.label + ': ' + context.parsed + ' orgs';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
   function loadImpactSummary() {
     NutriFlow.apiFetch('/api/impact/summary/')
       .then(function (res) { return res.json(); })
       .then(function (data) {
         var budgetEl = document.getElementById('adminStatBudget');
-        if (budgetEl) budgetEl.textContent = NutriFlow.formatCurrency(data.estimated_savings || 615870);
+        if (budgetEl) budgetEl.textContent = NutriFlow.formatCurrency(data.estimated_savings || 0);
       })
       .catch(function (err) {
         console.warn('Error loading impact summary:', err);
@@ -172,34 +229,79 @@ document.addEventListener('DOMContentLoaded', function () {
     var ctx = document.getElementById('adminTrendChart');
     if (!ctx) return;
 
-    if (trendChartInstance) trendChartInstance.destroy();
+    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var logs = data.results || data || [];
+        var sessionMap = {};
 
-    trendChartInstance = new Chart(ctx.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: ['Paneer Butter Masala', 'Dal Tadka', 'Steamed Rice', 'Tandoori Roti', 'Upma'],
-        datasets: [
-          {
-            label: 'Prepared (kg)',
-            data: [120, 95, 140, 80, 50],
-            backgroundColor: '#7A1C1C',
-            borderRadius: 6
-          },
-          {
-            label: 'Consumed (kg)',
-            data: [112, 88, 132, 75, 46],
-            backgroundColor: '#C06C2F',
-            borderRadius: 6
+        logs.forEach(function (l) {
+          var sName = l.session_name || 'Session ' + l.session;
+          if (!sessionMap[sName]) {
+            sessionMap[sName] = { prep: 0, cons: 0 };
           }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'Kilograms (kg)' } }
+          sessionMap[sName].prep += parseFloat(l.quantity_prepared_kg) || 0;
+          sessionMap[sName].cons += parseFloat(l.quantity_consumed_kg) || 0;
+        });
+
+        var sessions = Object.keys(sessionMap);
+        if (sessions.length === 0) {
+          sessions = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
         }
-      }
-    });
+
+        var prepData = sessions.map(function (s) { return sessionMap[s] ? sessionMap[s].prep : 0; });
+        var consData = sessions.map(function (s) { return sessionMap[s] ? sessionMap[s].cons : 0; });
+
+        if (trendChartInstance) trendChartInstance.destroy();
+
+        trendChartInstance = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: sessions,
+            datasets: [
+              {
+                label: 'Total Prepared (kg)',
+                data: prepData,
+                backgroundColor: '#7A1C1C',
+                borderRadius: 6,
+                borderSkipped: false
+              },
+              {
+                label: 'Total Consumed (kg)',
+                data: consData,
+                backgroundColor: '#C06C2F',
+                borderRadius: 6,
+                borderSkipped: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 750, easing: 'easeInOutQuart' },
+            plugins: {
+              legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Plus Jakarta Sans', size: 12 } } },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return ' ' + context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' kg';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { grid: { display: false } },
+              y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                title: { display: true, text: 'Kilograms (kg)', font: { family: 'Plus Jakarta Sans', size: 11 } }
+              }
+            }
+          }
+        });
+      })
+      .catch(function (err) {
+        console.warn('Error loading consumption trends for admin dashboard:', err);
+      });
   }
 });

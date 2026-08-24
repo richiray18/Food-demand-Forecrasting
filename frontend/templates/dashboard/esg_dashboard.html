@@ -132,8 +132,8 @@
                         <div class="nf-card" style="height: 100%;">
                             <div class="nf-card-header">
                                 <div>
-                                    <h3 class="nf-card-title"><i class="bi bi-graph-up" style="color: var(--nf-brand-primary);"></i> Cumulative ESG Value & Savings Trajectory</h3>
-                                    <div class="nf-card-subtitle">Tracking financial value and CO₂e avoidance over time</div>
+                                    <h3 class="nf-card-title"><i class="bi bi-graph-up" style="color: var(--nf-brand-primary);"></i> Cumulative Financial Value Preserved (₹)</h3>
+                                    <div class="nf-card-subtitle">Tracking cumulative financial savings over time</div>
                                 </div>
                                 <span class="nf-badge nf-badge-amber">Audit Grade</span>
                             </div>
@@ -147,7 +147,7 @@
                         <div class="nf-card" style="height: 100%;">
                             <div class="nf-card-header">
                                 <div>
-                                    <h3 class="nf-card-title"><i class="bi bi-pie-chart"></i> Impact Distribution</h3>
+                                    <h3 class="nf-card-title"><i class="bi bi-pie-chart" style="color: var(--nf-accent-amber);"></i> Rescue Share by Recipient NGO</h3>
                                     <div class="nf-card-subtitle">Redistribution share across partner shelters</div>
                                 </div>
                             </div>
@@ -155,7 +155,40 @@
                                 <canvas id="esgShareChart"></canvas>
                             </div>
                             <div style="font-size: 12px; color: var(--nf-ink-600); text-align: center; margin-top: 14px;">
-                                100% of safe surplus fast-routed via verified NGO network
+                                Fast-routed via verified NGO partner network
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary ESG Trends Row: CO2e Trajectory & Cumulative Meals Rescued Area Chart -->
+                <div class="row g-4 style-main-row" style="margin-bottom: 28px;">
+                    <div class="col-lg-6">
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-cloud-arrow-down-fill" style="color: var(--nf-accent-amber);"></i> CO₂e Avoided Over Time (kg CO₂e)</h3>
+                                    <div class="nf-card-subtitle">Emissions prevented from organic landfill decomposition</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Landfill Mitigation</span>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 260px;">
+                                <canvas id="esgCo2TrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="nf-card">
+                            <div class="nf-card-header">
+                                <div>
+                                    <h3 class="nf-card-title"><i class="bi bi-egg-fried" style="color: var(--nf-brand-primary);"></i> Cumulative Food & Meals Rescued</h3>
+                                    <div class="nf-card-subtitle">Growth trajectory of total kg food & meal units rescued</div>
+                                </div>
+                                <span class="nf-badge nf-badge-amber">Cumulative Rescue</span>
+                            </div>
+                            <div class="nf-chart-wrapper" style="height: 260px;">
+                                <canvas id="esgCumulativeMealsChart"></canvas>
                             </div>
                         </div>
                     </div>

@@ -10,20 +10,30 @@
 
   // Authentic Indian Food Photography Unsplash Collection Mapping
   var INDIAN_FOOD_IMAGES = {
-    'paneer': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=400&q=80', // Paneer Butter Masala
-    'dal': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80',    // Yellow Dal Tadka
-    'rice': 'https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?auto=format&fit=crop&w=400&q=80',   // Basmati Steamed Rice
-    'roti': 'https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=400&q=80',   // Tandoori Roti / Naan
-    'upma': 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=400&q=80',   // South Indian Upma / Idli
-    'curd': 'https://images.unsplash.com/photo-1571217697479-7108990c7499?auto=format&fit=crop&w=400&q=80',   // Fresh Yogurt / Curd
-    'gulab': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=400&q=80',  // Gulab Jamun
-    'jamun': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=400&q=80',  // Gulab Jamun
-    'biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&q=80',// Dum Biryani
-    'thali': 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=400&q=80',  // Indian Thali Feast
-    'chole': 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=400&q=80',  // Chole Bhature
-    'curry': 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=400&q=80',  // Indian Curry
-    'sabzi': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=400&q=80',  // Mix Veg Sabzi
-    'default': 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=400&q=80' // Default Indian Meal
+    'paneer': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=500&q=80',          // Paneer Butter Masala curry bowl
+    'dal': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=500&q=80',             // Yellow Dal Tadka
+    'rice': 'https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?auto=format&fit=crop&w=500&q=80',            // Steamed White Basmati Rice
+    'roti': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=80',          // Indian Roti / Chapati (Flatbread)
+    'naan': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=80',          // Indian Roti / Chapati (Flatbread)
+    'chapati': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=80',       // Indian Roti / Chapati (Flatbread)
+    'curd': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',            // Fresh Yogurt / Curd bowl
+    'yogurt': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',          // Fresh Yogurt / Curd bowl
+    'dahi': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',            // Fresh Yogurt / Curd bowl
+    'tea': 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80',             // Masala Chai / Tea
+    'chai': 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80',            // Masala Chai / Tea
+    'gulab': 'https://images.unsplash.com/photo-1627886403430-b57a16fb4ce3?auto=format&fit=crop&w=500&q=80',           // Gulab Jamun sweet balls in sugar syrup
+    'jamun': 'https://images.unsplash.com/photo-1627886403430-b57a16fb4ce3?auto=format&fit=crop&w=500&q=80',           // Gulab Jamun sweet balls in sugar syrup
+    'chicken': 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=500&q=80',         // Indian Chicken Curry / Chicken Hyderabadi
+    'hyderabadi': 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=500&q=80',      // Indian Chicken Curry / Chicken Hyderabadi
+    'coffee': 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80',          // Hot Brewed Coffee
+    'salad': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80',           // Fresh Green Salad bowl
+    'sandwich': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80',        // Grilled Cheese Sandwich
+    'cheese': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80',          // Grilled Cheese Sandwich
+    'upma': 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=500&q=80',           // Indian Suji Upma garnished with curry leaves
+    'biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=500&q=80',        // Dum Biryani
+    'chole': 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=500&q=80',         // Chole Bhature
+    'thali': 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=500&q=80',         // Indian Thali Feast
+    'default': 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=500&q=80'        // Default Indian Meal
   };
 
   function getCsrfToken() {
@@ -176,14 +186,32 @@
     },
 
     getFoodImage: function (itemName) {
-      if (!itemName) return INDIAN_FOOD_IMAGES['default'];
-      var lower = itemName.toLowerCase();
+      if (!itemName || typeof itemName !== 'string') return INDIAN_FOOD_IMAGES['default'];
+      var lower = itemName.toLowerCase().trim();
 
+      // Specific multi-word or compound term checks first
+      if (lower.includes('gulab') || lower.includes('jamun')) return INDIAN_FOOD_IMAGES['gulab'];
+      if (lower.includes('paneer')) return INDIAN_FOOD_IMAGES['paneer'];
+      if (lower.includes('chicken') || lower.includes('hyderabadi')) return INDIAN_FOOD_IMAGES['chicken'];
+      if (lower.includes('sandwich') || lower.includes('cheese')) return INDIAN_FOOD_IMAGES['sandwich'];
+      if (lower.includes('salad')) return INDIAN_FOOD_IMAGES['salad'];
+      if (lower.includes('dal') || lower.includes('lentil')) return INDIAN_FOOD_IMAGES['dal'];
+      if (lower.includes('rice') || lower.includes('pulao')) return INDIAN_FOOD_IMAGES['rice'];
+      if (lower.includes('roti') || lower.includes('naan') || lower.includes('chapati') || lower.includes('paratha')) return INDIAN_FOOD_IMAGES['roti'];
+      if (lower.includes('curd') || lower.includes('yogurt') || lower.includes('dahi')) return INDIAN_FOOD_IMAGES['curd'];
+      if (lower.includes('tea') || lower.includes('chai')) return INDIAN_FOOD_IMAGES['tea'];
+      if (lower.includes('coffee')) return INDIAN_FOOD_IMAGES['coffee'];
+      if (lower.includes('upma') || lower.includes('idli') || lower.includes('dosa')) return INDIAN_FOOD_IMAGES['upma'];
+      if (lower.includes('biryani')) return INDIAN_FOOD_IMAGES['biryani'];
+      if (lower.includes('chole') || lower.includes('chana')) return INDIAN_FOOD_IMAGES['chole'];
+
+      // Keyword iteration fallback
       for (var key in INDIAN_FOOD_IMAGES) {
         if (key !== 'default' && lower.includes(key)) {
           return INDIAN_FOOD_IMAGES[key];
         }
       }
+
       return INDIAN_FOOD_IMAGES['default'];
     },
 
