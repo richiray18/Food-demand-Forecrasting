@@ -35,6 +35,22 @@ def dashboard_view(request):
     return render(request, "dashboard/dashboard.html")
 
 
+def kitchen_dashboard_view(request):
+    return render(request, "dashboard/kitchen_dashboard.html")
+
+
+def admin_dashboard_view(request):
+    return render(request, "dashboard/admin_dashboard.html")
+
+
+def recipient_dashboard_view(request):
+    return render(request, "dashboard/recipient_dashboard.html")
+
+
+def esg_dashboard_view(request):
+    return render(request, "dashboard/esg_dashboard.html")
+
+
 def forecast_view(request):
     return render(request, "forecast/forecast.html")
 

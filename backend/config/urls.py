@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 from . import views
 
 urlpatterns = [
@@ -31,9 +32,17 @@ urlpatterns = [
     path("api/v1/config/", include("config.urls_api")),
     path("api/forecasting/", include("forecasting.urls")),
     path("api-auth/", include("rest_framework.urls")),
-        # Frontend Web Routes
+
+    # Frontend Web Routes
     path('', views.login_view, name='login'),
+    path('landing/', TemplateView.as_view(template_name='landing/landing.html'), name='landing'),
+    path('login/', views.login_view, name='login_page'),
+    path('register/', TemplateView.as_view(template_name='accounts/register.html'), name='register'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/kitchen/', views.kitchen_dashboard_view, name='dashboard_kitchen'),
+    path('dashboard/admin/', views.admin_dashboard_view, name='dashboard_admin'),
+    path('dashboard/recipient/', views.recipient_dashboard_view, name='dashboard_recipient'),
+    path('dashboard/esg/', views.esg_dashboard_view, name='dashboard_esg'),
     path('forecast/', views.forecast_view, name='forecast'),
     path('preparation/', views.preparation_view, name='preparation'),
     path('surplus/', views.surplus_view, name='surplus'),
