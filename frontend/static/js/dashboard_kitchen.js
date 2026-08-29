@@ -112,6 +112,22 @@ document.addEventListener('DOMContentLoaded', function () {
   var kitchSurplusChartInstance = null;
 
   function loadRecentLogs() {
+    // Fetch aggregated summary for today's KPI metrics
+    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/summary/')
+      .then(function (res) { return res.json(); })
+      .then(function (summary) {
+        var prepEl = document.getElementById('kitchStatPrepared');
+        var hcEl = document.getElementById('kitchStatHeadcount');
+        var surEl = document.getElementById('kitchStatSurplus');
+
+        if (prepEl) prepEl.innerHTML = (parseFloat(summary.prepared_today) || 0).toFixed(1) + '<span class="unit">kg</span>';
+        if (hcEl) hcEl.innerHTML = (parseInt(summary.headcount_served, 10) || 0).toLocaleString();
+        if (surEl) surEl.innerHTML = (parseFloat(summary.surplus_generated) || 0).toFixed(1) + '<span class="unit">kg</span>';
+      })
+      .catch(function (err) {
+        console.warn('Error loading summary stats:', err);
+      });
+
     NutriFlow.apiFetch('/api/v1/meals/consumption-logs/')
       .then(function (res) { return res.json(); })
       .then(function (data) {
@@ -126,10 +142,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function renderLogsTableAndStats(logs) {
     var tbody = document.getElementById('kitchRecentLogsTbody');
-    var totalPrepToday = 0;
-    var totalHeadcountToday = 0;
-    var totalSurplusToday = 0;
-
     if (!tbody) return;
 
     if (logs.length === 0) {
@@ -141,14 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
     logs.slice(0, 8).forEach(function (log) {
       var prep = parseFloat(log.quantity_prepared_kg) || 0;
       var cons = parseFloat(log.quantity_consumed_kg) || 0;
-      var hc = parseInt(log.headcount) || 0;
       var surplus = Math.max(0, prep - cons);
-
-      if (log.date === todayStr) {
-        totalPrepToday += prep;
-        totalHeadcountToday += hc;
-        totalSurplusToday += surplus;
-      }
 
       var sName = log.session_name || sessionsMap[log.session] || 'Session ' + log.session;
       var iName = log.item_name || itemsMap[log.item] || 'Item ' + log.item;
@@ -164,15 +169,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     tbody.innerHTML = html;
-
-    // Update KPI card numbers
-    var prepEl = document.getElementById('kitchStatPrepared');
-    var hcEl = document.getElementById('kitchStatHeadcount');
-    var surEl = document.getElementById('kitchStatSurplus');
-
-    if (prepEl) prepEl.innerHTML = totalPrepToday.toFixed(1) + '<span class="unit">kg</span>';
-    if (hcEl) hcEl.innerHTML = totalHeadcountToday;
-    if (surEl) surEl.innerHTML = totalSurplusToday.toFixed(1) + '<span class="unit">kg</span>';
   }
 
   function renderKitchenCharts(logs) {
