@@ -37,6 +37,17 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadDashboardData() {
     listStatus.innerHTML = '<div style="padding: 16px 20px; color: var(--nf-ink-600); font-size: 13.5px;"><i class="bi bi-hourglass-split"></i> Loading dining operational logs...</div>';
 
+    NutriFlow.apiFetch('/api/v1/meals/consumption-logs/summary/')
+      .then(function (r) { return r.json(); })
+      .then(function (summary) {
+        if (statPrepared) statPrepared.innerHTML = (parseFloat(summary.prepared_today) || 0).toFixed(1) + '<span class="unit">kg</span>';
+        if (statSurplus) statSurplus.innerHTML = (parseFloat(summary.surplus_generated) || 0).toFixed(1) + '<span class="unit">kg</span>';
+        if (statHeadcount) statHeadcount.textContent = (parseInt(summary.headcount_served, 10) || 0).toLocaleString();
+      })
+      .catch(function (err) {
+        console.error('Error fetching summary stats:', err);
+      });
+
     NutriFlow.apiFetch('/api/v1/meals/consumption-logs/')
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -68,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
     logs.forEach(function (log) {
       var prep = parseFloat(log.quantity_prepared_kg) || 0;
       var cons = parseFloat(log.quantity_consumed_kg) || 0;
-      var head = parseInt(log.headcount_served, 10) || 0;
+      var head = parseInt(log.headcount || log.headcount_served, 10) || 0;
 
       totPrep += prep;
       totCons += cons;
@@ -78,10 +89,10 @@ document.addEventListener('DOMContentLoaded', function () {
       totHeadcount += head;
     });
 
-    statPrepared.innerHTML = totPrep.toFixed(1) + '<span class="unit">kg</span>';
-    statConsumed.innerHTML = totCons.toFixed(1) + '<span class="unit">kg</span>';
-    statSurplus.innerHTML = totSurplus.toFixed(1) + '<span class="unit">kg</span>';
-    statHeadcount.textContent = totHeadcount.toLocaleString();
+    if (statPrepared) statPrepared.innerHTML = totPrep.toFixed(1) + '<span class="unit">kg</span>';
+    if (statConsumed) statConsumed.innerHTML = totCons.toFixed(1) + '<span class="unit">kg</span>';
+    if (statSurplus) statSurplus.innerHTML = totSurplus.toFixed(1) + '<span class="unit">kg</span>';
+    if (statHeadcount) statHeadcount.textContent = totHeadcount.toLocaleString();
   }
 
   function renderTable(logs) {
