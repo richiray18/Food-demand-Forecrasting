@@ -137,7 +137,120 @@
       });
     },
 
+    parseApiError: function (responseOrData, defaultMsg) {
+      defaultMsg = defaultMsg || 'An error occurred while processing your request.';
+      if (responseOrData && typeof responseOrData.json === 'function') {
+        return responseOrData.json()
+          .then(function (data) {
+            return NutriFlow.formatErrorMessage(data, defaultMsg);
+          })
+          .catch(function () {
+            return defaultMsg;
+          });
+      }
+      return Promise.resolve(NutriFlow.formatErrorMessage(responseOrData, defaultMsg));
+    },
+
+    formatErrorMessage: function (data, defaultMsg) {
+      if (!data) return defaultMsg;
+      if (typeof data === 'string') return data;
+      if (data.detail && typeof data.detail === 'string') return data.detail;
+      if (data.error && typeof data.error === 'string') return data.error;
+      if (data.message && typeof data.message === 'string') return data.message;
+
+      // Handle non_field_errors (e.g. Django unique_together)
+      if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
+        var joined = data.non_field_errors.join(' ');
+        if (joined.toLowerCase().includes('unique set') || joined.toLowerCase().includes('already exists')) {
+          return 'An entry for this date, session, and item already exists.';
+        }
+        return joined;
+      }
+
+      // Handle field-level validation errors
+      var fieldMsgs = [];
+      for (var key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          var val = data[key];
+          var fieldLabel = key.replace(/_/g, ' ');
+          fieldLabel = fieldLabel.charAt(0).toUpperCase() + fieldLabel.slice(1);
+          if (Array.isArray(val)) {
+            var msg = val.join(' ');
+            if (msg.toLowerCase().includes('unique set') || msg.toLowerCase().includes('already exists')) {
+              return 'An entry for this date, session, and item already exists.';
+            }
+            fieldMsgs.push(fieldLabel + ': ' + msg);
+          } else if (typeof val === 'string') {
+            fieldMsgs.push(fieldLabel + ': ' + val);
+          }
+        }
+      }
+
+      if (fieldMsgs.length > 0) {
+        return fieldMsgs.join(' • ');
+      }
+
+      return defaultMsg;
+    },
+
+    showToast: function (type, message, duration) {
+      duration = (typeof duration === 'number') ? duration : 4500;
+      var toastContainer = document.getElementById('nfToastContainer');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'nfToastContainer';
+        toastContainer.className = 'nf-toast-container';
+        document.body.appendChild(toastContainer);
+      }
+
+      var icon = 'bi-info-circle-fill';
+      var title = 'Notice';
+      if (type === 'success') {
+        icon = 'bi-check-circle-fill';
+        title = 'Success';
+      } else if (type === 'error' || type === 'danger') {
+        icon = 'bi-exclamation-triangle-fill';
+        title = 'Error';
+      } else if (type === 'warning') {
+        icon = 'bi-exclamation-circle-fill';
+        title = 'Warning';
+      }
+
+      var toast = document.createElement('div');
+      toast.className = 'nf-toast nf-toast-' + (type === 'danger' ? 'error' : type);
+      toast.innerHTML =
+        '<div class="nf-toast-icon"><i class="bi ' + icon + '"></i></div>' +
+        '<div class="nf-toast-content">' +
+          '<div class="nf-toast-title">' + title + '</div>' +
+          '<div class="nf-toast-message">' + message + '</div>' +
+        '</div>' +
+        '<button type="button" class="nf-toast-close" aria-label="Close">&times;</button>';
+
+      var closeBtn = toast.querySelector('.nf-toast-close');
+      function removeToast() {
+        toast.classList.add('nf-toast-hiding');
+        setTimeout(function () {
+          if (toast.parentNode) toast.remove();
+        }, 260);
+      }
+
+      closeBtn.addEventListener('click', removeToast);
+      toastContainer.appendChild(toast);
+
+      requestAnimationFrame(function () {
+        toast.classList.add('nf-toast-visible');
+      });
+
+      if (duration > 0) {
+        setTimeout(removeToast, duration);
+      }
+      return toast;
+    },
+
     showAlert: function (type, message, containerId) {
+      // Trigger floating toast for guaranteed visibility
+      this.showToast(type, message, 4500);
+
       var target = document.getElementById(containerId || 'nfMessages');
       if (!target) return;
 
@@ -153,7 +266,7 @@
       alertDiv.style.padding = '12px 18px';
       alertDiv.style.display = 'flex';
       alertDiv.style.alignItems = 'center';
-      alertDiv.style.justifySpaceBetween = 'space-between';
+      alertDiv.style.justifyContent = 'space-between';
 
       alertDiv.innerHTML = '<div style="display:flex; align-items:center; gap:10px;"><i class="bi ' + icon + '"></i> <span>' + message + '</span></div>' +
                            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size:12px;"></button>';

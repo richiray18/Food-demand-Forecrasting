@@ -336,7 +336,11 @@ document.addEventListener('DOMContentLoaded', function () {
         body: payload
       })
       .then(function (res) {
-        if (!res.ok) throw new Error('Failed to save consumption log entry.');
+        if (!res.ok) {
+          return NutriFlow.parseApiError(res, 'Failed to save consumption log entry.').then(function (errMsg) {
+            throw new Error(errMsg);
+          });
+        }
         return res.json();
       })
       .then(function () {
@@ -346,12 +350,14 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('kitchLogPrepared').value = '';
         document.getElementById('kitchLogConsumed').value = '';
         document.getElementById('kitchLogHeadcount').value = '';
+        document.getElementById('kitchLogNotes').value = '';
         loadRecentLogs();
+        loadDailySummary();
       })
       .catch(function (err) {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Save Session Prep Entry';
-        NutriFlow.showAlert('error', err.message, 'nfMessages');
+        NutriFlow.showAlert('error', err.message || 'Failed to save consumption log entry.', 'nfMessages');
       });
     });
   }
