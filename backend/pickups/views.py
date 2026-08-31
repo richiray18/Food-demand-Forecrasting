@@ -5,8 +5,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from surplus.models import SurplusFood
-
 from .models import Pickup, PickupMatchLog
 from .serializers import (
     PickupConfirmSerializer,
@@ -14,11 +12,6 @@ from .serializers import (
     PickupRejectSerializer,
     PickupSerializer,
 )
-
-try:
-    from recipients.models import Recipient
-except Exception:
-    Recipient = None
 
 
 class PickupViewSet(viewsets.ModelViewSet):
@@ -59,67 +52,6 @@ class PickupViewSet(viewsets.ModelViewSet):
         pickup = self.get_object()
         pickup.cancel(reason=request.data.get("reason", ""))
         return Response(PickupSerializer(pickup).data)
-
-    @action(detail=False, methods=["get"], url_path="match/(?P<surplus_id>[^/.]+)")
-    def match(self, request, surplus_id=None):
-        """
-        Ranks eligible, verified recipients for a given surplus item using
-        capacity fit, urgency (time left before it's unsafe) and dietary compatibility.
-        """
-        try:
-            surplus = SurplusFood.objects.get(pk=surplus_id)
-        except SurplusFood.DoesNotExist:
-            return Response({"detail": "Surplus item not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        if not surplus.is_safe:
-            return Response(
-                {"detail": "Surplus item is no longer safe to redistribute."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if Recipient is None:
-            return Response({"detail": "Recipients app is not available."}, status=status.HTTP_501_NOT_IMPLEMENTED)
-
-        candidates = Recipient.objects.filter(is_verified=True, is_active=True)
-        results = []
-        for recipient in candidates:
-            score, reason = self._score_recipient(surplus, recipient)
-            if score is None:
-                continue
-            PickupMatchLog.objects.create(surplus_food=surplus, recipient=recipient, score=score, reason=reason)
-            results.append({
-                "recipient_id": recipient.id,
-                "recipient_name": getattr(recipient, "name", str(recipient)),
-                "score": round(score, 2),
-                "reason": reason,
-            })
-
-        results.sort(key=lambda r: r["score"], reverse=True)
-        return Response({"surplus_food": surplus.food_name, "matches": results[:10]})
-
-    @staticmethod
-    def _score_recipient(surplus, recipient):
-        capacity = getattr(recipient, "daily_capacity_kg", None)
-        if capacity is not None and capacity <= 0:
-            return None, "No remaining capacity."
-
-        score = 50.0
-        reason_parts = []
-
-        if capacity:
-            fit_ratio = min(float(surplus.quantity_remaining) / float(capacity), 1.0)
-            score += fit_ratio * 20
-            reason_parts.append(f"capacity fit {fit_ratio:.0%}")
-
-        minutes_left = surplus.time_remaining.total_seconds() / 60
-        urgency_score = max(0.0, 30 - (minutes_left / 10))
-        score += urgency_score
-        reason_parts.append(f"{int(minutes_left)} min remaining")
-
-        if getattr(recipient, "dietary_restrictions", None):
-            reason_parts.append("dietary profile checked")
-
-        return score, "; ".join(reason_parts)
 
 
 class PickupMatchLogViewSet(viewsets.ReadOnlyModelViewSet):

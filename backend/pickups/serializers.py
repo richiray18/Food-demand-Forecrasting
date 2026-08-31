@@ -6,7 +6,7 @@ from .models import Pickup, PickupMatchLog
 
 class PickupSerializer(serializers.ModelSerializer):
     food_name = serializers.CharField(source="surplus_food.food_name", read_only=True)
-    recipient_name = serializers.CharField(source="recipient.name", read_only=True)
+    recipient_name = serializers.CharField(source="recipient.organization_name", read_only=True)
     is_surplus_safe = serializers.SerializerMethodField()
 
     class Meta:
@@ -53,7 +53,7 @@ class PickupRejectSerializer(serializers.Serializer):
 
 
 class PickupMatchLogSerializer(serializers.ModelSerializer):
-    recipient_name = serializers.CharField(source="recipient.name", read_only=True)
+    recipient_name = serializers.CharField(source="recipient.organization_name", read_only=True)
 
     class Meta:
         model = PickupMatchLog

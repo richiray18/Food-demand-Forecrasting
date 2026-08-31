@@ -3,7 +3,7 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import FoodSafetyRule, SurplusFood, TemperatureLog
@@ -23,7 +23,7 @@ class FoodSafetyRuleViewSet(viewsets.ModelViewSet):
 
 class SurplusFoodViewSet(viewsets.ModelViewSet):
     queryset = SurplusFood.objects.select_related("safety_rule", "meal", "created_by").all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["status", "unit", "is_refrigerated", "is_hot_held"]
     search_fields = ["food_name", "storage_location"]
