@@ -14,12 +14,27 @@ document.addEventListener('DOMContentLoaded', function () {
   var dateInput = document.getElementById('kitchLogDate');
   if (dateInput) dateInput.value = todayStr;
 
+  var cachedSessions = [];
+  var cachedItems = [];
+
   initKitchenDashboard();
 
   function initKitchenDashboard() {
     loadDropdownsAndForecasts();
     loadRecentLogs();
     setupQuickLogForm();
+
+    // Periodic dashboard refresh cycle (every 60s)
+    setInterval(refreshKitchenDashboard, 60000);
+  }
+
+  function refreshKitchenDashboard() {
+    if (cachedSessions.length > 0 && cachedItems.length > 0) {
+      fetchTodayForecasts(cachedSessions, cachedItems);
+    } else {
+      loadDropdownsAndForecasts();
+    }
+    loadRecentLogs();
   }
 
   function loadDropdownsAndForecasts() {
@@ -29,6 +44,9 @@ document.addEventListener('DOMContentLoaded', function () {
     ]).then(function (results) {
       var sessions = results[0].results || results[0] || [];
       var items = results[1].results || results[1] || [];
+
+      cachedSessions = sessions;
+      cachedItems = items;
 
       var sessionSelect = document.getElementById('kitchLogSession');
       var itemSelect = document.getElementById('kitchLogItem');
@@ -53,39 +71,95 @@ document.addEventListener('DOMContentLoaded', function () {
       fetchTodayForecasts(sessions, items);
     }).catch(function (err) {
       console.warn('Failed loading dropdowns for kitchen dashboard:', err);
+      var targetEl = document.getElementById('kitchStatTarget');
+      if (targetEl) targetEl.innerHTML = '—<span class="unit">kg</span>';
     });
   }
 
   function fetchTodayForecasts(sessions, items) {
     var container = document.getElementById('kitchForecastCardsRow');
-    if (!container) return;
+    var targetEl = document.getElementById('kitchStatTarget');
 
-    if (sessions.length === 0 || items.length === 0) {
-      container.innerHTML = '<div class="col-12"><div class="alert alert-info">No active meal sessions found.</div></div>';
+    if (!sessions || sessions.length === 0 || !items || items.length === 0) {
+      console.warn('[KitchenDashboard] No active meal sessions or items found for today.');
+      if (container) {
+        container.innerHTML = '<div class="col-12"><div class="alert alert-info">No active meal sessions found.</div></div>';
+      }
+      if (targetEl) {
+        targetEl.innerHTML = '—<span class="unit">kg</span>';
+      }
       return;
     }
 
     var promises = [];
-    sessions.slice(0, 3).forEach(function (s) {
-      var sampleItem = items[0];
-      var url = '/api/forecasting/predict/?item_id=' + sampleItem.id + '&session_id=' + s.id + '&date=' + todayStr;
+    var sessionsToFetch = sessions.slice(0, 3);
+    var sampleItem = items[0];
+
+    sessionsToFetch.forEach(function (s) {
+      var url = '/api/forecasting/predict/?item_id=' + encodeURIComponent(sampleItem.id) +
+                '&session_id=' + encodeURIComponent(s.id) +
+                '&date=' + encodeURIComponent(todayStr);
       promises.push(
         NutriFlow.apiFetch(url)
-          .then(function (res) { return res.json(); })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
           .then(function (data) {
             return { session: s, item: sampleItem, predict: data };
           })
-          .catch(function () {
-            return { session: s, item: sampleItem, predict: { recommended_prep_kg: 48.5, predicted_consumption_kg: 44.0 } };
+          .catch(function (err) {
+            console.warn('[KitchenDashboard] Prediction fetch failed for session ' + s.name + ':', err);
+            return null;
           })
       );
     });
 
-    Promise.all(promises).then(function (list) {
+    Promise.all(promises).then(function (results) {
+      var list = results.filter(function (entry) { return entry !== null && entry.predict; });
+
+      // Sanity check if the forecast array is empty for the day
+      if (list.length === 0) {
+        console.warn('[KitchenDashboard] Forecast array is empty for today; no predictions resolved.');
+        if (container) {
+          container.innerHTML = '<div class="col-12"><div class="alert alert-warning">No AI forecast predictions available for today.</div></div>';
+        }
+        if (targetEl) {
+          targetEl.innerHTML = '—<span class="unit">kg</span>';
+        }
+        return;
+      }
+
+      var totalTargetKg = 0;
+      var hasValidNumber = false;
       var html = '';
+
       list.forEach(function (entry) {
-        var prep = parseFloat(entry.predict.recommended_prep_kg || 45).toFixed(1);
-        var cons = parseFloat(entry.predict.predicted_consumption_kg || 40).toFixed(1);
+        var p = entry.predict || {};
+        var prepVal = null;
+
+        if (p.recommended_quantity_prepared_kg != null && !isNaN(parseFloat(p.recommended_quantity_prepared_kg))) {
+          prepVal = parseFloat(p.recommended_quantity_prepared_kg);
+        } else if (p.recommended_prep_kg != null && !isNaN(parseFloat(p.recommended_prep_kg))) {
+          prepVal = parseFloat(p.recommended_prep_kg);
+        } else if (p.recommended_kg != null && !isNaN(parseFloat(p.recommended_kg))) {
+          prepVal = parseFloat(p.recommended_kg);
+        } else if (p.predicted_quantity_kg != null && !isNaN(parseFloat(p.predicted_quantity_kg))) {
+          prepVal = parseFloat(p.predicted_quantity_kg);
+        } else if (p.baseline_kg != null && !isNaN(parseFloat(p.baseline_kg))) {
+          prepVal = parseFloat(p.baseline_kg);
+        }
+
+        if (prepVal !== null && !isNaN(prepVal)) {
+          totalTargetKg += prepVal;
+          hasValidNumber = true;
+        }
+
+        var prepDisplay = (prepVal !== null ? prepVal : 45.0).toFixed(1);
+        var consVal = (p.predicted_consumption_kg != null && !isNaN(parseFloat(p.predicted_consumption_kg)))
+          ? parseFloat(p.predicted_consumption_kg)
+          : (parseFloat(prepDisplay) * 0.9);
+        var consDisplay = consVal.toFixed(1);
 
         html += '<div class="col-md-4">' +
                   '<div style="background: var(--nf-surface); border: 1px solid var(--nf-border); border-radius: var(--nf-radius-md); padding: 16px; border-left: 4px solid var(--nf-brand-primary);">' +
@@ -94,17 +168,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     '<div style="display: flex; justify-content: space-between; align-items: flex-end;">' +
                       '<div>' +
                         '<div style="font-size: 11px; color: var(--nf-ink-600);">Rec. Prep Batch</div>' +
-                        '<div style="font-family: var(--nf-font-display); font-size: 24px; font-weight: 800; color: var(--nf-brand-primary);">' + prep + ' <span style="font-size: 14px;">kg</span></div>' +
+                        '<div style="font-family: var(--nf-font-display); font-size: 24px; font-weight: 800; color: var(--nf-brand-primary);">' + prepDisplay + ' <span style="font-size: 14px;">kg</span></div>' +
                       '</div>' +
                       '<div style="text-align: right;">' +
                         '<div style="font-size: 11px; color: var(--nf-ink-600);">Est. Intake</div>' +
-                        '<div style="font-size: 15px; font-weight: 700; color: var(--nf-accent-amber);">' + cons + ' kg</div>' +
+                        '<div style="font-size: 15px; font-weight: 700; color: var(--nf-accent-amber);">' + consDisplay + ' kg</div>' +
                       '</div>' +
                     '</div>' +
                   '</div>' +
                 '</div>';
       });
-      container.innerHTML = html;
+
+      if (container) {
+        container.innerHTML = html;
+      }
+
+      // Update #kitchStatTarget with computed total and preserve unit span
+      if (targetEl) {
+        if (hasValidNumber) {
+          targetEl.innerHTML = totalTargetKg.toFixed(1) + '<span class="unit">kg</span>';
+        } else {
+          console.warn('[KitchenDashboard] Forecast results resolved without numerical prep targets.');
+          targetEl.innerHTML = '—<span class="unit">kg</span>';
+        }
+      }
+    }).catch(function (err) {
+      console.warn('[KitchenDashboard] Error resolving today forecasts:', err);
+      if (targetEl) {
+        targetEl.innerHTML = '—<span class="unit">kg</span>';
+      }
     });
   }
 
@@ -336,7 +428,11 @@ document.addEventListener('DOMContentLoaded', function () {
         body: payload
       })
       .then(function (res) {
-        if (!res.ok) throw new Error('Failed to save consumption log entry.');
+        if (!res.ok) {
+          return NutriFlow.parseApiError(res, 'Failed to save consumption log entry.').then(function (errMsg) {
+            throw new Error(errMsg);
+          });
+        }
         return res.json();
       })
       .then(function () {
@@ -346,12 +442,14 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('kitchLogPrepared').value = '';
         document.getElementById('kitchLogConsumed').value = '';
         document.getElementById('kitchLogHeadcount').value = '';
+        document.getElementById('kitchLogNotes').value = '';
         loadRecentLogs();
+        refreshKitchenDashboard();
       })
       .catch(function (err) {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Save Session Prep Entry';
-        NutriFlow.showAlert('error', err.message, 'nfMessages');
+        NutriFlow.showAlert('error', err.message || 'Failed to save consumption log entry.', 'nfMessages');
       });
     });
   }

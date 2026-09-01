@@ -225,17 +225,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var submitBtn = document.getElementById('prepSubmitBtn');
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving Log...';
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging Batch...';
+
+    var selectedDishName = prepItem.options[prepItem.selectedIndex] ? prepItem.options[prepItem.selectedIndex].text : 'Prepared Dish';
 
     var payload = {
       date: dateVal,
       session: parseInt(sessionVal, 10),
-      meal_item: parseInt(itemVal, 10),
-      headcount_served: hcVal,
+      item: parseInt(itemVal, 10),
+      headcount: hcVal,
       quantity_prepared_kg: prepKg,
       quantity_consumed_kg: consKg,
       is_holiday: prepHoliday.checked,
-      is_exam: prepExam.checked
+      is_exam_period: prepExam.checked
     };
 
     NutriFlow.apiFetch('/api/v1/meals/consumption-logs/', {
@@ -243,29 +245,49 @@ document.addEventListener('DOMContentLoaded', function () {
       body: payload
     })
       .then(function (res) {
-        if (!res.ok) throw new Error('Failed to save preparation log (' + res.status + ')');
+        if (!res.ok) {
+          return NutriFlow.parseApiError(res, 'Failed to save preparation log (' + res.status + ')').then(function (errMsg) {
+            throw new Error(errMsg);
+          });
+        }
         return res.json();
       })
       .then(function (log) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Consumption Log';
 
-        NutriFlow.showAlert('success', 'Kitchen batch preparation log successfully saved!');
-        prepForm.reset();
-        prepDate.value = new Date().toISOString().split('T')[0];
+        var savedDish = log.item_name || log.meal_item_name || selectedDishName;
+        NutriFlow.showAlert('success', 'Batch logged successfully! (' + prepKg.toFixed(1) + ' kg ' + savedDish + ')');
+
+        // Reset form inputs to sensible defaults
+        prepPrepared.value = '';
+        prepConsumed.value = '';
+        prepHeadcount.value = '';
+        prepSession.value = '';
+        prepItem.value = '';
+        prepHoliday.checked = false;
+        prepExam.checked = false;
+        if (aiCallout) aiCallout.style.display = 'none';
+
+        // Keep date as today
+        var todayStr = new Date().toISOString().split('T')[0];
+        if (prepDate) prepDate.value = todayStr;
+
         calculateLiveSurplus();
+
+        // Re-fetch and re-render recent audit log table immediately
         loadPrepLogs();
 
         // Check if Surplus occurred -> prompt fast route modal
         var surplus = prepKg - consKg;
         if (surplus > 0) {
-          promptFastSurplusRoute(log.meal_item_name || currentSelectedDishName || 'Surplus Dish', surplus);
+          promptFastSurplusRoute(savedDish, surplus);
         }
       })
       .catch(function (err) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Consumption Log';
-        NutriFlow.showAlert('error', err.message);
+        NutriFlow.showAlert('error', err.message || 'An error occurred while saving the preparation log.');
       });
   }
 
@@ -288,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     routeSubmitBtn.disabled = true;
-    routeSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Registering Surplus...';
+    routeSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering Surplus...';
 
     var payload = {
       food_name: foodName,
@@ -308,14 +330,18 @@ document.addEventListener('DOMContentLoaded', function () {
       body: payload
     })
       .then(function (res) {
-        if (!res.ok) throw new Error('Failed to register surplus food batch');
+        if (!res.ok) {
+          return NutriFlow.parseApiError(res, 'Failed to register surplus food batch').then(function (errMsg) {
+            throw new Error(errMsg);
+          });
+        }
         return res.json();
       })
       .then(function () {
         routeSubmitBtn.disabled = false;
         routeSubmitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Register to Surplus Inventory';
         NutriFlow.closeModal('prepSurplusModal');
-        NutriFlow.showAlert('success', 'Surplus batch registered to HACCP monitor! Redirecting to surplus tab...', 'nfMessages');
+        NutriFlow.showAlert('success', 'Surplus batch registered to HACCP monitor! Redirecting to surplus tab...');
         setTimeout(function () {
           window.location.href = '/surplus/';
         }, 1500);
@@ -323,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(function (err) {
         routeSubmitBtn.disabled = false;
         routeSubmitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Register to Surplus Inventory';
-        NutriFlow.showAlert('error', err.message);
+        NutriFlow.showAlert('error', err.message || 'Failed to register surplus batch.');
       });
   }
 
@@ -357,8 +383,9 @@ document.addEventListener('DOMContentLoaded', function () {
       var cons = parseFloat(log.quantity_consumed_kg) || 0;
       var diff = prep - cons;
 
-      var dishName = log.meal_item_name || log.item_name || 'Dal Tadka & Rice';
+      var dishName = log.item_name || log.meal_item_name || 'Dish';
       var imgUrl = NutriFlow.getFoodImage(dishName);
+      var headcountVal = log.headcount !== undefined ? log.headcount : (log.headcount_served || 0);
 
       var surplusBadge = '';
       if (diff > 0) {
@@ -374,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
         : '<span style="font-size: 12px; color: var(--nf-ink-600); font-style: italic;">No Surplus</span>';
 
       tr.innerHTML = '<td><strong style="color: var(--nf-ink-900);">' + (log.date || 'Today') + '</strong><br><span class="nf-badge nf-badge-neutral">' + (log.session_name || 'Session') + '</span></td>' +
-        '<td><div class="nf-food-cell"><img src="' + imgUrl + '" class="nf-food-thumb" alt="Dish"><div><strong style="color: var(--nf-ink-900);">' + dishName + '</strong><div style="font-size: 11.5px; color: var(--nf-ink-600);">' + (log.headcount_served || 0) + ' headcount</div></div></div></td>' +
+        '<td><div class="nf-food-cell"><img src="' + imgUrl + '" class="nf-food-thumb" alt="Dish"><div><strong style="color: var(--nf-ink-900);">' + dishName + '</strong><div style="font-size: 11.5px; color: var(--nf-ink-600);">' + headcountVal + ' headcount</div></div></div></td>' +
         '<td><strong style="color: var(--nf-pink-600); font-family: var(--nf-font-mono);">' + prep.toFixed(1) + ' kg</strong> prep<br><strong style="color: var(--nf-sage-600); font-family: var(--nf-font-mono);">' + cons.toFixed(1) + ' kg</strong> consumed</td>' +
         '<td>' + surplusBadge + '</td>' +
         '<td>' + actionHtml + '</td>';
