@@ -1,0 +1,97 @@
+=====================================================================================
+NUTRIFLOW FORECASTING EXPERIMENT REPORT: EXTREME DEMAND & MODEL COMPARISON
+=====================================================================================
+
+1. EXTREME DEMAND FINDINGS (TOP 30 HIGHEST ERROR OBSERVATIONS)
+-------------------------------------------------------------------------------------
+Meal ID Concentration in Top 30:
+meal_id
+1971    20
+2290     5
+1109     2
+1754     1
+2826     1
+2490     1
+
+Category Concentration in Top 30:
+category
+Sandwich     22
+Rice Bowl     7
+Salad         1
+
+Center Concentration in Top 30:
+center_id
+43     6
+99     4
+137    3
+13     3
+67     2
+80     2
+124    2
+104    1
+65     1
+11     1
+86     1
+157    1
+36     1
+51     1
+152    1
+
+Observations with BOTH Emailer and Homepage Featured: 26 / 30 (86.7%)
+Observations with EITHER Emailer or Homepage Featured: 30 / 30 (100.0%)
+Average Discount Depth in Top 30: 32.4%
+
+2. HISTORICAL CONTEXT TRAJECTORIES (PRE-WEEK VS TARGET WEEK)
+-------------------------------------------------------------------------------------
+
+Trajectory for Meal 1971 at Center 43 around Week 132:
+ week  meal_id  center_id  num_orders  checkout_price  base_price  discount_pct  emailer_for_promotion  homepage_featured
+  128     1971         43        1000          284.27      324.04         0.123                      0                  0
+  129     1971         43         703          291.97      292.97         0.003                      0                  0
+  130     1971         43         432          324.04      323.04        -0.003                      0                  0
+  131     1971         43        1714          222.13      324.04         0.314                      0                  0
+  132     1971         43       13150          204.70      324.04         0.368                      1                  1
+  133     1971         43        8169          181.42      324.04         0.440                      1                  1
+
+Trajectory for Meal 1971 at Center 137 around Week 132:
+ week  meal_id  center_id  num_orders  checkout_price  base_price  discount_pct  emailer_for_promotion  homepage_featured
+  128     1971        137         648          269.66      322.04         0.163                      0                  0
+  129     1971        137         474          274.54      322.04         0.147                      0                  0
+  130     1971        137         215          318.22      317.22        -0.003                      0                  0
+  131     1971        137        2526          178.48      318.22         0.439                      0                  0
+  132     1971        137       11056          171.72      316.22         0.457                      1                  1
+  133     1971        137        7926          181.42      317.22         0.428                      1                  1
+
+Trajectory for Meal 2290 at Center 13 around Week 134:
+ week  meal_id  center_id  num_orders  checkout_price  base_price  discount_pct  emailer_for_promotion  homepage_featured
+  130     2290         13        2443          291.03      290.03        -0.003                      0                  0
+  131     2290         13        2404          293.91      294.91         0.003                      0                  0
+  132     2290         13        1930          281.33      281.33         0.000                      0                  0
+  133     2290         13        2186          298.79      299.79         0.003                      0                  0
+  134     2290         13        7911          290.03      299.79         0.033                      1                  1
+  135     2290         13        1850          276.48      277.48         0.004                      0                  0
+
+3. PROMOTIONAL INTERACTION DISTRIBUTION (FULL DATASET)
+-------------------------------------------------------------------------------------
+                                       Condition  Count  Mean Orders  Median    P75    P90    P99  Max Orders
+           1. Baseline (No promo, <=5% discount) 324731        205.9   121.0  271.0  499.0 1148.0        9045
+          2. Deep discount only (>30%, no promo)  11677        198.0   108.0  204.0  458.0 1457.0        9044
+                   3. Emailer only (no homepage)  17819        431.3   229.0  473.0  986.0 3455.0       13580
+                   4. Homepage only (no emailer)  30624        455.9   258.0  594.0 1121.0 2552.0       14229
+                      5. Both Emailer + Homepage  19231        816.2   474.0 1012.0 1877.0 4779.4       24299
+6. Trifecta (Emailer + Homepage + Discount >30%)   7399       1007.8   582.0 1229.0 2375.0 6117.5       24299
+
+4. MODEL COMPARISON: ORIGINAL VS LOG-TARGET VS POISSON
+-------------------------------------------------------------------------------------
+                       Model  Overall MAE  Overall RMSE  Overall R2  Overall Bias  Low Demand MAE  Low Demand Bias  Medium Demand MAE  Medium Demand Bias  High Demand MAE  High Demand Bias  Extreme Demand MAE  Extreme Demand RMSE  Extreme Demand Bias  Promo Subset MAE  Promo Subset RMSE  Promo Subset Bias  Top 30 Cases MAE  Top 30 Cases Bias
+            Original XGBoost        74.95        163.66      0.7992         -8.24           29.85            25.39              53.12               12.12           117.96            -43.48              354.80               601.24              -244.27            160.05             355.26             -39.65           4274.78           -4274.78
+    Experimental Log XGBoost        77.30        181.03      0.7543        -36.93           20.59            15.38              50.04              -11.32           131.74            -87.28              426.01               702.73              -362.64            171.67             403.46            -108.27           4752.26           -4752.26
+Experimental Poisson XGBoost        75.75        172.84      0.7760        -13.00           30.79            28.23              50.95               11.52           119.74            -53.35              380.17               657.83              -309.52            161.83             382.51             -65.42           4635.36           -4635.36
+
+5. OPERATIONAL SHORTAGE ANALYSIS (ANALYTICAL MEASURE)
+-------------------------------------------------------------------------------------
+                       Model  Shortage Rate (%)  Mean Shortage (Orders/Obs)  Median Shortage  Total Shortage Volume (Orders)  Extreme Tier Shortage Rate (%)  Extreme Mean Shortage (Orders)  Extreme Total Shortage (Orders)  Promo Shortage Rate (%)  Promo Mean Shortage (Orders)  Promo Total Shortage (Orders)
+            Original XGBoost              46.65                       41.59             0.00                         3959457                           75.40                          299.54                          1414712                    52.01                         99.85                        1311527
+    Experimental Log XGBoost              57.93                       57.11             9.77                         5437323                           84.33                          394.32                          1862393                    65.54                        139.97                        1838451
+Experimental Poisson XGBoost              45.69                       44.37             0.00                         4224278                           79.25                          344.84                          1628689                    52.21                        113.62                        1492458
+

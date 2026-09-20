@@ -1,0 +1,4 @@
+Model,Overall MAE,Overall RMSE,Overall R2,Overall Bias,Low Demand MAE,Low Demand Bias,Medium Demand MAE,Medium Demand Bias,High Demand MAE,High Demand Bias,Extreme Demand MAE,Extreme Demand RMSE,Extreme Demand Bias,Promo Subset MAE,Promo Subset RMSE,Promo Subset Bias,Top 30 Cases MAE,Top 30 Cases Bias
+Original XGBoost,74.95,163.66,0.7992,-8.24,29.85,25.39,53.12,12.12,117.96,-43.48,354.8,601.24,-244.27,160.05,355.26,-39.65,4274.78,-4274.78
+Experimental Log XGBoost,77.3,181.03,0.7543,-36.93,20.59,15.38,50.04,-11.32,131.74,-87.28,426.01,702.73,-362.64,171.67,403.46,-108.27,4752.26,-4752.26
+Experimental Poisson XGBoost,75.75,172.84,0.776,-13.0,30.79,28.23,50.95,11.52,119.74,-53.35,380.17,657.83,-309.52,161.83,382.51,-65.42,4635.36,-4635.36
