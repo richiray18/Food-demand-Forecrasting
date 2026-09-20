@@ -1,0 +1,60 @@
+=====================================================================================
+NUTRIFLOW FORECASTING EXPERIMENT REPORT: PROMOTIONAL INTERACTION FEATURES
+=====================================================================================
+
+1. EXECUTIVE SUMMARY & FEATURE AUDIT
+-------------------------------------------------------------------------------------
+Candidate Promotional Features Tested:
+  • emailer_and_homepage (binary interaction: both channels active)
+  • has_any_promo (binary indicator: at least one channel active)
+  • email_discount_interaction (emailer * discount_percent)
+  • homepage_discount_interaction (homepage * discount_percent)
+  • promo_discount_interaction (dual promo * discount_percent)
+  • discount_percent_squared (quadratic price elasticity)
+  • prev_promo_orders (strictly past order volume of previous campaign for meal-center)
+  • rolling_promo_mean (strictly past historical promotional average)
+  • rolling_promo_max (strictly past maximum promotional peak)
+  • count_prior_promos (number of past promotional campaigns prior to target week)
+  • hist_promo_uplift (ratio of past promo mean to baseline rolling demand)
+
+Leakage Audit Status: PASS (100% verified strictly past-only; no current week target used)
+
+2. COMPARATIVE EVALUATION MATRIX (PRODUCTION VS EXPERIMENTAL PROMO MODEL)
+-------------------------------------------------------------------------------------
+                     Model  Overall MAE  Overall RMSE  Overall R2  Overall Bias  Low Demand MAE  Low Demand Bias  Medium Demand MAE  Medium Demand Bias  High Demand MAE  High Demand Bias  Extreme Demand MAE  Extreme Demand RMSE  Extreme Demand Bias  Promo Subset MAE  Promo Subset RMSE  Promo Subset Bias  Dual Promo (Both=1) MAE  Dual Promo (Both=1) Bias  Top 30 Volume MAE  Top 30 Volume Bias
+        Production XGBoost        72.14        158.04      0.8127         -8.25           26.29            21.66              52.55               11.02           114.92            -38.98              334.97               579.54              -232.11            154.43             346.47             -41.44                   255.59                   -109.31            4059.44            -4059.44
+Experimental Promo XGBoost        70.73        153.51      0.8233         -9.65           25.74            21.51              50.37                7.22           115.24            -40.43              329.67               559.54              -216.36            148.13             332.16             -25.26                   240.00                    -65.57            3899.88            -3899.88
+
+3. SPECIFIC EXTREME CASE INSPECTION (BEFORE VS AFTER PROMO FEATURES)
+-------------------------------------------------------------------------------------
+ meal_id  center_id  week  actual  prod_pred  exp_pred  emailer  homepage discount_pct  prev_promo_orders  rolling_promo_max  count_prior_promos  exp_improvement
+    1971         43   132   13150     3139.4    4504.8        1         1        36.8%             5279.0             9773.0                  28           1365.4
+    1971        137   132   11056     3083.0    3052.9        1         1        45.7%             2065.0             4672.0                  31            -30.2
+    2290         13   134    7911     3634.6    2896.2        1         1         3.3%             3605.0            10745.0                  16           -738.4
+    1971         67   132    9019     3300.4    3398.4        1         1        45.0%             2309.0             4576.0                  31             98.0
+    2290         65   134    6426     2257.7    1750.9        1         1         0.0%             1768.0             6804.0                  15           -506.7
+
+4. OPERATIONAL SHORTAGE IMPACT (ANALYTICAL MEASURE)
+-------------------------------------------------------------------------------------
+                     Model  Shortage Rate (%)  Mean Shortage (Orders)  Median Shortage  Total Shortage Volume (Orders)  Extreme Shortage Rate (%)  Extreme Mean Shortage (Orders)  Extreme Total Shortage (Orders)  Promo Shortage Rate (%)  Promo Mean Shortage (Orders)  Promo Total Shortage (Orders)
+        Production XGBoost               47.0                   40.19              0.0                         3826472                      75.21                          283.54                          1339144                    51.95                         97.94                        1286378
+Experimental Promo XGBoost               47.9                   40.19              0.0                         3826122                      75.35                          273.02                          1289457                    50.77                         86.69                        1138718
+
+5. TOP 15 FEATURE IMPORTANCES (EXPERIMENTAL MODEL)
+-------------------------------------------------------------------------------------
+prev_week_orders              0.152655
+has_any_promo                 0.151787
+email_discount_interaction    0.107999
+rolling_3_orders              0.081891
+rolling_promo_mean            0.062213
+emailer_for_promotion         0.047699
+emailer_and_homepage          0.037517
+prev_promo_orders             0.024462
+price_ratio                   0.024192
+rolling_promo_max             0.023472
+discount_percent              0.023404
+category_Sandwich             0.019099
+checkout_price                0.019033
+promo_discount_interaction    0.017889
+category_Rice Bowl            0.015938
+

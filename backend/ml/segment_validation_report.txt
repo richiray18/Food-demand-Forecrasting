@@ -1,0 +1,154 @@
+================================================================================
+NUTRIFLOW DEMAND FORECASTING ENGINE — SECOND-LEVEL VALIDATION REPORT
+================================================================================
+
+A. OVERALL VALIDATION METRICS
+--------------------------------------------------------------------------------
+Validation Dataset Records: 95,200 (Weeks 117 to 145)
+XGBoost MAE               : 74.95 orders
+XGBoost RMSE              : 163.66 orders
+XGBoost R²                : 0.7992
+XGBoost Mean Error (Bias) : -8.24 orders
+Baseline MAE              : 109.84 orders
+Baseline RMSE             : 249.01 orders
+Baseline R²               : 0.5351
+
+B. MEAL-LEVEL ANALYSIS
+--------------------------------------------------------------------------------
+Top 5 Highest MAE Meals:
+ meal_id  category cuisine  records  mean_actual  mean_predicted    mae   rmse  mean_error     r2
+    1971  Sandwich Italian     2228        620.8      597.000000 239.02 584.44      -23.80 0.6802
+    2290 Rice Bowl  Indian     2233        810.0      738.000000 210.67 381.50      -72.01 0.6794
+    1109 Rice Bowl  Indian     2233        655.1      569.099976 166.24 299.30      -85.96 0.7753
+    2490     Salad Italian     2232        321.2      373.700012 144.38 265.22       52.53 0.5510
+    1754  Sandwich Italian     2233        522.2      481.200012 139.68 242.70      -41.04 0.6616
+
+Top 5 Lowest MAE Meals:
+ meal_id  category cuisine  records  mean_actual  mean_predicted   mae  rmse  mean_error      r2
+    1770   Biryani  Indian     1446         31.1       35.900002 17.32 27.49        4.88 -0.4769
+    1247   Biryani  Indian     1447         32.9       35.799999 19.57 29.93        2.87 -0.6721
+    1902   Biryani  Indian     1382         33.0       39.200001 20.33 33.01        6.21 -0.6129
+    2139 Beverages  Indian     1965         47.9       53.500000 24.25 36.17        5.69 -0.0589
+    2126     Pasta Italian     1872         55.4       55.099998 26.86 37.43       -0.29  0.2929
+
+Top 5 Strongest Underprediction Meals (Most Negative Mean Error):
+ meal_id  category     cuisine  records  mean_actual  mean_predicted    mae   rmse  mean_error     r2
+    1109 Rice Bowl      Indian     2233        655.1      569.099976 166.24 299.30      -85.96 0.7753
+    2290 Rice Bowl      Indian     2233        810.0      738.000000 210.67 381.50      -72.01 0.6794
+    2826  Sandwich     Italian     2232        472.3      417.700012 128.69 239.53      -54.59 0.7074
+    1962     Pizza Continental     2228        302.6      259.399994  99.76 162.55      -43.18 0.6038
+    1754  Sandwich     Italian     2233        522.2      481.200012 139.68 242.70      -41.04 0.6616
+
+Top 5 Strongest Overprediction Meals (Most Positive Mean Error):
+ meal_id category     cuisine  records  mean_actual  mean_predicted    mae   rmse  mean_error      r2
+    2490    Salad     Italian     2232        321.2      373.700012 144.38 265.22       52.53  0.5510
+    2104     Fish Continental     1082         86.2      106.800003  47.73  70.99       20.59  0.2313
+    1847     Soup        Thai      881         93.5      105.500000  36.94  49.60       11.95  0.2374
+    2956     Fish Continental     1238        106.9      118.800003  48.74  72.09       11.90  0.4746
+    2306    Pasta     Italian     1545         51.3       63.000000  36.22  66.96       11.77 -0.1286
+
+C. CENTER-LEVEL ANALYSIS
+--------------------------------------------------------------------------------
+Top 5 Highest MAE Centers:
+ center_id center_type  city_code  op_area  records  mean_actual  mean_predicted    mae   rmse  mean_error     r2
+        43      TYPE_A        590      5.1     1461        554.6      509.600006 148.04 404.47      -45.00 0.7636
+        13      TYPE_B        590      6.7     1478        595.9      554.799988 141.07 331.62      -41.07 0.8154
+       137      TYPE_A        590      4.4     1434        437.5      388.299988 132.00 351.14      -49.17 0.7092
+        52      TYPE_B        685      5.6     1466        465.8      431.500000 114.13 198.34      -34.35 0.8546
+        10      TYPE_B        590      6.3     1474        478.7      453.100006 111.59 178.38      -25.69 0.8735
+
+Top 5 Lowest MAE Centers:
+ center_id center_type  city_code  op_area  records  mean_actual  mean_predicted   mae  rmse  mean_error     r2
+       149      TYPE_A        478      2.4     1041        116.2      118.199997 44.36 71.33        2.07 0.6580
+        74      TYPE_A        702      2.8     1066        106.7      124.099998 49.65 91.36       17.39 0.3154
+       161      TYPE_B        658      3.9     1166        133.1      141.699997 50.41 91.08        8.66 0.6317
+       143      TYPE_B        562      3.8     1247        153.6      161.699997 50.84 85.53        8.14 0.7218
+        91      TYPE_C        590      0.9      808        112.4      113.699997 51.12 79.72        1.37 0.5622
+
+Top 5 Strongest Underpredicting Centers:
+ center_id center_type  city_code  op_area  records  mean_actual  mean_predicted    mae   rmse  mean_error     r2
+       137      TYPE_A        590      4.4     1434        437.5      388.299988 132.00 351.14      -49.17 0.7092
+        43      TYPE_A        590      5.1     1461        554.6      509.600006 148.04 404.47      -45.00 0.7636
+        13      TYPE_B        590      6.7     1478        595.9      554.799988 141.07 331.62      -41.07 0.8154
+        24      TYPE_B        614      3.6     1329        386.6      350.600006  97.73 168.37      -36.02 0.8389
+        67      TYPE_B        638      7.0     1459        418.9      383.000000 109.81 268.71      -35.91 0.7846
+
+Top 5 Strongest Overpredicting Centers:
+ center_id center_type  city_code  op_area  records  mean_actual  mean_predicted   mae   rmse  mean_error     r2
+        74      TYPE_A        702      2.8     1066        106.7      124.099998 49.65  91.36       17.39 0.3154
+       129      TYPE_A        593      3.9     1231        163.3      175.899994 56.21 100.94       12.62 0.7743
+       139      TYPE_C        693      2.8      962        163.1      174.199997 64.18 124.30       11.08 0.5895
+        34      TYPE_B        615      4.2     1237        174.9      184.899994 59.83 102.81       10.01 0.6627
+        64      TYPE_A        553      4.4     1125        167.6      177.300003 55.61  89.08        9.71 0.7286
+
+D. DEMAND RANGE ANALYSIS
+--------------------------------------------------------------------------------
+   demand_range  observations  mean_actual  mean_predicted    mae   rmse  mean_error
+     Low (<=54)         25040         30.6       56.000000  29.85  46.32       25.39
+Medium (55-298)         46384        150.3      162.399994  53.12  78.93       12.12
+ High (299-825)         19053        483.5      440.000000 117.96 161.99      -43.48
+ Extreme (>825)          4723       1411.8     1167.500000 354.80 601.24     -244.27
+
+E. PROMOTION ANALYSIS
+--------------------------------------------------------------------------------
+               factor  value  observations  mean_actual  mean_predicted    mae   rmse  mean_error
+emailer_for_promotion      0         87904        218.1      213.899994  63.69 109.20       -4.19
+emailer_for_promotion      1          7296        610.0      553.000000 210.57 453.69      -56.94
+    homepage_featured      0         85171        214.6      211.699997  64.34 115.41       -2.93
+    homepage_featured      1         10029        532.4      479.100006 165.03 375.69      -53.32
+
+F. DISCOUNT ANALYSIS
+--------------------------------------------------------------------------------
+   discount_bucket  observations  mean_actual  mean_predicted    mae   rmse  mean_error
+No Discount (<=0%)         47729        222.6      218.899994  62.60 112.14       -3.72
+       Low (0-10%)         24374        231.4      225.899994  67.28 129.52       -5.52
+ Moderate (10-25%)         14856        269.7      256.799988  84.68 163.58      -12.85
+     High (25-40%)          7116        390.1      361.500000 143.16 321.18      -28.63
+       Deep (>40%)          1125        507.6      438.899994 204.69 603.25      -68.72
+
+G. EXTREME ERROR ANALYSIS (TOP 30 HIGHEST ABSOLUTE ERRORS)
+--------------------------------------------------------------------------------
+ week  meal_id  center_id  actual_num_orders  predicted_num_orders  absolute_error discount_percent  emailer_for_promotion  homepage_featured
+  132     1971         43              13150           3139.399902         10010.6            36.8%                      1                  1
+  132     1971        137              11056           3083.000000          7973.0            45.7%                      1                  1
+  132     1971         13               8979           2752.000000          6227.0            42.3%                      1                  1
+  132     1971         67               9019           3300.399902          5718.6            45.0%                      1                  1
+  132     1971         80               7060           2331.199951          4728.8            42.0%                      1                  1
+  133     1971         67               7803           3141.800049          4661.2            40.2%                      1                  1
+  132     1971        104               6481           1846.599976          4634.4            36.9%                      1                  1
+  133     1971        137               7926           3593.899902          4332.1            42.8%                      1                  1
+  134     2290         13               7911           3634.600098          4276.4             3.3%                      1                  1
+  122     1971        124               6695           2488.000000          4207.0            39.7%                      1                  1
+  134     2290         65               6426           2257.699951          4168.3             0.0%                      1                  1
+  128     1754         99               5427           1276.099976          4150.9            32.7%                      1                  1
+  121     1971         43               7708           3642.300049          4065.7            40.1%                      1                  1
+  132     1971         11               5804           1818.400024          3985.6            34.7%                      1                  1
+  122     1971         86               7073           3101.699951          3971.3            39.8%                      1                  1
+  134     2290        137               7088           3141.300049          3946.7             1.6%                      1                  1
+  128     2826         99               5912           1999.900024          3912.1            36.8%                      1                  1
+  134     2290        157               5577           1675.199951          3901.8            24.4%                      1                  0
+  132     1971         36               5669           1812.699951          3856.3            46.3%                      1                  1
+  132     1971        124               5102           1420.599976          3681.4            36.3%                      1                  1
+  133     1971         13               6615           2939.300049          3675.7            42.0%                      1                  1
+  122     1971         80               6480           2870.500000          3609.5            39.6%                      1                  1
+  130     1109         43               6171           2930.899902          3240.1            17.0%                      1                  0
+  132     1971         51               5360           2132.500000          3227.5            41.8%                      1                  1
+  134     2290        152               4766           1639.599976          3126.4             0.0%                      1                  1
+  117     2490         43               5050           1988.000000          3062.0            34.8%                      1                  1
+  121     1971         99               4630           1595.599976          3034.4            39.7%                      1                  1
+  132     1971         99               5143           2121.600098          3021.4            40.4%                      1                  0
+  119     1109         43               5778           2813.100098          2964.9             8.4%                      1                  1
+  122     1971         43               8140           5267.500000          2872.5            40.5%                      1                  0
+
+H. ERROR DISTRIBUTION PERCENTILES
+--------------------------------------------------------------------------------
+Median Absolute Error (P50) : 39.08 orders
+75th Percentile (P75)       : 86.46 orders
+90th Percentile (P90)       : 162.74 orders
+95th Percentile (P95)       : 243.33 orders
+Maximum Absolute Error      : 10010.59 orders
+Predictions within <= 10 orders : 16.01%
+Predictions within <= 25 orders : 36.38%
+Predictions within <= 50 orders : 58.01%
+Predictions within <= 100 orders: 79.09%
+
